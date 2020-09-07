@@ -12,6 +12,8 @@ from drawBot.drawBotDrawingTools import _drawBotDrawingTool
 from drawBot.context.drawBotContext import DrawBotContext
 from drawBot.ui.drawView import DrawView
 
+from layout import OCCProofingLayout
+
 WINDOW_WIDTH = 400 # In PIXELS
 PAGE_WIDTH = 8.5 # in inches
 PAGE_HEIGHT = 11.0 # in inches
@@ -60,7 +62,7 @@ class OCCParametersView:
         # self.group.parameters.text = TextBox((0, 0, -0, -0), "Parameters View")
         self.group.parameters.list = List(
             (0, 0, -0, self.window_height * 0.7),
-            [{"Line": 1, "Style": MASTERS_LIST[0], "Point Size": 12}],
+            [{"Line": 1, "Style": MASTERS_LIST[5], "Point Size": 72}],
             columnDescriptions=[
                 {
                     "title": "Line",
@@ -160,10 +162,11 @@ class OCCParametersView:
             masters.append(master[0])
 
         parameters = {
-            'padding': {'left': 20, 'right': 70, 'top': 20, 'bottom': 100, 'line': 100},
+            'padding': {'left': 20, 'right': 70, 'top': 20, 'bottom': 100, 'line': 20},
             'masters': masters,
             'point_sizes': map(int, point_sizes),
-            'aligned': False
+            'aligned': False,
+            'document': {'width': 11, 'height': 8.5}
         }
 
         return parameters
@@ -176,11 +179,11 @@ class OCCProofingTool:
         # Unit Arithmetic
         self.em_per_u = 1.0 / Glyphs.font.upm
         self.in_per_pt = 0.0138889
-        self.px_per_in = WINDOW_WIDTH / PAGE_WIDTH
+        self.px_per_in = 612 / PAGE_WIDTH
 
 
-        self.width, self.height = _drawBotDrawingTool.sizes('Letter')
-        self.window_width, self.window_height = WINDOW_WIDTH, (WINDOW_WIDTH * (float(self.height) / float(self.width)))
+        self.height, self.width = _drawBotDrawingTool.sizes('Letter')
+        self.window_width, self.window_height = WINDOW_WIDTH, (WINDOW_WIDTH * (11.0 / 8.5))
 
         print(self.window_width, self.window_height)
 
@@ -205,7 +208,10 @@ class OCCProofingTool:
 
         self.mainWindow.open()
 
-
+    def updateParametersAndRedraw(self, parameters):
+        self.parameters = parameters
+        self.layersets = map(lambda _: GLYPHS, parameters['masters'])
+        self.draw()
 
     def calculate_scale(self, pts_per_em):
         return self.em_per_u * \
@@ -213,14 +219,11 @@ class OCCProofingTool:
             self.px_per_in * \
             pts_per_em
 
-    def updateParametersAndRedraw(self, parameters):
-        self.parameters = parameters
-        self.layersets = map(lambda _: GLYPHS, parameters['masters'])
-        self.draw()
-
-
     def draw(self):
-        proof = self.layout(self.width, self.height)
+        proof = OCCProofingLayout(self.layersets[0], self.parameters, self.width, self.height, Glyphs.font.upm).get()
+        # print(test_proof)
+
+        # proof = self.layout(self.width, self.height)
         context = DrawBotContext()
 
         _drawBotDrawingTool.newDrawing()
@@ -242,87 +245,12 @@ class OCCProofingTool:
 
             _drawBotDrawingTool.restore()
 
-        _drawBotDrawingTool.saveImage("/Users/nic/Desktop/proof.pdf")
+        # _drawBotDrawingTool.printImage()
+        #_drawBotDrawingTool.saveImage("/Users/nic/Desktop/proof.pdf")
 
         _drawBotDrawingTool._drawInContext(context)
         pdfDocument = context.getNSPDFDocument()
         self.drawView.setPDFDocument(pdfDocument)
 
-
-
-
-
-    def layout(self, width, height):
-        """Takes a list of lists of layers,
-        and applies a positioning transform to each one,
-        followed by a scale transform.
-        """
-        result = [[]]
-        page_index = 0
-
-        padding_px = self.parameters['padding']
-        lineheight_ratio = 1.75
-        base_y_offset_px = 0
-
-        def get_max_heights_and_lineheights():
-            max_heights_u = []
-            for i, sequence in enumerate(self.layersets):
-                M = self.parameters['masters'][i]
-                max_heights_u.append( max(map(lambda g: g.layers[M.id].master.ascender - min(0, g.layers[M.id].master.ascender), sequence)) )
-
-            return max_heights_u
-
-        def get_scalefactors():
-            result = []
-            for i, sequence in enumerate(self.layersets):
-                result.append(self.calculate_scale(self.parameters['point_sizes'][i]))
-
-            return result;
-
-
-        max_heights_u = get_max_heights_and_lineheights()
-        u_to_pxs = get_scalefactors()
-
-        max_u_to_px = max(u_to_pxs)
-        sequence_advance_px = sum(map(lambda (h,s): h * s * lineheight_ratio, zip(max_heights_u, u_to_pxs))) + padding_px['line']
-
-        for i, sequence in enumerate(self.layersets):
-            u_to_px = u_to_pxs[i]
-            M = self.parameters['masters'][i]
-            max_height_u = max_heights_u[i]
-
-            # reset advances
-            advance_y_px = height - padding_px['top'] - (max_height_u * u_to_px) - base_y_offset_px
-            advance_x_px = padding_px['left']
-
-            for j, glyph in enumerate(sequence):
-                main_layer = glyph.layers[M.id]
-
-                if self.parameters['aligned']:
-                    layer_width_px = max(map(lambda (k,s): s[j].layers[self.parameters['masters'][k].id].width, enumerate(self.layersets))) * u_to_px
-                else:
-                    layer_width_px = main_layer.width * u_to_px
-
-                # Check page boundaries
-                if (advance_x_px + layer_width_px > width - padding_px['right']):
-                    advance_x_px = padding_px['left']
-                    advance_y_px -= sequence_advance_px
-
-                    if advance_y_px < padding_px['bottom']:
-                        page_index += 1
-
-                        if page_index >= len(result): result.append([])
-
-                        advance_y_px = height - padding_px['top'] - (max_height_u * u_to_px) - base_y_offset_px
-
-                orphan_layer = main_layer.copyDecomposedLayer()
-                orphan_layer.applyTransform((u_to_px, 0.0, 0.0, u_to_px, advance_x_px, advance_y_px))
-                advance_x_px += layer_width_px
-                result[page_index].append(orphan_layer)
-
-            page_index = 0
-            base_y_offset_px += lineheight_ratio * max_height_u * u_to_px
-
-        return result
 
 OCCProofingTool()
