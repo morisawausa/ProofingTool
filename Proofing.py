@@ -6,6 +6,7 @@ Starts the proofing environment
 
 from AppKit import *
 from vanilla import *
+from vanilla.dialogs import putFile
 from GlyphsApp.UI import *
 
 from drawBot.drawBotDrawingTools import _drawBotDrawingTool
@@ -14,6 +15,7 @@ from drawBot.ui.drawView import DrawView
 
 from layout import OCCProofingLayout
 
+TEXT_PLACEMENT = 20
 WINDOW_WIDTH = 400 # In PIXELS
 PAGE_WIDTH = 8.5 # in inches
 PAGE_HEIGHT = 11.0 # in inches
@@ -34,10 +36,11 @@ def tryParseInt(value, default_value):
 
 
 class OCCParametersView:
-    def __init__(self, width_px, height_px, parent_window, parametersChangedCallback=None):
+    def __init__(self, width_px, height_px, parent_window, parametersChangedCallback=None, saveProofCallback=None):
         self.window_width = width_px
         self.window_height = height_px
         self.parametersChangedCallback = parametersChangedCallback
+        self.saveProofCallback = saveProofCallback
 
         self.parameters = {
             'padding': {
@@ -51,7 +54,9 @@ class OCCParametersView:
             'masters': [],
             'point_sizes': [],
             'aligned': False,
-            'document': {'width': 11, 'height': 8.5}
+            'document': {'width': 11, 'height': 8.5},
+            'title': '',
+            'footer': '',
         }
 
 
@@ -87,12 +92,8 @@ class OCCParametersView:
         # self.group.parameters.text = TextBox((0, 0, -0, -0), "Parameters View")
         self.group.parameters.list = List(
             (0, 0, -0, self.window_height * MAIN_PANEL_HEIGHT_FACTOR),
-            [{"Line": 1, "Style": MASTERS_LIST[5], "Point Size": 72}],
+            [{"Style": MASTERS_LIST[5], "Point Size": 72}],
             columnDescriptions=[
-                {
-                    "title": "Line",
-                    "editable": False
-                },
                 {
                     "title": "Style",
                     "cell": PopUpButtonListCell(MASTERS_LIST),
@@ -146,29 +147,48 @@ class OCCParametersView:
         self.group.margins.marginlabel = TextBox((OFFSET_LEFT + ENTRY_BOX_OFFSET, OFFSET_TOP - 20, 100, 20), "Margins", sizeStyle="small")
 
         self.group.margins.toplabel = TextBox((OFFSET_LEFT, OFFSET_TOP + 4, 25, 20), "Top |", alignment="right", sizeStyle="mini")
-        self.group.margins.top = EditText((OFFSET_LEFT+ENTRY_BOX_OFFSET, OFFSET_TOP, 100, 20), "20", sizeStyle="small", callback=self.triggerParametersListEdit)
+        self.group.margins.top = EditText((OFFSET_LEFT+ENTRY_BOX_OFFSET, OFFSET_TOP, 100, 20), self.parameters['padding']['top'], sizeStyle="small", callback=self.triggerParametersListEdit)
 
         self.group.margins.leftlabel = TextBox((OFFSET_LEFT, OFFSET_TOP + 24, 25, 20), "Left  |", alignment="right", sizeStyle="mini")
-        self.group.margins.left = EditText((OFFSET_LEFT+ENTRY_BOX_OFFSET, OFFSET_TOP + 20, 50, 20), "20", sizeStyle="small", callback=self.triggerParametersListEdit)
+        self.group.margins.left = EditText((OFFSET_LEFT+ENTRY_BOX_OFFSET, OFFSET_TOP + 20, 50, 20), self.parameters['padding']['left'], sizeStyle="small", callback=self.triggerParametersListEdit)
 
         self.group.margins.rightlabel = TextBox((OFFSET_LEFT + ENTRY_BOX_OFFSET + 105, OFFSET_TOP + 24, 100, 20), "Right", alignment="left", sizeStyle="mini")
-        self.group.margins.right = EditText((OFFSET_LEFT+ENTRY_BOX_OFFSET+50, OFFSET_TOP + 20, 50, 20), "20", sizeStyle="small", callback=self.triggerParametersListEdit)
+        self.group.margins.right = EditText((OFFSET_LEFT+ENTRY_BOX_OFFSET+50, OFFSET_TOP + 20, 50, 20), self.parameters['padding']['right'], sizeStyle="small", callback=self.triggerParametersListEdit)
 
         self.group.margins.botlabel = TextBox((OFFSET_LEFT, OFFSET_TOP + 44, 25, 20), "Bot", alignment="right", sizeStyle="mini")
-        self.group.margins.bottom = EditText((OFFSET_LEFT+ENTRY_BOX_OFFSET, OFFSET_TOP + 40, 100, 20), "20", sizeStyle="small", callback=self.triggerParametersListEdit)
+        self.group.margins.bottom = EditText((OFFSET_LEFT+ENTRY_BOX_OFFSET, OFFSET_TOP + 40, 100, 20), self.parameters['padding']['bottom'], sizeStyle="small", callback=self.triggerParametersListEdit)
 
-        self.group.margins.divider = VerticalLine((globalsGroupPosSize[2] / 2.0, ELEMENT_PADDING, 1, -ELEMENT_PADDING))
+        self.group.margins.divider = VerticalLine((globalsGroupPosSize[2] / 2.0 + 2, ELEMENT_PADDING, 1, -ELEMENT_PADDING))
 
         self.group.margins.paddinglabel = TextBox((OFFSET_LEFT + ENTRY_BOX_OFFSET + 200, OFFSET_TOP - 20, 100, 20), "Padding", sizeStyle="small")
 
         self.group.margins.linelabel = TextBox((OFFSET_LEFT + ENTRY_BOX_OFFSET + 165, OFFSET_TOP + 4, 30, 20), "Line", alignment="right", sizeStyle="mini")
-        self.group.margins.line = EditText((OFFSET_LEFT + ENTRY_BOX_OFFSET + 200, OFFSET_TOP, 100, 20), "20", sizeStyle="small", callback=self.triggerParametersListEdit)
+        self.group.margins.line = EditText((OFFSET_LEFT + ENTRY_BOX_OFFSET + 200, OFFSET_TOP, 100, 20), self.parameters['padding']['line'], sizeStyle="small", callback=self.triggerParametersListEdit)
 
         self.group.margins.blocklabel = TextBox((OFFSET_LEFT + ENTRY_BOX_OFFSET + 165, OFFSET_TOP + 24, 30, 20), "Block", alignment="right", sizeStyle="mini")
-        self.group.margins.block = EditText((OFFSET_LEFT + ENTRY_BOX_OFFSET + 200, OFFSET_TOP + 20, 100, 20), "20", sizeStyle="small", callback=self.triggerParametersListEdit)
+        self.group.margins.block = EditText((OFFSET_LEFT + ENTRY_BOX_OFFSET + 200, OFFSET_TOP + 20, 100, 20), self.parameters['padding']['block'], sizeStyle="small", callback=self.triggerParametersListEdit)
+
+        self.group.margins.show(False)
 
 
         self.group.output = Group(globalsGroupPosSize)
+
+        self.group.output.saveprooflabel = TextBox((OFFSET_LEFT + ENTRY_BOX_OFFSET,OFFSET_TOP - 20,100,20),"Proof Info", sizeStyle="small")
+
+        self.group.output.proofnamelabel = TextBox((OFFSET_LEFT - 10,OFFSET_TOP + 4, 35,20), "Name", alignment="right", sizeStyle="mini")
+        self.group.output.proofname = EditText((OFFSET_LEFT + ENTRY_BOX_OFFSET,OFFSET_TOP,300,20), callback=self.triggerParametersListEdit)
+
+        self.group.output.prooffooterlabel = TextBox((OFFSET_LEFT - 10,OFFSET_TOP + 24,35,20), "Footer", alignment="right", sizeStyle="mini")
+        self.group.output.prooffooter = EditText((OFFSET_LEFT + ENTRY_BOX_OFFSET,OFFSET_TOP + 20,300,20), callback=self.triggerParametersListEdit)
+
+
+        self.group.output.saveproof = Button((OFFSET_LEFT + ENTRY_BOX_OFFSET,OFFSET_TOP + 45,50,20), "Save", sizeStyle="small", )
+        self.group.output.saveproofas = Button((OFFSET_LEFT + ENTRY_BOX_OFFSET + 45 + ELEMENT_PADDING,OFFSET_TOP + 45,75,20), "Save As...", sizeStyle="small", callback=self.saveProofAs)
+
+        self.group.output.printproof = Button((OFFSET_LEFT + ENTRY_BOX_OFFSET + 250, OFFSET_TOP + 45,50,20), "Print", sizeStyle="small", )
+
+
+        self.group.output.show(False)
 
 
         # self.group.proofname = EditText(
@@ -185,10 +205,24 @@ class OCCParametersView:
         parent_window.g = self.group
 
         self.setActiveSection(1)
-        # self.setActiveGlobal(0)
+        self.setActiveGlobal(0)
 
         if self.parametersChangedCallback is not None:
             self.parametersChangedCallback(self.getParameterSet())
+
+
+    def saveProofAs(self, sender):
+        name = self.group.output.proofname.get()
+        name = name + '.pdf' if name != '' else 'Untitled.pdf'
+
+        result = putFile(
+            title="Save Proof",
+            messageText="Save Proof As...",
+            fileName=name)
+
+        if self.saveProofCallback is not None:
+            self.outputPath = result
+            self.saveProofCallback(result)
 
 
     def setProofTitle(self, sender):
@@ -205,21 +239,16 @@ class OCCParametersView:
         self.setActiveSection(int(sender.get()))
 
     def triggerSetActiveGlobal(self, sender):
-        # self.setActiveSection(int(sender.get()))
-        pass
+        self.setActiveGlobal(int(sender.get()))
 
     def triggerAddRowToParametersList(self, sender):
         self.group.parameters.list.append({
-            "Line": len(self.group.parameters.list) + 1,
             "Style": MASTERS_LIST[0],
             "Point Size": 12})
 
     def triggerRemoveSelectedFromParametersList(self, sender):
         for index in reversed(self.group.parameters.list.getSelection()):
             del self.group.parameters.list[index]
-
-        for i, element in enumerate(self.group.parameters.list):
-            self.group.parameters.list[i]["Line"] = i + 1
 
 
     def setActiveSection(self, index):
@@ -229,6 +258,14 @@ class OCCParametersView:
         self.group.templates.show(index == 0)
         self.group.parameters.show(index == 1)
         self.group.glyphsset.show(index == 2)
+
+    def setActiveGlobal(self, index):
+        if index != 0 and index != 1: return
+
+        self.group.globals.set(index)
+        self.group.margins.show(index == 0)
+        self.group.output.show(index == 1)
+
 
     def getParameterSet(self):
 
@@ -253,7 +290,9 @@ class OCCParametersView:
             'masters': masters,
             'point_sizes': map(int, point_sizes),
             'aligned': False,
-            'document': {'width': 11, 'height': 8.5}
+            'document': {'width': 11, 'height': 8.5},
+            'title': self.group.output.proofname.get(),
+            'footer': self.group.output.prooffooter.get()
         }
 
         return parameters
@@ -291,14 +330,15 @@ class OCCProofingTool:
             self.window_width,
             self.window_height,
             self.mainWindow,
-            parametersChangedCallback=self.updateParametersAndRedraw)
+            parametersChangedCallback=self.updateParametersAndRedraw,
+            saveProofCallback=self.saveProof)
 
         self.mainWindow.open()
 
     def updateParametersAndRedraw(self, parameters):
         self.parameters = parameters
         self.layersets = map(lambda _: GLYPHS, parameters['masters'])
-        self.draw()
+        self.draw(preview=True)
 
     def calculate_scale(self, pts_per_em):
         return self.em_per_u * \
@@ -306,7 +346,13 @@ class OCCProofingTool:
             self.px_per_in * \
             pts_per_em
 
-    def draw(self):
+
+    def saveProof(self, filename):
+        self.draw(preview=False)
+        _drawBotDrawingTool.saveImage(filename)
+
+
+    def draw(self, preview = True):
         proof = OCCProofingLayout(self.layersets[0], self.parameters, self.width, self.height, Glyphs.font.upm).get()
         # print(test_proof)
 
@@ -314,15 +360,21 @@ class OCCProofingTool:
         context = DrawBotContext()
 
         _drawBotDrawingTool.newDrawing()
-        _drawBotDrawingTool.fontSize(10)
+        _drawBotDrawingTool.fontSize(8)
 
         # ==
         # Render full document
         # ==
+        if self.parameters['title'] != '' and self.parameters['footer'] != '':
+            text = '%s - %s' % (self.parameters['title'], self.parameters['footer'])
+        elif self.parameters['title'] != '' or self.parameters['footer'] != '':
+            text = self.parameters['title'] + self.parameters['footer']
+        else:
+            text = ''
 
-        for page in proof[:1]:
+        for i, page in enumerate(proof[:1] if preview else proof):
             _drawBotDrawingTool.newPage(self.width, self.height)
-            _drawBotDrawingTool.save()
+            _drawBotDrawingTool.fontSize(8)
 
             _drawBotDrawingTool.fill(1,1,1)
             _drawBotDrawingTool.rect(0,0,self.width, self.height)
@@ -332,9 +384,12 @@ class OCCProofingTool:
                 _drawBotDrawingTool.drawPath(layer.completeBezierPath)
 
             _drawBotDrawingTool.fill(0.5, 0.5, 0.5)
-            _drawBotDrawingTool.text("test", (self.parameters['padding']['left'], self.parameters['padding']['top']))
 
-            _drawBotDrawingTool.restore()
+            page = 'pg. %s' % str(i+1)
+
+            if self.parameters['padding']['bottom'] > TEXT_PLACEMENT:
+                _drawBotDrawingTool.text(text, (self.parameters['padding']['left'], TEXT_PLACEMENT))
+                _drawBotDrawingTool.text(page, (self.width - self.parameters['padding']['left'] - 20, TEXT_PLACEMENT))
 
         # _drawBotDrawingTool.printImage()
         #_drawBotDrawingTool.saveImage("/Users/nic/Desktop/proof.pdf")
