@@ -14,7 +14,8 @@ class OCCProofingLayout:
         self.in_per_pt = 0.0138889
         self.px_per_in = width / parameters['document']['width']
         self.line_height_factor = 1.25
-        self.line_padding = 20
+        self.line_padding = parameters['padding']['line']
+        self.block_padding = parameters['padding']['block']
 
         # 1. determine which parameter group takes defines the shortest line.
         #    and define the block size.
@@ -25,7 +26,7 @@ class OCCProofingLayout:
 
         self.block_line_heights = map(lambda a: int(a[1]), heights_per_line)
         self.block_line_origin = (self.block_line_heights[0] - self.line_padding) if len(self.block_line_heights) > 0 else 0
-        self.block_height = sum(self.block_line_heights)
+        self.block_height = sum(self.block_line_heights) + self.block_padding
 
         # print('block_line_height: %s px' % self.block_line_height)
         # print('block_total_height: %s px' % self.block_height)
@@ -124,12 +125,13 @@ class OCCProofingLayout:
         u_to_px = self.get_scalefactor(point_size)
         advance_px = self.parameters['padding']['left']
         glyph_count = 0
+        available_space_px = self.width - self.parameters['padding']['right']
 
         # print('')
         # print('starting glyph index: %s' % self.block_glyph_index)
 
 
-        while advance_px < (self.width - self.parameters['padding']['right']) and self.block_glyph_index + glyph_count < len(self.glyphs):
+        while advance_px < available_space_px and self.block_glyph_index + glyph_count < len(self.glyphs):
             glyph = self.glyphs[self.block_glyph_index + glyph_count]
             layer = glyph.layers[master.id]
             width_px = layer.width * u_to_px
@@ -140,8 +142,10 @@ class OCCProofingLayout:
             advance_px += width_px
             glyph_count += 1
 
+        line_length = glyph_count - 1 if advance_px >available_space_px else glyph_count
+
         # print('final glyph_count: %s' % glyph_count)
-        return line_index, glyph_count
+        return line_index, line_length
 
         #
         # print('document width: %s' % (self.width - self.parameters['padding']['right']))
