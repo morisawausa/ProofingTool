@@ -21,13 +21,16 @@ LETTER_PORTAIT_RATIO = PAGE_HEIGHT / PAGE_WIDTH
 
 ELEMENT_PADDING = 5
 SECTION_SELECTOR_HEIGHT = 20
+MAIN_PANEL_HEIGHT_FACTOR = 0.6
+
 MASTERS_LIST = map(lambda m: m.name, Glyphs.font.masters)
 GLYPHS = filter(lambda g: g.subCategory == 'Uppercase' and g.script == 'latin',  Glyphs.font.glyphs)
 
-
-class OCCDrawingView:
-    def __init__(self, width_px, height_px, parent_window):
-        pass
+def tryParseInt(value, default_value):
+    try:
+        return int(value)
+    except ValueError as e:
+        return default_value
 
 
 class OCCParametersView:
@@ -36,17 +39,39 @@ class OCCParametersView:
         self.window_height = height_px
         self.parametersChangedCallback = parametersChangedCallback
 
+        self.parameters = {
+            'padding': {
+                'left': 20,
+                'right': 70,
+                'top': 20,
+                'bottom': 100,
+                'line': 20,
+                'block': 20
+            },
+            'masters': [],
+            'point_sizes': [],
+            'aligned': False,
+            'document': {'width': 11, 'height': 8.5}
+        }
+
+
         self.group = Group((self.window_width, 0, self.window_width, self.window_height))
+
+
+        #
+        # Segmented Button at the top of View:
+        # Lets you switch between templates, edit, and glyphs.
+        #
 
         self.group.sections = SegmentedButton(
             (ELEMENT_PADDING, ELEMENT_PADDING, self.window_width - 2 * ELEMENT_PADDING, SECTION_SELECTOR_HEIGHT),
-            [dict(title="Templates"), dict(title="Parameters"), dict(title="Glyphset")],
+            [dict(title="Templates"), dict(title="Edit"), dict(title="Glyphs")],
             callback=self.triggerSetActiveSection)
 
         primaryGroupPosSize = (ELEMENT_PADDING,
             2*ELEMENT_PADDING + SECTION_SELECTOR_HEIGHT,
             self.window_width - 2 * ELEMENT_PADDING,
-            self.window_height * 0.75)
+            self.window_height * (MAIN_PANEL_HEIGHT_FACTOR + 0.15))
 
 
 
@@ -61,7 +86,7 @@ class OCCParametersView:
         self.group.parameters = Group(primaryGroupPosSize)
         # self.group.parameters.text = TextBox((0, 0, -0, -0), "Parameters View")
         self.group.parameters.list = List(
-            (0, 0, -0, self.window_height * 0.7),
+            (0, 0, -0, self.window_height * MAIN_PANEL_HEIGHT_FACTOR),
             [{"Line": 1, "Style": MASTERS_LIST[5], "Point Size": 72}],
             columnDescriptions=[
                 {
@@ -85,11 +110,11 @@ class OCCParametersView:
             rowHeight=20.0
         )
         self.group.parameters.addRow = Button(
-            (0, self.window_height * 0.7, 50, 30), "+",
+            (0, self.window_height * MAIN_PANEL_HEIGHT_FACTOR, 50, 30), "+",
             callback=self.triggerAddRowToParametersList)
 
         self.group.parameters.removeRow = Button(
-            (50 + ELEMENT_PADDING, self.window_height * 0.7, 50, 30), "-",
+            (50 + ELEMENT_PADDING, self.window_height * MAIN_PANEL_HEIGHT_FACTOR, 50, 30), "-",
             callback=self.triggerRemoveSelectedFromParametersList)
 
         self.group.parameters.show(False)
@@ -98,20 +123,63 @@ class OCCParametersView:
         self.group.glyphsset.text = TextBox((0, 0, -0, -0), "Glyphs View")
         self.group.glyphsset.show(False)
 
+        self.group.line = HorizontalLine((ELEMENT_PADDING, primaryGroupPosSize[3] - 2 * ELEMENT_PADDING, self.window_width - 2 * ELEMENT_PADDING, 1))
+
+
+        self.group.globals = SegmentedButton(
+            (ELEMENT_PADDING, primaryGroupPosSize[3], self.window_width - 2 * ELEMENT_PADDING, SECTION_SELECTOR_HEIGHT),
+            [dict(title="Margins & Padding"), dict(title="Output")],
+            callback=self.triggerSetActiveGlobal)
+
+        globalsGroupPosSize = (
+            ELEMENT_PADDING,
+            primaryGroupPosSize[3] + SECTION_SELECTOR_HEIGHT + ELEMENT_PADDING,
+            self.window_width - 2 * ELEMENT_PADDING,
+            self.window_height * 0.2)
+
+        self.group.margins = Group(globalsGroupPosSize)
+
+        OFFSET_TOP = 10
+        OFFSET_LEFT = 0
+        ENTRY_BOX_OFFSET = 30
+
+        self.group.margins.toplabel = TextBox((OFFSET_LEFT, OFFSET_TOP + 4, 25, 20), "Top |", alignment="right", sizeStyle="mini")
+        self.group.margins.top = EditText((OFFSET_LEFT+ENTRY_BOX_OFFSET, OFFSET_TOP, 100, 20), "20", sizeStyle="small", callback=self.triggerParametersListEdit)
+
+        self.group.margins.leftlabel = TextBox((OFFSET_LEFT, OFFSET_TOP + 32, 25, 20), "Left  |", alignment="right", sizeStyle="mini")
+        self.group.margins.left = EditText((OFFSET_LEFT+ENTRY_BOX_OFFSET, OFFSET_TOP + 20, 50, 40), "20", sizeStyle="small", callback=self.triggerParametersListEdit)
+
+        self.group.margins.rightlabel = TextBox((OFFSET_LEFT + ENTRY_BOX_OFFSET + 105, OFFSET_TOP + 32, 100, 20), "Right", alignment="left", sizeStyle="mini")
+        self.group.margins.right = EditText((OFFSET_LEFT+ENTRY_BOX_OFFSET+50, OFFSET_TOP + 20, 50, 40), "20", sizeStyle="small", callback=self.triggerParametersListEdit)
+
+        self.group.margins.botlabel = TextBox((OFFSET_LEFT, OFFSET_TOP + 64, 25, 20), "Bot", alignment="right", sizeStyle="mini")
+        self.group.margins.bottom = EditText((OFFSET_LEFT+ENTRY_BOX_OFFSET, OFFSET_TOP + 60, 100, 20), "20", sizeStyle="small", callback=self.triggerParametersListEdit)
+
+        self.group.margins.divider = VerticalLine((OFFSET_LEFT + ENTRY_BOX_OFFSET + 140, ELEMENT_PADDING, 1, -ELEMENT_PADDING))
+
+
+        self.group.margins.line = EditText((OFFSET_LEFT + ENTRY_BOX_OFFSET + 170, OFFSET_TOP, 100, 20), "20", sizeStyle="small", callback=self.triggerParametersListEdit)
+        self.group.margins.block = EditText((OFFSET_LEFT + ENTRY_BOX_OFFSET + 170, OFFSET_TOP + 20 + ELEMENT_PADDING, 100, 20), "20", sizeStyle="small", callback=self.triggerParametersListEdit)
+
+
+
+
         # self.group.proofname = EditText(
         #     (ELEMENT_PADDING, self.window_height - 20 - ELEMENT_PADDING, self.window_width * 0.75, 20),
         #     placeholder="Proof Name...")
 
-        self.group.saveButton = Button(
-            (self.window_width * 0.75 + 2 * ELEMENT_PADDING,
-             self.window_height - 20 - ELEMENT_PADDING,
-             self.window_width * 0.25 - 3 * ELEMENT_PADDING,
-             20), "Save Proof")
+        # self.group.saveButton = Button(
+        #     (self.window_width * 0.75 + 2 * ELEMENT_PADDING,
+        #      self.window_height - 20 - ELEMENT_PADDING,
+        #      self.window_width * 0.25 - 3 * ELEMENT_PADDING,
+        #      20), "Save Proof")
 
 
         parent_window.g = self.group
 
         self.setActiveSection(1)
+        # self.setActiveGlobal(0)
+
         if self.parametersChangedCallback is not None:
             self.parametersChangedCallback(self.getParameterSet())
 
@@ -128,6 +196,10 @@ class OCCParametersView:
 
     def triggerSetActiveSection(self, sender):
         self.setActiveSection(int(sender.get()))
+
+    def triggerSetActiveGlobal(self, sender):
+        # self.setActiveSection(int(sender.get()))
+        pass
 
     def triggerAddRowToParametersList(self, sender):
         self.group.parameters.list.append({
@@ -161,8 +233,16 @@ class OCCParametersView:
             master = filter(lambda m: m.name == item['Style'], Glyphs.font.masters)
             masters.append(master[0])
 
+
         parameters = {
-            'padding': {'left': 20, 'right': 70, 'top': 20, 'bottom': 100, 'line': 20},
+            'padding': {
+                'left': tryParseInt(self.group.margins.left.get(), self.parameters['padding']['left']),
+                'right': tryParseInt(self.group.margins.right.get(), self.parameters['padding']['right']),
+                'top': tryParseInt(self.group.margins.top.get(), self.parameters['padding']['top']),
+                'bottom': tryParseInt(self.group.margins.bottom.get(), self.parameters['padding']['bottom']),
+                'line': tryParseInt(self.group.margins.line.get(), self.parameters['padding']['line']),
+                'block': tryParseInt(self.group.margins.block.get(), self.parameters['padding']['block'])
+            },
             'masters': masters,
             'point_sizes': map(int, point_sizes),
             'aligned': False,
@@ -229,7 +309,11 @@ class OCCProofingTool:
         _drawBotDrawingTool.newDrawing()
         _drawBotDrawingTool.fontSize(10)
 
-        for page in proof:
+        # ==
+        # Render full document
+        # ==
+
+        for page in proof[:1]:
             _drawBotDrawingTool.newPage(self.width, self.height)
             _drawBotDrawingTool.save()
 
