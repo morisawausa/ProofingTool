@@ -128,7 +128,7 @@ class OCCParametersView:
 
         self.group.globals = SegmentedButton(
             (ELEMENT_PADDING, primaryGroupPosSize[3], self.window_width - 2 * ELEMENT_PADDING, SECTION_SELECTOR_HEIGHT),
-            [dict(title="Margins & Padding"), dict(title="Output")],
+            [dict(title="Margins & Padding", width=(self.window_width - 2 * ELEMENT_PADDING) / 2), dict(title="Output", width=(self.window_width - 2 * ELEMENT_PADDING) / 2)],
             callback=self.triggerSetActiveGlobal)
 
         globalsGroupPosSize = (
@@ -139,29 +139,36 @@ class OCCParametersView:
 
         self.group.margins = Group(globalsGroupPosSize)
 
-        OFFSET_TOP = 10
-        OFFSET_LEFT = 0
+        OFFSET_TOP = 25
+        OFFSET_LEFT = 15
         ENTRY_BOX_OFFSET = 30
+
+        self.group.margins.marginlabel = TextBox((OFFSET_LEFT + ENTRY_BOX_OFFSET, OFFSET_TOP - 20, 100, 20), "Margins", sizeStyle="small")
 
         self.group.margins.toplabel = TextBox((OFFSET_LEFT, OFFSET_TOP + 4, 25, 20), "Top |", alignment="right", sizeStyle="mini")
         self.group.margins.top = EditText((OFFSET_LEFT+ENTRY_BOX_OFFSET, OFFSET_TOP, 100, 20), "20", sizeStyle="small", callback=self.triggerParametersListEdit)
 
-        self.group.margins.leftlabel = TextBox((OFFSET_LEFT, OFFSET_TOP + 32, 25, 20), "Left  |", alignment="right", sizeStyle="mini")
-        self.group.margins.left = EditText((OFFSET_LEFT+ENTRY_BOX_OFFSET, OFFSET_TOP + 20, 50, 40), "20", sizeStyle="small", callback=self.triggerParametersListEdit)
+        self.group.margins.leftlabel = TextBox((OFFSET_LEFT, OFFSET_TOP + 24, 25, 20), "Left  |", alignment="right", sizeStyle="mini")
+        self.group.margins.left = EditText((OFFSET_LEFT+ENTRY_BOX_OFFSET, OFFSET_TOP + 20, 50, 20), "20", sizeStyle="small", callback=self.triggerParametersListEdit)
 
-        self.group.margins.rightlabel = TextBox((OFFSET_LEFT + ENTRY_BOX_OFFSET + 105, OFFSET_TOP + 32, 100, 20), "Right", alignment="left", sizeStyle="mini")
-        self.group.margins.right = EditText((OFFSET_LEFT+ENTRY_BOX_OFFSET+50, OFFSET_TOP + 20, 50, 40), "20", sizeStyle="small", callback=self.triggerParametersListEdit)
+        self.group.margins.rightlabel = TextBox((OFFSET_LEFT + ENTRY_BOX_OFFSET + 105, OFFSET_TOP + 24, 100, 20), "Right", alignment="left", sizeStyle="mini")
+        self.group.margins.right = EditText((OFFSET_LEFT+ENTRY_BOX_OFFSET+50, OFFSET_TOP + 20, 50, 20), "20", sizeStyle="small", callback=self.triggerParametersListEdit)
 
-        self.group.margins.botlabel = TextBox((OFFSET_LEFT, OFFSET_TOP + 64, 25, 20), "Bot", alignment="right", sizeStyle="mini")
-        self.group.margins.bottom = EditText((OFFSET_LEFT+ENTRY_BOX_OFFSET, OFFSET_TOP + 60, 100, 20), "20", sizeStyle="small", callback=self.triggerParametersListEdit)
+        self.group.margins.botlabel = TextBox((OFFSET_LEFT, OFFSET_TOP + 44, 25, 20), "Bot", alignment="right", sizeStyle="mini")
+        self.group.margins.bottom = EditText((OFFSET_LEFT+ENTRY_BOX_OFFSET, OFFSET_TOP + 40, 100, 20), "20", sizeStyle="small", callback=self.triggerParametersListEdit)
 
-        self.group.margins.divider = VerticalLine((OFFSET_LEFT + ENTRY_BOX_OFFSET + 140, ELEMENT_PADDING, 1, -ELEMENT_PADDING))
+        self.group.margins.divider = VerticalLine((globalsGroupPosSize[2] / 2.0, ELEMENT_PADDING, 1, -ELEMENT_PADDING))
+
+        self.group.margins.paddinglabel = TextBox((OFFSET_LEFT + ENTRY_BOX_OFFSET + 200, OFFSET_TOP - 20, 100, 20), "Padding", sizeStyle="small")
+
+        self.group.margins.linelabel = TextBox((OFFSET_LEFT + ENTRY_BOX_OFFSET + 165, OFFSET_TOP + 4, 30, 20), "Line", alignment="right", sizeStyle="mini")
+        self.group.margins.line = EditText((OFFSET_LEFT + ENTRY_BOX_OFFSET + 200, OFFSET_TOP, 100, 20), "20", sizeStyle="small", callback=self.triggerParametersListEdit)
+
+        self.group.margins.blocklabel = TextBox((OFFSET_LEFT + ENTRY_BOX_OFFSET + 165, OFFSET_TOP + 24, 30, 20), "Block", alignment="right", sizeStyle="mini")
+        self.group.margins.block = EditText((OFFSET_LEFT + ENTRY_BOX_OFFSET + 200, OFFSET_TOP + 20, 100, 20), "20", sizeStyle="small", callback=self.triggerParametersListEdit)
 
 
-        self.group.margins.line = EditText((OFFSET_LEFT + ENTRY_BOX_OFFSET + 170, OFFSET_TOP, 100, 20), "20", sizeStyle="small", callback=self.triggerParametersListEdit)
-        self.group.margins.block = EditText((OFFSET_LEFT + ENTRY_BOX_OFFSET + 170, OFFSET_TOP + 20 + ELEMENT_PADDING, 100, 20), "20", sizeStyle="small", callback=self.triggerParametersListEdit)
-
-
+        self.group.output = Group(globalsGroupPosSize)
 
 
         # self.group.proofname = EditText(
