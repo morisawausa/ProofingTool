@@ -28,9 +28,6 @@ class OCCProofingLayout:
         self.block_line_origin = (self.block_line_heights[0] - self.line_padding) if len(self.block_line_heights) > 0 else 0
         self.block_height = sum(self.block_line_heights) + self.block_padding
 
-        # print('block_line_height: %s px' % self.block_line_height)
-        # print('block_total_height: %s px' % self.block_height)
-
         # 2. layout each block.
         pages = [[]]
 
@@ -39,7 +36,6 @@ class OCCProofingLayout:
         page_origin_y_px = self.height - parameters['padding']['top']
 
         block_index = 0
-        # block_line_glyph_index = 0
 
         block_origin_x_px = page_origin_x_px
         block_origin_y_px = page_origin_y_px
@@ -47,14 +43,8 @@ class OCCProofingLayout:
         block_advance_position_x_px = 0
         block_advance_position_y_px = self.block_line_origin
 
-        # print(map(lambda a: a.name, self.glyphs))
 
         while len(self.glyphs[self.block_glyph_index:]) > 0:
-            # print('new block: %s' % block_index)
-            # print('page height: %s' % self.height)
-            # print('block line_heights', self.block_line_heights)
-            # print('block height: %s' % self.block_height)
-            # print('block_origin y: %s' % block_origin_y_px)
 
             if block_origin_y_px - self.block_height < parameters['padding']['bottom']:
                 # This block overshoots the end of the page.
@@ -64,14 +54,9 @@ class OCCProofingLayout:
                 block_origin_y_px = page_origin_y_px
                 block_advance_position_y_px = self.block_line_origin
 
-
-
             # First, get the line-length for this line
             bounds_per_line = map(self.get_line_lengths, parameter_rows)
             block_line_length = min(map(lambda a: a[1], bounds_per_line))
-
-            # block_line_length = 2
-
 
             # Then layout the line with this length
             block_glyphs = self.glyphs[ self.block_glyph_index : self.block_glyph_index + block_line_length ]
@@ -127,42 +112,16 @@ class OCCProofingLayout:
         glyph_count = 0
         available_space_px = self.width - self.parameters['padding']['right']
 
-        # print('')
-        # print('starting glyph index: %s' % self.block_glyph_index)
-
-
         while advance_px < available_space_px and self.block_glyph_index + glyph_count < len(self.glyphs):
             glyph = self.glyphs[self.block_glyph_index + glyph_count]
             layer = glyph.layers[master.id]
             width_px = layer.width * u_to_px
-            # print('current advance_px: %s' % advance_px)
-            # print('first_glyph_name: %s' % glyph.name)
-            # print('first_layer_name: %s' % layer.name)
-            # print('first_layer_width: %s' % round(width_px))
             advance_px += width_px
             glyph_count += 1
 
         line_length = glyph_count - 1 if advance_px >available_space_px else glyph_count
 
-        # print('final glyph_count: %s' % glyph_count)
         return line_index, line_length
-
-        #
-        # print('document width: %s' % (self.width - self.parameters['padding']['right']))
-        # print('\n')
-        #
-        # while advance_px < self.width - self.parameters['padding']['right'] and glyph_index < len(self.glyphs):
-        #     main_layer = self.glyphs[glyph_index].layers[master.id]
-        #     advance_px += main_layer.width * u_to_px
-        #     glyph_index += 1
-        #     glyph_count += 1
-        #
-        #     print('iteration %s:' % glyph_count)
-        #     print('advance_px %s:' % advance_px)
-        #     print('glyph_index_in_set %s:' % glyph_index)
-        #     print('\n')
-        #
-        # return line_index, glyph_count - 1
 
 
     def get(self):
