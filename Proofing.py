@@ -18,13 +18,8 @@ from parameters import OCCParametersView
 
 TEXT_PLACEMENT = 20
 WINDOW_WIDTH = 400 # In PIXELS
-PAGE_WIDTH = 8.5 # in inches
-PAGE_HEIGHT = 11.0 # in inches
-LETTER_PORTAIT_RATIO = PAGE_HEIGHT / PAGE_WIDTH
 
 GLYPHS = filter(lambda g: g.subCategory == 'Uppercase' and g.script == 'latin',  Glyphs.font.glyphs)
-
-
 
 
 class OCCProofingTool:
@@ -32,7 +27,7 @@ class OCCProofingTool:
         # Unit Arithmetic
         self.em_per_u = 1.0 / Glyphs.font.upm
         self.in_per_pt = 0.0138889
-        self.px_per_in = 612 / PAGE_WIDTH
+        self.px_per_in = 612.0 / 8.5 # Drawbot pixel / inch ratio
 
 
         self.height, self.width = _drawBotDrawingTool.sizes('Letter')
