@@ -311,8 +311,6 @@ class OCCProofingTool:
         self.height, self.width = _drawBotDrawingTool.sizes('Letter')
         self.window_width, self.window_height = WINDOW_WIDTH, (WINDOW_WIDTH * (11.0 / 8.5))
 
-        print(self.window_width, self.window_height)
-
         self.mainWindow = Window(
             (self.window_width * 2, self.window_height),
             "Modular Proof",
