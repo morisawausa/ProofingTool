@@ -154,26 +154,26 @@ class OCCParametersView:
         self.group.margins.marginlabel = TextBox((OFFSET_LEFT + ENTRY_BOX_OFFSET, OFFSET_TOP - 20, 100, 20), "Margins", sizeStyle="small")
 
         self.group.margins.toplabel = TextBox((OFFSET_LEFT, OFFSET_TOP + 4, 25, 20), "Top |", alignment="right", sizeStyle="mini")
-        self.group.margins.top = EditText((OFFSET_LEFT+ENTRY_BOX_OFFSET, OFFSET_TOP, 100, 20), self.parameters['padding']['top'], sizeStyle="small", callback=self.triggerParametersListEdit)
+        self.group.margins.top = EditText((OFFSET_LEFT+ENTRY_BOX_OFFSET, OFFSET_TOP, 100, 20), self.parameters['padding']['top'], sizeStyle="small", continuous=False, callback=self.triggerParametersListEdit)
 
         self.group.margins.leftlabel = TextBox((OFFSET_LEFT, OFFSET_TOP + 24, 25, 20), "Left  |", alignment="right", sizeStyle="mini")
-        self.group.margins.left = EditText((OFFSET_LEFT+ENTRY_BOX_OFFSET, OFFSET_TOP + 20, 50, 20), self.parameters['padding']['left'], sizeStyle="small", callback=self.triggerParametersListEdit)
+        self.group.margins.left = EditText((OFFSET_LEFT+ENTRY_BOX_OFFSET, OFFSET_TOP + 20, 50, 20), self.parameters['padding']['left'], sizeStyle="small", continuous=False, callback=self.triggerParametersListEdit)
 
         self.group.margins.rightlabel = TextBox((OFFSET_LEFT + ENTRY_BOX_OFFSET + 105, OFFSET_TOP + 24, 100, 20), "Right", alignment="left", sizeStyle="mini")
-        self.group.margins.right = EditText((OFFSET_LEFT+ENTRY_BOX_OFFSET+50, OFFSET_TOP + 20, 50, 20), self.parameters['padding']['right'], sizeStyle="small", callback=self.triggerParametersListEdit)
+        self.group.margins.right = EditText((OFFSET_LEFT+ENTRY_BOX_OFFSET+50, OFFSET_TOP + 20, 50, 20), self.parameters['padding']['right'], sizeStyle="small", continuous=False, callback=self.triggerParametersListEdit)
 
         self.group.margins.botlabel = TextBox((OFFSET_LEFT, OFFSET_TOP + 44, 25, 20), "Bot", alignment="right", sizeStyle="mini")
-        self.group.margins.bottom = EditText((OFFSET_LEFT+ENTRY_BOX_OFFSET, OFFSET_TOP + 40, 100, 20), self.parameters['padding']['bottom'], sizeStyle="small", callback=self.triggerParametersListEdit)
+        self.group.margins.bottom = EditText((OFFSET_LEFT+ENTRY_BOX_OFFSET, OFFSET_TOP + 40, 100, 20), self.parameters['padding']['bottom'], sizeStyle="small", continuous=False, callback=self.triggerParametersListEdit)
 
         self.group.margins.divider = VerticalLine((globalsGroupPosSize[2] / 2.0 + 2, ELEMENT_PADDING, 1, -ELEMENT_PADDING))
 
         self.group.margins.paddinglabel = TextBox((OFFSET_LEFT + ENTRY_BOX_OFFSET + 200, OFFSET_TOP - 20, 100, 20), "Padding", sizeStyle="small")
 
         self.group.margins.linelabel = TextBox((OFFSET_LEFT + ENTRY_BOX_OFFSET + 165, OFFSET_TOP + 4, 30, 20), "Line", alignment="right", sizeStyle="mini")
-        self.group.margins.line = EditText((OFFSET_LEFT + ENTRY_BOX_OFFSET + 200, OFFSET_TOP, 100, 20), self.parameters['padding']['line'], sizeStyle="small", callback=self.triggerParametersListEdit)
+        self.group.margins.line = EditText((OFFSET_LEFT + ENTRY_BOX_OFFSET + 200, OFFSET_TOP, 100, 20), self.parameters['padding']['line'], sizeStyle="small", continuous=False, callback=self.triggerParametersListEdit)
 
         self.group.margins.blocklabel = TextBox((OFFSET_LEFT + ENTRY_BOX_OFFSET + 165, OFFSET_TOP + 24, 30, 20), "Block", alignment="right", sizeStyle="mini")
-        self.group.margins.block = EditText((OFFSET_LEFT + ENTRY_BOX_OFFSET + 200, OFFSET_TOP + 20, 100, 20), self.parameters['padding']['block'], sizeStyle="small", callback=self.triggerParametersListEdit)
+        self.group.margins.block = EditText((OFFSET_LEFT + ENTRY_BOX_OFFSET + 200, OFFSET_TOP + 20, 100, 20), self.parameters['padding']['block'], sizeStyle="small", continuous=False, callback=self.triggerParametersListEdit)
 
         self.group.margins.show(False)
 
@@ -183,10 +183,10 @@ class OCCParametersView:
         self.group.output.saveprooflabel = TextBox((OFFSET_LEFT + ENTRY_BOX_OFFSET,OFFSET_TOP - 20,100,20),"Proof Info", sizeStyle="small")
 
         self.group.output.proofnamelabel = TextBox((OFFSET_LEFT - 10,OFFSET_TOP + 4, 35,20), "Name", alignment="right", sizeStyle="mini")
-        self.group.output.proofname = EditText((OFFSET_LEFT + ENTRY_BOX_OFFSET,OFFSET_TOP,300,20), callback=self.triggerParametersListEdit)
+        self.group.output.proofname = EditText((OFFSET_LEFT + ENTRY_BOX_OFFSET,OFFSET_TOP,300,20), continuous=False, callback=self.triggerParametersListEdit)
 
         self.group.output.prooffooterlabel = TextBox((OFFSET_LEFT - 10,OFFSET_TOP + 24,35,20), "Footer", alignment="right", sizeStyle="mini")
-        self.group.output.prooffooter = EditText((OFFSET_LEFT + ENTRY_BOX_OFFSET,OFFSET_TOP + 20,300,20), callback=self.triggerParametersListEdit)
+        self.group.output.prooffooter = EditText((OFFSET_LEFT + ENTRY_BOX_OFFSET,OFFSET_TOP + 20,300,20), continuous=False, callback=self.triggerParametersListEdit)
 
         self.group.output.saveproof = Button((OFFSET_LEFT + ENTRY_BOX_OFFSET,OFFSET_TOP + 45,50,20), "Save", sizeStyle="small", callback=self.saveProof )
         self.group.output.saveproof.enable(False)
@@ -411,7 +411,7 @@ class OCCProofingTool:
                 _drawBotDrawingTool.text(text, (self.parameters['padding']['left'], TEXT_PLACEMENT))
                 _drawBotDrawingTool.text(page, (self.width - self.parameters['padding']['left'] - 20, TEXT_PLACEMENT))
 
-        # _drawBotDrawingTool.printImage()
+        #_drawBotDrawingTool.printImage()
         #_drawBotDrawingTool.saveImage("/Users/nic/Desktop/proof.pdf")
 
         _drawBotDrawingTool._drawInContext(context)
