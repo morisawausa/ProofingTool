@@ -220,7 +220,7 @@ class OCCParametersView:
             messageText="Save Proof As...",
             fileName=name)
 
-        if self.saveProofCallback is not None:
+        if self.saveProofCallback is not None and result is not None:
             self.outputPath = result
             self.saveProofCallback(result)
 
