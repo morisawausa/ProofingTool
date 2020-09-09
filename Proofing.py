@@ -36,11 +36,18 @@ def tryParseInt(value, default_value):
 
 
 class OCCParametersView:
-    def __init__(self, width_px, height_px, parent_window, parametersChangedCallback=None, saveProofCallback=None):
+    def __init__(self, width_px, height_px, parent_window,
+        parametersChangedCallback=None,
+        saveProofCallback=None,
+        printProofCallback=None):
+
         self.window_width = width_px
         self.window_height = height_px
         self.parametersChangedCallback = parametersChangedCallback
         self.saveProofCallback = saveProofCallback
+        self.printProofCallback = printProofCallback
+
+        self.outputPath = None
 
         self.parameters = {
             'padding': {
@@ -181,11 +188,12 @@ class OCCParametersView:
         self.group.output.prooffooterlabel = TextBox((OFFSET_LEFT - 10,OFFSET_TOP + 24,35,20), "Footer", alignment="right", sizeStyle="mini")
         self.group.output.prooffooter = EditText((OFFSET_LEFT + ENTRY_BOX_OFFSET,OFFSET_TOP + 20,300,20), callback=self.triggerParametersListEdit)
 
+        self.group.output.saveproof = Button((OFFSET_LEFT + ENTRY_BOX_OFFSET,OFFSET_TOP + 45,50,20), "Save", sizeStyle="small", callback=self.saveProof )
+        self.group.output.saveproof.enable(False)
 
-        self.group.output.saveproof = Button((OFFSET_LEFT + ENTRY_BOX_OFFSET,OFFSET_TOP + 45,50,20), "Save", sizeStyle="small", )
         self.group.output.saveproofas = Button((OFFSET_LEFT + ENTRY_BOX_OFFSET + 45 + ELEMENT_PADDING,OFFSET_TOP + 45,75,20), "Save As...", sizeStyle="small", callback=self.saveProofAs)
 
-        self.group.output.printproof = Button((OFFSET_LEFT + ENTRY_BOX_OFFSET + 250, OFFSET_TOP + 45,50,20), "Print", sizeStyle="small", )
+        self.group.output.printproof = Button((OFFSET_LEFT + ENTRY_BOX_OFFSET + 250, OFFSET_TOP + 45,50,20), "Print", sizeStyle="small", callback=self.printProof)
 
 
         self.group.output.show(False)
@@ -211,6 +219,14 @@ class OCCParametersView:
             self.parametersChangedCallback(self.getParameterSet())
 
 
+    def printProof(self, sender):
+        if self.printProofCallback is not None:
+            self.printProofCallback()
+
+    def saveProof(self, sender):
+        if self.outputPath is not None:
+            self.saveProofCallback(self.outputPath)
+
     def saveProofAs(self, sender):
         name = self.group.output.proofname.get()
         name = name + '.pdf' if name != '' else 'Untitled.pdf'
@@ -222,6 +238,7 @@ class OCCParametersView:
 
         if self.saveProofCallback is not None and result is not None:
             self.outputPath = result
+            self.group.output.saveproof.enable(True)
             self.saveProofCallback(result)
 
 
@@ -329,7 +346,8 @@ class OCCProofingTool:
             self.window_height,
             self.mainWindow,
             parametersChangedCallback=self.updateParametersAndRedraw,
-            saveProofCallback=self.saveProof)
+            saveProofCallback=self.saveProof,
+            printProofCallback=self.printProof)
 
         self.mainWindow.open()
 
@@ -348,6 +366,10 @@ class OCCProofingTool:
     def saveProof(self, filename):
         self.draw(preview=False)
         _drawBotDrawingTool.saveImage(filename)
+
+    def printProof(self):
+        self.draw(preview=False)
+        _drawBotDrawingTool.printImage()
 
 
     def draw(self, preview = True):
@@ -370,7 +392,7 @@ class OCCProofingTool:
         else:
             text = ''
 
-        for i, page in enumerate(proof[:1] if preview else proof):
+        for i, page in enumerate(proof if preview else proof):
             _drawBotDrawingTool.newPage(self.width, self.height)
             _drawBotDrawingTool.fontSize(8)
 
