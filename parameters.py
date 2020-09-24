@@ -19,6 +19,26 @@ def tryParseInt(value, default_value):
     except ValueError as e:
         return default_value
 
+
+def getAllCategories():
+    categories = {}
+    result = ['Any']
+
+    for g in Glyphs.font.glyphs:
+        if g.category is not None :
+            if g.category in categories and g.subCategory is not None:
+                categories[g.category].add(g.subCategory)
+            else:
+                categories[g.category] = set([g.subCategory] if g.subCategory is not None else [])
+
+    for category in sorted(categories.keys()):
+        result.append(category)
+        for subcategory in sorted(list(categories[category])):
+            result.append('  %s' % subcategory)
+
+    return result
+
+
 class OCCParametersView:
 
 
@@ -34,6 +54,8 @@ class OCCParametersView:
         self.printProofCallback = printProofCallback
 
         self.outputPath = None
+
+        self.glyphs = filter(lambda g: g.category == 'Letter' and g.subCategory == 'Uppercase' and g.script == 'latin', Glyphs.font.glyphs)
 
         self.parameters = {
             'padding': {
@@ -79,7 +101,9 @@ class OCCParametersView:
         self.group.templates.show(False)
 
 
-
+        #
+        # Edit View List
+        #
 
         self.group.parameters = Group(primaryGroupPosSize)
 
@@ -113,12 +137,74 @@ class OCCParametersView:
 
         self.group.parameters.show(False)
 
+        #
+        # Glyphset View
+        #
+
         self.group.glyphsset = Group(primaryGroupPosSize)
-        self.group.glyphsset.text = TextBox((0, 0, -0, -0), "Glyphs View")
+        # self.group.glyphsset.list = List(
+        #     (0, 0, -0, self.window_height * MAIN_PANEL_HEIGHT_FACTOR / 2 - 4 * ELEMENT_PADDING),
+        #     [],
+        #     columnDescriptions=[
+        #         {
+        #             "title": "Category",
+        #             "cell": PopUpButtonListCell(getAllCategories()),
+        #             "binding": "selectedValue"
+        #         },
+        #         {
+        #             "title": "Script"
+        #         },
+        #         {
+        #             "title": "Filter"
+        #         }
+        #     ],
+        #     # editCallback=self.triggerParametersListEdit,
+        #     # selectionCallback=self.triggerParametersListSelection,
+        #     drawFocusRing=False,
+        #     allowsSorting=False,
+        #     allowsEmptySelection=True,
+        #     rowHeight=20.0
+        # )
+        #
+        # self.group.glyphsset.list.enable(True)
+        self.group.glyphsset.selectionLabel = TextBox((0, 10, -0, -0), "Glyphs From Selection")
+        self.group.glyphsset.selectionDescription = TextBox((0, 35, primaryGroupPosSize[2] / 2, -0), "Select the glyphs for this proof in the Font Window.", sizeStyle="small")
+
+        self.group.glyphsset.fromSelectionButton = Button(
+        (primaryGroupPosSize[2] / 2 + ELEMENT_PADDING, 35, primaryGroupPosSize[2] / 2 - 2 * ELEMENT_PADDING, 20),
+        "From Selection", callback=self.triggerSetGlyphsFromSelection )
+
+        EDIT_VIEW_OFFSET = 200
+
+        self.group.glyphsset.line = HorizontalLine((0, EDIT_VIEW_OFFSET - 25, -0, 2))
+
+        self.group.glyphsset.editViewLabel = TextBox((0, EDIT_VIEW_OFFSET, -0, -0), "Glyphs From Edit View")
+        self.group.glyphsset.editViewDescription = TextBox((0, EDIT_VIEW_OFFSET + 25, primaryGroupPosSize[2] / 2, -0), "Use the edit view to create the content of this proof.", sizeStyle="small")
+
+        self.group.glyphsset.fromEditViewButton = Button(
+        (primaryGroupPosSize[2] / 2 + ELEMENT_PADDING, EDIT_VIEW_OFFSET + 25, primaryGroupPosSize[2] / 2 - 2 * ELEMENT_PADDING, 20),
+        "From Current Edit View", callback=self.triggerSetGlyphsFromEditView );
+
+        # self.group.glyphsset.syncEditViewButton = CheckBox(
+        # (primaryGroupPosSize[2] / 2 + ELEMENT_PADDING, 82, primaryGroupPosSize[2] / 2, 20),
+        # "Sync With Edit View");
+        #
+        # self.group.glyphsset.syncEditViewButton.show(False)
+
+        # self.group.glyphsset.fromEditViewButton = Button(
+        # (0, 0, primaryGroupPosSize[2] / 2, self.window_height * MAIN_PANEL_HEIGHT_FACTOR / 2 - 4 * ELEMENT_PADDING),
+        # "From Selection", callback=self.triggerSetGlyphsFromSelection );
+
+
         self.group.glyphsset.show(False)
 
         self.group.line = HorizontalLine((ELEMENT_PADDING, primaryGroupPosSize[3] - 2 * ELEMENT_PADDING, self.window_width - 2 * ELEMENT_PADDING, 1))
 
+
+
+        #
+        # Globals Tabbed View
+        #
 
         self.group.globals = SegmentedButton(
             (ELEMENT_PADDING, primaryGroupPosSize[3], self.window_width - 2 * ELEMENT_PADDING, SECTION_SELECTOR_HEIGHT),
@@ -185,24 +271,13 @@ class OCCParametersView:
         self.group.output.show(False)
 
 
-        # self.group.proofname = EditText(
-        #     (ELEMENT_PADDING, self.window_height - 20 - ELEMENT_PADDING, self.window_width * 0.75, 20),
-        #     placeholder="Proof Name...")
-
-        # self.group.saveButton = Button(
-        #     (self.window_width * 0.75 + 2 * ELEMENT_PADDING,
-        #      self.window_height - 20 - ELEMENT_PADDING,
-        #      self.window_width * 0.25 - 3 * ELEMENT_PADDING,
-        #      20), "Save Proof")
-
-
         parent_window.g = self.group
 
         self.setActiveSection(1)
         self.setActiveGlobal(0)
 
         if self.parametersChangedCallback is not None:
-            self.parametersChangedCallback(self.getParameterSet())
+            self.parametersChangedCallback(self.getParameterSet(), self.getGlyphSet())
 
 
     def printProof(self, sender):
@@ -232,8 +307,7 @@ class OCCParametersView:
         print(sender.get())
 
     def triggerParametersListEdit(self, sender):
-        self.parametersChangedCallback(self.getParameterSet())
-
+        self.parametersChangedCallback(self.getParameterSet(), self.getGlyphSet())
 
     def triggerParametersListSelection(self, sender):
         self.group.parameters.removeRow.enable(len(sender.getSelection()) > 0)
@@ -253,6 +327,17 @@ class OCCParametersView:
         for index in reversed(self.group.parameters.list.getSelection()):
             del self.group.parameters.list[index]
 
+    def triggerSetGlyphsFromSelection(self, sender):
+        self.glyphs = filter(lambda g: g.selected, Glyphs.font.glyphs)
+        if self.parametersChangedCallback is not None:
+            self.parametersChangedCallback(self.getParameterSet(), self.getGlyphSet())
+
+    def triggerSetGlyphsFromEditView(self, sender):
+        if Glyphs.font.currentTab is not None:
+            self.glyphs = map(lambda l: l.parent, Glyphs.font.currentTab.layers)
+            if self.parametersChangedCallback is not None:
+                self.parametersChangedCallback(self.getParameterSet(), self.getGlyphSet())
+
 
     def setActiveSection(self, index):
         if index != 0 and index != 1 and index != 2: return
@@ -268,6 +353,10 @@ class OCCParametersView:
         self.group.globals.set(index)
         self.group.margins.show(index == 0)
         self.group.output.show(index == 1)
+
+
+    def getGlyphSet(self):
+        return self.glyphs
 
 
     def getParameterSet(self):

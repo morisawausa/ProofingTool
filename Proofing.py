@@ -42,7 +42,7 @@ class OCCProofingTool:
         self.mainWindow.drawing = self.drawView;
         self.kerning = False
 
-        self.layersets = []
+        self.glyphs = []
 
         self.parameters = {}
 
@@ -56,9 +56,9 @@ class OCCProofingTool:
 
         self.mainWindow.open()
 
-    def updateParametersAndRedraw(self, parameters):
+    def updateParametersAndRedraw(self, parameters, glyphs):
         self.parameters = parameters
-        self.layersets = map(lambda _: GLYPHS, parameters['masters'])
+        self.glyphs = glyphs
         self.draw(preview=True)
 
     def calculate_scale(self, pts_per_em):
@@ -78,7 +78,7 @@ class OCCProofingTool:
 
 
     def draw(self, preview = True):
-        proof = OCCProofingLayout(self.layersets[0], self.parameters, self.width, self.height, Glyphs.font.upm).get()
+        proof = OCCProofingLayout(self.glyphs, self.parameters, self.width, self.height, Glyphs.font.upm).get()
         # print(test_proof)
 
         # proof = self.layout(self.width, self.height)
