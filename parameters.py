@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import re
+
 from GlyphsApp import *
 from AppKit import *
 from vanilla import *
@@ -307,7 +309,10 @@ class OCCParametersView:
         print(sender.get())
 
     def triggerParametersListEdit(self, sender):
-        self.parametersChangedCallback(self.getParameterSet(), self.getGlyphSet())
+        print(self.group.parameters.list.getSelection())
+
+        if self.parametersChangedCallback is not None:
+            self.parametersChangedCallback(self.getParameterSet(), self.getGlyphSet())
 
     def triggerParametersListSelection(self, sender):
         self.group.parameters.removeRow.enable(len(sender.getSelection()) > 0)
@@ -315,13 +320,16 @@ class OCCParametersView:
     def triggerSetActiveSection(self, sender):
         self.setActiveSection(int(sender.get()))
 
-    def triggerSetActiveGlobal(self, sender):
+    def triggerSetActiveGlobal(self,
+    sender):
         self.setActiveGlobal(int(sender.get()))
 
     def triggerAddRowToParametersList(self, sender):
-        self.group.parameters.list.append({
-            "Style": MASTERS_LIST[0],
-            "Point Size": 12})
+        if len(self.group.parameters.list) > 0:
+            last_style = self.group.parameters.list[-1]['Style']
+            last_ptsz = self.group.parameters.list[-1]['Point Size']
+
+        self.group.parameters.list.append({"Style": last_style, "Point Size": last_ptsz})
 
     def triggerRemoveSelectedFromParametersList(self, sender):
         for index in reversed(self.group.parameters.list.getSelection()):
@@ -364,8 +372,11 @@ class OCCParametersView:
         masters = []
         point_sizes = []
 
-        for item in self.group.parameters.list:
-            point_sizes.append(int(item['Point Size']))
+        for i, item in enumerate(self.group.parameters.list):
+            size_dirty = item['Point Size']
+            size_clean = re.sub('[^0-9]', '', str(size_dirty))
+            size = tryParseInt(size_clean, 72)
+            point_sizes.append(size)
             master = filter(lambda m: m.name == item['Style'], Glyphs.font.masters)
             masters.append(master[0])
 
