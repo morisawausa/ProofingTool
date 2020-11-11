@@ -8,6 +8,8 @@ from vanilla import *
 from vanilla.dialogs import putFile
 from GlyphsApp.UI import *
 
+from templates import OCCTemplatesView
+
 ELEMENT_PADDING = 5
 SECTION_SELECTOR_HEIGHT = 20
 MAIN_PANEL_HEIGHT_FACTOR = 0.6
@@ -54,6 +56,7 @@ class OCCParametersView:
         self.parametersChangedCallback = parametersChangedCallback
         self.saveProofCallback = saveProofCallback
         self.printProofCallback = printProofCallback
+        self.templates = OCCTemplatesView()
 
         self.outputPath = None
 
@@ -96,10 +99,22 @@ class OCCParametersView:
             self.window_height * (MAIN_PANEL_HEIGHT_FACTOR + 0.15))
 
 
-
-
         self.group.templates = Group(primaryGroupPosSize)
-        self.group.templates.text = TextBox((0, 0, -0, -0), "Templates View")
+        self.group.templates.list = List(
+            (0, 0, -0, self.window_height * MAIN_PANEL_HEIGHT_FACTOR),
+            map(lambda x: {'Name': x['name']}, self.templates.data),
+            columnDescriptions=[{"title": "Name"}],
+            selectionCallback=self.triggerTemplatesListSelection,
+            drawFocusRing=False,
+            allowsSorting=False,
+            allowsEmptySelection=True,
+            allowsMultipleSelection=False,
+            rowHeight=20.0
+        )
+        self.group.templates.loadTemplate = Button(
+            (0, self.window_height * MAIN_PANEL_HEIGHT_FACTOR, 150, 30), "Load Template",
+            callback=self.triggerLoadSelectedTemplate)
+
         self.group.templates.show(False)
 
 
@@ -317,11 +332,33 @@ class OCCParametersView:
     def triggerParametersListSelection(self, sender):
         self.group.parameters.removeRow.enable(len(sender.getSelection()) > 0)
 
+    def triggerTemplatesListSelection(self, sender):
+        for i in self.group.templates.list.getSelection():
+            print(self.templates.data[i])
+
+    def triggerLoadSelectedTemplate(self, sender):
+        for i in self.group.templates.list.getSelection():
+            template = self.templates.data[i]
+
+            lines = map(lambda row: {"Style": row['style'], "Point Size": row['size']}, template['lines'])
+
+            self.group.parameters.list.set(lines)
+
+            # margins
+            self.group.margins.left.set(tryParseInt(template['proof']['margins']['left'], 0))
+            self.group.margins.right.set(tryParseInt(template['proof']['margins']['right'], 0))
+            self.group.margins.top.set(tryParseInt(template['proof']['margins']['top'], 0))
+            self.group.margins.bottom.set(tryParseInt(template['proof']['margins']['bottom'], 0))
+
+            self.group.margins.block.set(tryParseInt(template['proof']['padding']['block'], 0))
+            self.group.margins.line.set(tryParseInt(template['proof']['padding']['line'], 0))
+
+            self.group.output.proofname.set(template["name"])
+
     def triggerSetActiveSection(self, sender):
         self.setActiveSection(int(sender.get()))
 
-    def triggerSetActiveGlobal(self,
-    sender):
+    def triggerSetActiveGlobal(self, sender):
         self.setActiveGlobal(int(sender.get()))
 
     def triggerAddRowToParametersList(self, sender):

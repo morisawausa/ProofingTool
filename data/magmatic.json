@@ -1,0 +1,22 @@
+{
+  "name": "Basic Proof Test",
+  "style": "Medium Comp",
+  "size": 35,
+  "lines": [
+    {"style": "Black Comp", "size": 50},
+    {"style": "Medium Comp", "size": 50},
+    {"style": "Thin Comp", "size": 50}
+  ],
+  "proof": {
+    "margins": {
+      "left": 20,
+      "right": 50,
+      "top": 20,
+      "bottom": 50
+    },
+    "padding": {
+      "block": 20,
+      "line": 20
+    }
+  }
+}

@@ -6,6 +6,10 @@ This Glyphs Plugin helps you output proofs directly from Glyphs. The plugin focu
 
 For a items on our roadmap, look at [this document](https://docs.google.com/document/d/1z0BD3hXVslzn5acJ_5KomH_WkwnMeQ9gEiJh3z79fHE/edit).
 
+## Templates
+
+
+
 ## Installation
 
 At this moment, the tool works as a Glyphs.app script. To install the tool:
