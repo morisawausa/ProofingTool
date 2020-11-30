@@ -37,24 +37,51 @@ class OCCTemplatesView():
             print('[%s]\t"%s" does not have a template name specified. Naming it "Template %i"' % (template_name, template_name, index))
             name = 'Template %i' % index
 
+        default_style = None
+        default_size = 24
+
+        if template.has_key('style'):
+            if len(filter(lambda m: m.name == template['style'], Glyphs.font.masters)) == 1:
+                default_style = template['style']
+            else:
+                print("[%s]\tthe template specifies a default style (%s), but it's not a style of the current typeface." % (template_name, template['style']))
+        else:
+            print("[%s]\tthe template does not specify a default style." % template_file)
+
+        if template.has_key('size'):
+            if isinstance(template['size'], int):
+                default_size = template['size']
+            else:
+                print("[%s]\tthe proof specifies a default size (%s), but it's not a whole number." % (template_name, template['size']))
+        else:
+            print("[%s]\tthe template does not specify a default size." % template_file)
+
+
         if template.has_key('lines'):
             lines = []
             for linenum, line in enumerate(template['lines']):
                 if not line.has_key('style'):
-                    print('[%s]\tline %i has no style specified, skipping...' % (template_name, linenum))
-                    continue
-
-                if not line.has_key('size'):
-                    print('[%s]\tline %i has no size specified, skipping...' % (template_name, linenum))
-                    continue
+                    if default_style is not None:
+                        line['style'] = default_style
+                    else:
+                        print('[%s]\tline %i has no style specified and no default style is set.' % (template_name, linenum))
+                        continue
 
                 if len(filter(lambda m: m.name == line['style'], Glyphs.font.masters)) != 1:
-                    print('[%s]\tline %i does not specify an existing master in this typeface, skipping...' % (template_name, linenum))
-                    continue
+                    if default_style is not None:
+                        print('[%s]\tline %i specifies "%s," which is not an instance in this typeface. Replacing with the default "%s."' % (template_name, linenum, line['style'], default_style))
+                        line['style'] = default_style
+                    else:
+                        print('[%s]\tline %i specifies "%s," which is not an instance in this typeface. Since no valid default style is specified, I\'m skipping the line.' % (template_name, linenum, line['style']))
+                        continue
+
+                if not line.has_key('size'):
+                    print('[%s]\tline %i has no size specified, setting default of %s.' % (template_name, linenum, default_size))
+                    line['size'] = default_size
 
                 if not isinstance(line['size'], int):
-                    print('[%s]\tline %i does not specify a numerical size, skipping...' % (template_name, linenum))
-                    continue
+                    print('[%s]\tline %i does not specify a whole number size, replacing it with the default (%s)...' % (template_name, linenum, default_size))
+                    line['size'] = default_size
 
                 lines.append(line)
 
@@ -89,12 +116,8 @@ class OCCTemplatesView():
         else:
             print('[%s]\t"%s" does not specify margin and padding information. Setting defaults. "' % (template_name, template_name))
 
-
-        return template
-
-
-    def getTemplateList(self):
-        pass
-
-    def getTemplate(self, index):
-        pass
+        return {
+            "name": name,
+            "lines": lines,
+            "proof": proof
+        }
