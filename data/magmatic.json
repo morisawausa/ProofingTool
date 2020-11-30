@@ -1,7 +1,7 @@
 {
   "name": "Basic Proof Test",
   "style": "Medium Comp",
-  "size": 35,
+  "size": 50,
   "lines": [
     {"style": "Black Comp", "size": 50},
     {"style": "Medium Comp", "size": 50},
