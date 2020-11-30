@@ -57,6 +57,18 @@ class OCCTemplatesView():
             print("[%s]\tthe template does not specify a default size." % template_file)
 
 
+        glyphs = []
+
+        if template.has_key("glyphs"):
+            if isinstance(template['glyphs'], list):
+                glyphs = template['glyphs']
+
+            else:
+                print('[%s]\tthe template provides a "glyphs" key, but it\'s not a list of glyph names.' % (template_name))
+        else:
+            print('[%s]\tthe template does not provide a "glyphs" key.' % (template_name))
+
+
         if template.has_key('lines'):
             lines = []
             for linenum, line in enumerate(template['lines']):
@@ -119,5 +131,6 @@ class OCCTemplatesView():
         return {
             "name": name,
             "lines": lines,
-            "proof": proof
+            "proof": proof,
+            "glyphs": glyphs
         }

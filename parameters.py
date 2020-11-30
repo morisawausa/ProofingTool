@@ -338,7 +338,13 @@ class OCCParametersView:
 
     def triggerLoadSelectedTemplate(self, sender):
         for i in self.group.templates.list.getSelection():
+
+            # set this first
             template = self.templates.data[i]
+            valid_names = filter(lambda n: n in Glyphs.font.glyphs, template['glyphs'])
+            self.glyphs = map(lambda n: Glyphs.font.glyphs[n], valid_names)
+
+            print(self.glyphs)
 
             lines = map(lambda row: {"Style": row['style'], "Point Size": row['size']}, template['lines'])
 
@@ -354,6 +360,10 @@ class OCCParametersView:
             self.group.margins.line.set(tryParseInt(template['proof']['padding']['line'], 0))
 
             self.group.output.proofname.set(template["name"])
+
+            # Load valid glyphs from proof
+
+
 
     def triggerSetActiveSection(self, sender):
         self.setActiveSection(int(sender.get()))
@@ -413,9 +423,11 @@ class OCCParametersView:
             size_dirty = item['Point Size']
             size_clean = re.sub('[^0-9]', '', str(size_dirty))
             size = tryParseInt(size_clean, 72)
-            point_sizes.append(size)
             master = filter(lambda m: m.name == item['Style'], Glyphs.font.masters)
-            masters.append(master[0])
+
+            if len(master) == 1:
+                masters.append(master[0])
+                point_sizes.append(size)
 
 
         parameters = {
