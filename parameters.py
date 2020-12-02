@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 
 import re
+import os
 
 from GlyphsApp import *
 from AppKit import *
 from vanilla import *
-from vanilla.dialogs import putFile
+from vanilla.dialogs import putFile, getFile
 from GlyphsApp.UI import *
 
 from templates import OCCTemplatesView
@@ -102,7 +103,7 @@ class OCCParametersView:
         self.group.templates = Group(primaryGroupPosSize)
         self.group.templates.list = List(
             (0, 0, -0, self.window_height * MAIN_PANEL_HEIGHT_FACTOR),
-            map(lambda x: {'Name': x['name']}, self.templates.data),
+            map(lambda x: self.formatTemplateForDisplayList(x), self.templates.data),
             columnDescriptions=[{"title": "Name"}],
             selectionCallback=self.triggerTemplatesListSelection,
             drawFocusRing=False,
@@ -111,9 +112,14 @@ class OCCParametersView:
             allowsMultipleSelection=False,
             rowHeight=20.0
         )
+
         self.group.templates.loadTemplate = Button(
             (0, self.window_height * MAIN_PANEL_HEIGHT_FACTOR, 150, 30), "Load Template",
             callback=self.triggerLoadSelectedTemplate)
+
+        self.group.templates.openTemplate = Button(
+            (150 + ELEMENT_PADDING, self.window_height * MAIN_PANEL_HEIGHT_FACTOR, 150, 30), "Open Template",
+            callback=self.triggerOpenTemplate)
 
         self.group.templates.show(False)
 
@@ -333,8 +339,7 @@ class OCCParametersView:
         self.group.parameters.removeRow.enable(len(sender.getSelection()) > 0)
 
     def triggerTemplatesListSelection(self, sender):
-        for i in self.group.templates.list.getSelection():
-            print(self.templates.data[i])
+        self.triggerLoadSelectedTemplate(sender)
 
     def triggerLoadSelectedTemplate(self, sender):
         for i in self.group.templates.list.getSelection():
@@ -343,8 +348,6 @@ class OCCParametersView:
             template = self.templates.data[i]
             valid_names = filter(lambda n: n in Glyphs.font.glyphs, template['glyphs'])
             self.glyphs = map(lambda n: Glyphs.font.glyphs[n], valid_names)
-
-            print(self.glyphs)
 
             lines = map(lambda row: {"Style": row['style'], "Point Size": row['size']}, template['lines'])
 
@@ -361,7 +364,24 @@ class OCCParametersView:
 
             self.group.output.proofname.set(template["name"])
 
-            # Load valid glyphs from proof
+
+    def formatTemplateForDisplayList(self, template):
+        return {'Name': template['name']}
+
+
+
+    def triggerOpenTemplate(self, sender):
+
+        template_files = GetFile("Choose a Proof Template file (ending in '.json')", True, ["json"])
+
+        if template_files is not None and len(template_files) > 0:
+            for filepath in template_files:
+                with open(filepath, 'r') as template_file:
+                    name = filepath.split(os.path.sep)[-1]
+                    template = self.templates.parseTemplateFile(name, template_file)
+                    if template is not None:
+                        self.templates.data.append(template)
+                        self.group.templates.list.append(self.formatTemplateForDisplayList(template))
 
 
 
