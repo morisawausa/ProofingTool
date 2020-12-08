@@ -27,12 +27,15 @@ class OCCTemplatesView():
 
     def parseTemplateFile(self, name, file):
         try:
+            print('[%s]\tloading template...' % (name))
             template = json.load(file)
-            return self.validateAndFormatTemplate(name, template)
+            result = self.validateAndFormatTemplate(name, template)
+            print('[%s]\tdone.\n' % (name))
+            return result
 
         except Exception as error:
-            print('[%s] error parsing this template\'s json:' % name)
-            print(error)
+            print('[%s]\terror parsing this template\'s json:' % name)
+            print('[%s]\t%s' % (name, str(error)))
 
             return None
 
@@ -84,23 +87,23 @@ class OCCTemplatesView():
                     if default_style is not None:
                         line['style'] = default_style
                     else:
-                        print('[%s]\tline %i has no style specified and no default style is set.' % (template_name, linenum))
+                        print('[%s]\tline %i has no style specified and no default style is set.' % (template_name, linenum + 1))
                         continue
 
                 if len(filter(lambda m: m.name == line['style'], Glyphs.font.masters)) != 1:
                     if default_style is not None:
-                        print('[%s]\tline %i specifies "%s," which is not an instance in this typeface. Replacing with the default "%s."' % (template_name, linenum, line['style'], default_style))
+                        print('[%s]\tline %i specifies "%s," which is not an instance in this typeface. Replacing with the default "%s."' % (template_name, linenum + 1, line['style'], default_style))
                         line['style'] = default_style
                     else:
-                        print('[%s]\tline %i specifies "%s," which is not an instance in this typeface. Since no valid default style is specified, I\'m skipping the line.' % (template_name, linenum, line['style']))
+                        print('[%s]\tline %i specifies "%s," which is not an instance in this typeface. Since no valid default style is specified, I\'m skipping the line.' % (template_name, linenum + 1, line['style']))
                         continue
 
                 if not line.has_key('size'):
-                    print('[%s]\tline %i has no size specified, setting default of %s.' % (template_name, linenum, default_size))
+                    print('[%s]\tline %i has no size specified, setting default of %s.' % (template_name, linenum + 1, default_size))
                     line['size'] = default_size
 
                 if not isinstance(line['size'], int):
-                    print('[%s]\tline %i does not specify a whole number size, replacing it with the default (%s)...' % (template_name, linenum, default_size))
+                    print('[%s]\tline %i does not specify a whole number size, replacing it with the default (%s)...' % (template_name, linenum + 1, default_size))
                     line['size'] = default_size
 
                 lines.append(line)
