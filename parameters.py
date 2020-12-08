@@ -91,7 +91,7 @@ class OCCParametersView:
 
         self.group.sections = SegmentedButton(
             (ELEMENT_PADDING, ELEMENT_PADDING, self.window_width - 2 * ELEMENT_PADDING, SECTION_SELECTOR_HEIGHT),
-            [dict(title="Templates"), dict(title="Edit"), dict(title="Glyphs")],
+            [dict(title="Templates"), dict(title="Glyphs"), dict(title="Edit")],
             callback=self.triggerSetActiveSection)
 
         primaryGroupPosSize = (ELEMENT_PADDING,
@@ -439,8 +439,8 @@ class OCCParametersView:
 
         self.group.sections.set(index)
         self.group.templates.show(index == 0)
-        self.group.parameters.show(index == 1)
-        self.group.glyphsset.show(index == 2)
+        self.group.glyphsset.show(index == 1)
+        self.group.parameters.show(index == 2)
 
     def setActiveGlobal(self, index):
         if index != 0 and index != 1: return
