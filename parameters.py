@@ -296,7 +296,7 @@ class OCCParametersView:
 
         parent_window.g = self.group
 
-        self.setActiveSection(1)
+        self.setActiveSection(0)
         self.setActiveGlobal(0)
 
         if self.parametersChangedCallback is not None:
@@ -377,17 +377,27 @@ class OCCParametersView:
     def triggerOpenTemplate(self, sender):
 
         template_files = GetFile("Choose a Proof Template file (ending in '.json')", True, ["json"])
-
+        modified_indices = []
         if template_files is not None and len(template_files) > 0:
             for filepath in template_files:
                 with open(filepath, 'r') as template_file:
                     name = filepath.split(os.path.sep)[-1]
                     template = self.templates.parseTemplateFile(name, template_file)
                     if template is not None:
-                        self.templates.data.append(template)
-                        self.group.templates.list.append(self.formatTemplateForDisplayList(template))
+                        display = self.formatTemplateForDisplayList(template);
+                        try:
+                            i = self.group.templates.list.index(display)
+                            self.templates.data[i] = template
+                            self.group.templates.list[i] = display
+                            modified_indices.append(i)
+                        except ValueError:
+                            self.templates.data.append(template)
+                            self.group.templates.list.append(display)
+                            modified_indices.append(len(self.group.templates.list) - 1)
 
-            self.group.templates.list.setSelection([len(self.group.templates.list) - 1])
+            self.loadSelectedTemplate([modified_indices[-1]])
+            self.group.templates.list.setSelection([modified_indices[-1]])
+            # self.parametersChangedCallback(self.getParameterSet(), self.getGlyphSet())
             # self.loadSelectedTemplate([len(self.group.templates.list) - 1])
 
 
