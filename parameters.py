@@ -113,12 +113,12 @@ class OCCParametersView:
             rowHeight=20.0
         )
 
-        self.group.templates.loadTemplate = Button(
-            (0, self.window_height * MAIN_PANEL_HEIGHT_FACTOR, 150, 30), "Load Template",
-            callback=self.triggerLoadSelectedTemplate)
+        # self.group.templates.loadTemplate = Button(
+        #     (0, self.window_height * MAIN_PANEL_HEIGHT_FACTOR, 150, 30), "Load Template",
+        #     callback=self.triggerLoadSelectedTemplate)
 
         self.group.templates.openTemplate = Button(
-            (150 + ELEMENT_PADDING, self.window_height * MAIN_PANEL_HEIGHT_FACTOR, 150, 30), "Open Template",
+            (0, self.window_height * MAIN_PANEL_HEIGHT_FACTOR, 150, 30), "Open Template",
             callback=self.triggerOpenTemplate)
 
         self.group.templates.show(False)
@@ -327,11 +327,10 @@ class OCCParametersView:
 
 
     def setProofTitle(self, sender):
-        print(sender.get())
+        pass
+        # print(sender.get())
 
     def triggerParametersListEdit(self, sender):
-        print(self.group.parameters.list.getSelection())
-
         if self.parametersChangedCallback is not None:
             self.parametersChangedCallback(self.getParameterSet(), self.getGlyphSet())
 
@@ -342,7 +341,11 @@ class OCCParametersView:
         self.triggerLoadSelectedTemplate(sender)
 
     def triggerLoadSelectedTemplate(self, sender):
-        for i in self.group.templates.list.getSelection():
+        self.loadSelectedTemplate(self.group.templates.list.getSelection())
+
+
+    def loadSelectedTemplate(self, indices):
+        for i in indices:
 
             # set this first
             template = self.templates.data[i]
@@ -365,6 +368,7 @@ class OCCParametersView:
             self.group.output.proofname.set(template["name"])
 
 
+
     def formatTemplateForDisplayList(self, template):
         return {'Name': template['name']}
 
@@ -383,6 +387,8 @@ class OCCParametersView:
                         self.templates.data.append(template)
                         self.group.templates.list.append(self.formatTemplateForDisplayList(template))
 
+            self.group.templates.list.setSelection([len(self.group.templates.list) - 1])
+            # self.loadSelectedTemplate([len(self.group.templates.list) - 1])
 
 
     def triggerSetActiveSection(self, sender):

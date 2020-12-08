@@ -7,9 +7,6 @@ Starts the proofing environment
 # parent_dir = os.path.abspath(os.path.dirname(__file__))
 # vendor_dir = os.path.join(parent_dir, 'lib')
 # sys.path.append(vendor_dir)
-#
-# import yaml
-# print(dir(yaml))
 
 
 from AppKit import *
@@ -86,10 +83,7 @@ class OCCProofingTool:
 
 
     def draw(self, preview = True):
-        print(self.glyphs)
         proof = OCCProofingLayout(self.glyphs, self.parameters, self.width, self.height, Glyphs.font.upm).get()
-        # print(test_proof)
-
         # proof = self.layout(self.width, self.height)
         context = DrawBotContext()
 
