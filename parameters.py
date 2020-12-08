@@ -302,6 +302,10 @@ class OCCParametersView:
         if self.parametersChangedCallback is not None:
             self.parametersChangedCallback(self.getParameterSet(), self.getGlyphSet())
 
+        if len(self.group.templates.list) > 0:
+            self.group.templates.list.setSelection([0])
+            self.loadSelectedTemplate([0])
+
 
     def printProof(self, sender):
         if self.printProofCallback is not None:
