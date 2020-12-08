@@ -1,5 +1,5 @@
 {
-  "name": "Basic Proof Test",
+  "name": "Demo Proof",
   "style": "Medium Comp",
   "size": 50,
   "lines": [
@@ -19,5 +19,37 @@
       "line": 20
     }
   },
-  "glyphs": ["A"]
+  "glyphs": [
+    "A",
+    "AE",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G",
+    "H",
+    "I",
+    "IJ",
+    "J",
+    "K",
+    "L",
+    "M",
+    "N",
+    "O",
+    "OE",
+    "P",
+    "Q",
+    "R",
+    "S",
+    "Germandbls",
+    "Schwa",
+    "T",
+    "U",
+    "V",
+    "W",
+    "X",
+    "Y",
+    "Z"
+  ]
 }
