@@ -2,6 +2,8 @@
 
 import re
 import os
+import json
+from collections import OrderedDict
 
 from GlyphsApp import *
 from AppKit import *
@@ -113,13 +115,13 @@ class OCCParametersView:
             rowHeight=20.0
         )
 
-        # self.group.templates.loadTemplate = Button(
-        #     (0, self.window_height * MAIN_PANEL_HEIGHT_FACTOR, 150, 30), "Load Template",
-        #     callback=self.triggerLoadSelectedTemplate)
-
         self.group.templates.openTemplate = Button(
             (0, self.window_height * MAIN_PANEL_HEIGHT_FACTOR, 150, 30), "Open Template",
             callback=self.triggerOpenTemplate)
+
+        self.group.templates.loadTemplate = Button(
+            (150 + ELEMENT_PADDING, self.window_height * MAIN_PANEL_HEIGHT_FACTOR, 200, 30), "Save Proof as Template",
+            callback=self.triggerSaveProofAsTemplate)
 
         self.group.templates.show(False)
 
@@ -377,6 +379,38 @@ class OCCParametersView:
         return {'Name': template['name']}
 
 
+    def triggerSaveProofAsTemplate(self, sender):
+        name = self.group.output.proofname.get()
+        name = name if name is not "" else "Proof"
+        filename = '-'.join(name.lower().split(' ')) + '.json'
+
+        template = OrderedDict()
+        template['name'] = name
+        template['lines'] = map(lambda l: {"style": l["Style"], "size": int(l["Point Size"])}, self.group.parameters.list)
+        template['proof'] = {
+            "margins": {
+                "left": int(self.group.margins.left.get()),
+                "right": int(self.group.margins.right.get()),
+                "top": int(self.group.margins.top.get()),
+                "bottom": int(self.group.margins.bottom.get())
+            },
+            "padding": {
+                "block": int(self.group.margins.block.get()),
+                "line": int(self.group.margins.line.get())
+            }
+        }
+
+        template['glyphs'] = map(lambda g: g.name, self.getGlyphSet())
+
+        outfile = result = putFile(
+            title="Save Template",
+            messageText="Save Proof As Template...",
+            fileName=filename)
+
+        with open(outfile, 'w') as file:
+            json.dump(template, file, indent=4)
+
+
 
     def triggerOpenTemplate(self, sender):
 
@@ -399,8 +433,9 @@ class OCCParametersView:
                             self.group.templates.list.append(display)
                             modified_indices.append(len(self.group.templates.list) - 1)
 
-            self.loadSelectedTemplate([modified_indices[-1]])
-            self.group.templates.list.setSelection([modified_indices[-1]])
+            if len(modified_indices) > 0:
+                self.loadSelectedTemplate([modified_indices[-1]])
+                self.group.templates.list.setSelection([modified_indices[-1]])
             # self.parametersChangedCallback(self.getParameterSet(), self.getGlyphSet())
             # self.loadSelectedTemplate([len(self.group.templates.list) - 1])
 
