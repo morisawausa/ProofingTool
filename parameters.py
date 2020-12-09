@@ -315,7 +315,7 @@ class OCCParametersView:
         print(self.templates.data)
         if len(self.group.templates.list) > 0:
             self.group.templates.list.setSelection([0])
-            # self.loadSelectedTemplate([0])
+            self.loadSelectedTemplate([0])
 
 
     def printProof(self, sender):
