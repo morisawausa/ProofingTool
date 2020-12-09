@@ -1,11 +1,9 @@
 {
   "name": "Demo Proof",
-  "style": "Medium Comp",
-  "size": 50,
   "lines": [
-    {"style": "Black Comp", "size": 50},
-    {"style": "Medium Comp", "size": 50},
-    {"style": "Thin Comp", "size": 50}
+    {"style": "Bold", "size": 50},
+    {"style": "Medium", "size": 50},
+    {"style": "Light", "size": 50}
   ],
   "proof": {
     "margins": {
