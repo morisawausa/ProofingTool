@@ -54,6 +54,14 @@ class OCCParametersView:
         saveProofCallback=None,
         printProofCallback=None):
 
+        # def paramsChangedValid(parameters, glyphs):
+        #     valid_sequences = len(parameters['masters']) > 0 and len(parameters['point_sizes']) > 0
+        #     sequences_match = len(parameters['masters']) == len(parameters['point_sizes'])
+        #     callback_valid = parametersChangedCallback is not None
+        #     if valid_sequences and sequences_match and callback_valid:
+        #         parametersChangedCallback(parameters, glyphs)
+
+
         self.window_width = width_px
         self.window_height = height_px
         self.parametersChangedCallback = parametersChangedCallback
@@ -304,9 +312,10 @@ class OCCParametersView:
         if self.parametersChangedCallback is not None:
             self.parametersChangedCallback(self.getParameterSet(), self.getGlyphSet())
 
+        print(self.templates.data)
         if len(self.group.templates.list) > 0:
             self.group.templates.list.setSelection([0])
-            self.loadSelectedTemplate([0])
+            # self.loadSelectedTemplate([0])
 
 
     def printProof(self, sender):
@@ -450,8 +459,12 @@ class OCCParametersView:
         if len(self.group.parameters.list) > 0:
             last_style = self.group.parameters.list[-1]['Style']
             last_ptsz = self.group.parameters.list[-1]['Point Size']
+            self.group.parameters.list.append({"Style": last_style, "Point Size": last_ptsz})
 
-        self.group.parameters.list.append({"Style": last_style, "Point Size": last_ptsz})
+        else:
+            self.group.parameters.list.append({
+                "Style": MASTERS_LIST[0],
+                "Point Size": 24})
 
     def triggerRemoveSelectedFromParametersList(self, sender):
         for index in reversed(self.group.parameters.list.getSelection()):

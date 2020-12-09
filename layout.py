@@ -22,6 +22,11 @@ class OCCProofingLayout:
         self.block_glyph_index = 0
 
         parameter_rows = list(enumerate(zip(parameters['masters'], parameters['point_sizes'])))
+        # If we don't have any rendering criteria, we can't render. Fail early.
+        if len(parameter_rows) == 0:
+            self.pages = []
+            return
+
         heights_per_line = map(self.get_line_heights, parameter_rows)
 
         self.block_line_heights = map(lambda a: int(a[1]), heights_per_line)
