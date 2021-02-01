@@ -8,6 +8,9 @@ class OCCProofingLayout:
         self.height = height
         self.glyphs = glyphs
         self.parameters = parameters
+        #
+        # print(glyphs)
+        # print(parameters)
 
         # 0. Determine page constraints based on document size in inches.
         self.em_per_u = 1.0 / upm
@@ -48,8 +51,12 @@ class OCCProofingLayout:
         block_advance_position_x_px = 0
         block_advance_position_y_px = self.block_line_origin
 
-
-        while len(self.glyphs[self.block_glyph_index:]) > 0:
+        # NOTE: we need to properly select a length for the glyphset.
+        # this should be done by normalizing the glyphs passed to layout
+        # in the parameters file, perhaps supplying notdef or space
+        # as a glyph when once glyph is present in one font, and not in the
+        # other one.
+        while len(self.glyphs[0][self.block_glyph_index:]) > 0:
 
             if block_origin_y_px - self.block_height < parameters['padding']['bottom']:
                 # This block overshoots the end of the page.
@@ -64,12 +71,13 @@ class OCCProofingLayout:
             block_line_length = min(map(lambda a: a[1], bounds_per_line))
 
             # Then layout the line with this length
-            block_glyphs = self.glyphs[ self.block_glyph_index : self.block_glyph_index + block_line_length ]
+            block_glyphs = map( lambda g: g[ self.block_glyph_index : self.block_glyph_index + block_line_length ], self.glyphs)
 
-            for i, (master, point_size) in parameter_rows:
+
+            for i, ((font_index, master), point_size) in parameter_rows:
                 # Layout the current line.
                 u_to_px = self.get_scalefactor(point_size)
-                for glyph in block_glyphs:
+                for glyph in block_glyphs[font_index]:
                     orphan_layer = glyph.layers[master.id].copyDecomposedLayer()
                     transform = (
                         u_to_px, # x-axis scale factor,
@@ -103,28 +111,28 @@ class OCCProofingLayout:
             pts_per_em
 
 
-    def get_line_heights(self, (line_index, (master, point_size))):
+    def get_line_heights(self, (line_index, ((font_index, master), point_size))):
         u_to_px = self.get_scalefactor(point_size)
         height_px = (master.ascender - master.descender) * u_to_px + self.line_padding
 
         return line_index, height_px
 
 
-    def get_line_lengths(self, (line_index, (master, point_size))):
+    def get_line_lengths(self, (line_index, ((font_index, master), point_size))):
 
         u_to_px = self.get_scalefactor(point_size)
         advance_px = self.parameters['padding']['left']
         glyph_count = 0
         available_space_px = self.width - self.parameters['padding']['right']
 
-        while advance_px < available_space_px and self.block_glyph_index + glyph_count < len(self.glyphs):
-            glyph = self.glyphs[self.block_glyph_index + glyph_count]
+        while advance_px < available_space_px and self.block_glyph_index + glyph_count < len(self.glyphs[font_index]):
+            glyph = self.glyphs[font_index][self.block_glyph_index + glyph_count]
             layer = glyph.layers[master.id]
             width_px = layer.width * u_to_px
             advance_px += width_px
             glyph_count += 1
 
-        line_length = glyph_count - 1 if advance_px >available_space_px else glyph_count
+        line_length = glyph_count - 1 if advance_px > available_space_px else glyph_count
 
         return line_index, line_length
 

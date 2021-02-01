@@ -18,8 +18,6 @@ SECTION_SELECTOR_HEIGHT = 20
 MAIN_PANEL_HEIGHT_FACTOR = 0.6
 
 
-MASTERS_LIST = map(lambda m: m.name, Glyphs.font.masters)
-
 def tryParseInt(value, default_value):
     try:
         return int(value)
@@ -138,6 +136,9 @@ class OCCParametersView:
         # Edit View List
         #
 
+        # MASTERS_LIST = map(lambda m: m.name, Glyphs.font.masters)
+        # MASTERS_LIST = get_font_masters_list()
+
         self.group.parameters = Group(primaryGroupPosSize)
 
         self.group.parameters.list = List(
@@ -175,31 +176,6 @@ class OCCParametersView:
         #
 
         self.group.glyphsset = Group(primaryGroupPosSize)
-        # self.group.glyphsset.list = List(
-        #     (0, 0, -0, self.window_height * MAIN_PANEL_HEIGHT_FACTOR / 2 - 4 * ELEMENT_PADDING),
-        #     [],
-        #     columnDescriptions=[
-        #         {
-        #             "title": "Category",
-        #             "cell": PopUpButtonListCell(getAllCategories()),
-        #             "binding": "selectedValue"
-        #         },
-        #         {
-        #             "title": "Script"
-        #         },
-        #         {
-        #             "title": "Filter"
-        #         }
-        #     ],
-        #     # editCallback=self.triggerParametersListEdit,
-        #     # selectionCallback=self.triggerParametersListSelection,
-        #     drawFocusRing=False,
-        #     allowsSorting=False,
-        #     allowsEmptySelection=True,
-        #     rowHeight=20.0
-        # )
-        #
-        # self.group.glyphsset.list.enable(True)
         self.group.glyphsset.selectionLabel = TextBox((0, 10, -0, -0), "Glyphs From Selection")
         self.group.glyphsset.selectionDescription = TextBox((0, 35, primaryGroupPosSize[2] / 2, -0), "Select the glyphs for this proof in the Font Window.", sizeStyle="small")
 
@@ -217,16 +193,6 @@ class OCCParametersView:
         self.group.glyphsset.fromEditViewButton = Button(
         (primaryGroupPosSize[2] / 2 + ELEMENT_PADDING, EDIT_VIEW_OFFSET + 25, primaryGroupPosSize[2] / 2 - 2 * ELEMENT_PADDING, 20),
         "From Current Edit View", callback=self.triggerSetGlyphsFromEditView );
-
-        # self.group.glyphsset.syncEditViewButton = CheckBox(
-        # (primaryGroupPosSize[2] / 2 + ELEMENT_PADDING, 82, primaryGroupPosSize[2] / 2, 20),
-        # "Sync With Edit View");
-        #
-        # self.group.glyphsset.syncEditViewButton.show(False)
-
-        # self.group.glyphsset.fromEditViewButton = Button(
-        # (0, 0, primaryGroupPosSize[2] / 2, self.window_height * MAIN_PANEL_HEIGHT_FACTOR / 2 - 4 * ELEMENT_PADDING),
-        # "From Selection", callback=self.triggerSetGlyphsFromSelection );
 
 
         self.group.glyphsset.show(False)
@@ -499,7 +465,7 @@ class OCCParametersView:
 
 
     def getGlyphSet(self):
-        return self.glyphs
+        return [self.glyphs]
 
 
     def getParameterSet(self):
@@ -514,7 +480,7 @@ class OCCParametersView:
             master = filter(lambda m: m.name == item['Style'], Glyphs.font.masters)
 
             if len(master) == 1:
-                masters.append(master[0])
+                masters.append([0, master[0]])
                 point_sizes.append(size)
 
 
