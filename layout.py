@@ -2,6 +2,114 @@
 
 from math import ceil
 
+class OCCProofingParagraphLayout:
+    def __init__(self, glyphs, parameters, width, height, upm):
+        self.width = width
+        self.height = height
+        self.glyphs = glyphs
+        self.parameters = parameters
+        #
+        # print(glyphs)
+        # print(parameters)
+
+        # 0. Determine page constraints based on document size in inches.
+        self.em_per_u = 1.0 / upm
+        self.in_per_pt = 0.0138889
+        self.px_per_in = width / parameters['document']['width']
+        self.line_height_factor = 1.25
+        self.line_padding = parameters['padding']['line']
+        self.block_padding = parameters['padding']['block']
+
+        page_index = 0
+        pages = [[]]
+
+        # 1. determine which parameter group takes defines the shortest line.
+        #    and define the block size.
+        self.block_glyph_index = 0
+
+        parameter_rows = list(enumerate(zip(parameters['masters'], parameters['point_sizes'])))
+        # If we don't have any rendering criteria, we can't render. Fail early.
+
+        page_origin_x_px = parameters['padding']['left']
+        available_space_x_px = self.width - self.parameters['padding']['right']
+
+        page_origin_y_px = self.height - parameters['padding']['top']
+
+
+        block_advance_position_x_px = 0
+        block_advance_position_y_px = 0
+
+        for i, (master, point_size) in parameter_rows:
+            master_index, master_data = master
+            # each of these represents a paragraph.
+            u_to_px = self.get_scalefactor(point_size)
+            height_px = (master_data.ascender - master_data.descender) * u_to_px + self.line_padding
+
+            block_advance_position_x_px = 0
+            block_advance_position_y_px += height_px
+
+            page_start_index = len(pages[page_index])
+            backtracked = False
+            i = 0
+
+            while i < len(self.glyphs[0]):
+
+                if page_origin_y_px - block_advance_position_y_px < self.parameters['padding']['bottom']:
+                    # we've fallen off the end of the page, time to add another one.
+                    block_advance_position_y_px = height_px
+                    block_advance_position_x_px = 0
+
+                    pages.append([])
+
+                    if page_start_index > 0: # if we have some unrelated glyphs on the previous page, shift em down
+                        page_previous_block = pages[page_index][:page_start_index]
+                        pages[page_index] = page_previous_block
+                        i = 0
+
+                    page_start_index = 0
+                    page_index += 1
+
+                glyph = self.glyphs[0][i]
+
+                orphan_layer = glyph.layers[master_data.id].copyDecomposedLayer()
+                transform = (
+                    u_to_px, # x-axis scale factor,
+                    0.0, # y-axis skew factor,
+                    0.0, # x-axis skew factor,
+                    u_to_px, # y-axis scale factor,
+                    page_origin_x_px + block_advance_position_x_px, # x-axis translation
+                    page_origin_y_px - block_advance_position_y_px  # y-axis translation
+                )
+                orphan_layer.applyTransform(transform)
+                pages[page_index].append(orphan_layer)
+                block_advance_position_x_px += (orphan_layer.width * u_to_px)
+
+                # next step. Check whether the width is too big for the and wrap the advance height.
+                if block_advance_position_x_px > available_space_x_px:
+                    block_advance_position_y_px += height_px
+                    block_advance_position_x_px = 0
+
+                i += 1
+
+
+            block_advance_position_y_px += self.block_padding
+
+
+        self.pages = pages
+
+
+    def get_scalefactor(self, pts_per_em):
+        return self.em_per_u * \
+            self.in_per_pt * \
+            self.px_per_in * \
+            pts_per_em
+
+    def get(self):
+        return self.pages
+
+
+
+
 class OCCProofingLayout:
     def __init__(self, glyphs, parameters, width, height, upm):
         self.width = width
@@ -89,7 +197,7 @@ class OCCProofingLayout:
                     )
                     orphan_layer.applyTransform(transform)
                     pages[page_index].append(orphan_layer)
-                    block_advance_position_x_px += round(orphan_layer.width * u_to_px)
+                    block_advance_position_x_px += (orphan_layer.width * u_to_px)
 
                 block_advance_position_y_px += self.block_line_heights[i + 1] if len(self.block_line_heights) > i + 1 else 0
                 block_advance_position_x_px = 0

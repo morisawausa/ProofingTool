@@ -122,7 +122,8 @@ class OCCTemplatesView():
             "padding": {
                 "line": 20,
                 "block": 20
-            }
+            },
+            "mode": "waterfall"
         }
 
         if template.has_key('proof'):
@@ -135,6 +136,10 @@ class OCCTemplatesView():
             if template['proof'].has_key('padding'):
                 proof['padding']['line'] = template['proof']['padding']['line'] if hasattr(template['proof']['padding'], 'line') else 20
                 proof['padding']['block'] = template['proof']['padding']['block'] if hasattr(template['proof']['padding'], 'block') else 20
+
+            if template['proof'].has_key('mode'):
+                proof['mode'] = template['proof']['mode']
+
 
         else:
             print('[%s]\t"%s" does not specify margin and padding information. Setting defaults. "' % (template_name, template_name))

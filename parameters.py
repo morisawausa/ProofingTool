@@ -71,6 +71,7 @@ class OCCParametersView:
 
         self.glyphs = filter(lambda g: g.category == 'Letter' and g.subCategory == 'Uppercase' and g.script == 'latin', Glyphs.font.glyphs)
 
+        self.proof_mode = 'waterfall'
         self.parameters = {
             'padding': {
                 'left': 20,
@@ -86,6 +87,7 @@ class OCCParametersView:
             'document': {'width': 11, 'height': 8.5},
             'title': '',
             'footer': '',
+            'mode': 'waterfall'
         }
 
 
@@ -136,7 +138,7 @@ class OCCParametersView:
         # Edit View List
         #
 
-        # MASTERS_LIST = map(lambda m: m.name, Glyphs.font.masters)
+        MASTERS_LIST = map(lambda m: m.name, Glyphs.font.masters)
         # MASTERS_LIST = get_font_masters_list()
 
         self.group.parameters = Group(primaryGroupPosSize)
@@ -245,6 +247,8 @@ class OCCParametersView:
 
         self.group.margins.blocklabel = TextBox((OFFSET_LEFT + ENTRY_BOX_OFFSET + 165, OFFSET_TOP + 24, 30, 20), "Block", alignment="right", sizeStyle="mini")
         self.group.margins.block = EditText((OFFSET_LEFT + ENTRY_BOX_OFFSET + 200, OFFSET_TOP + 20, 100, 20), self.parameters['padding']['block'], sizeStyle="small", continuous=False, callback=self.triggerParametersListEdit)
+        self.group.margins.proofMode = SegmentedButton((OFFSET_LEFT + ENTRY_BOX_OFFSET + 200, OFFSET_TOP + 50, 100, 20), [dict(title="Waterfall"), dict(title="Paragraphs")], callback=self.triggerProofModeChange)
+
 
         self.group.margins.show(False)
 
@@ -323,6 +327,13 @@ class OCCParametersView:
 
     def triggerLoadSelectedTemplate(self, sender):
         self.loadSelectedTemplate(self.group.templates.list.getSelection())
+
+    def triggerProofModeChange(self, sender):
+        index = int(sender.get())
+        self.proof_mode = 'waterfall' if index == 0 else 'paragraphs'
+
+        if self.parametersChangedCallback is not None:
+            self.parametersChangedCallback(self.getParameterSet(), self.getGlyphSet())
 
 
     def loadSelectedTemplate(self, indices):
@@ -438,6 +449,9 @@ class OCCParametersView:
 
     def triggerSetGlyphsFromSelection(self, sender):
         self.glyphs = filter(lambda g: g.selected, Glyphs.font.glyphs)
+
+        # add normalizing term for any other masters in the font
+
         if self.parametersChangedCallback is not None:
             self.parametersChangedCallback(self.getParameterSet(), self.getGlyphSet())
 
@@ -498,7 +512,8 @@ class OCCParametersView:
             'aligned': False,
             'document': {'width': 11, 'height': 8.5},
             'title': self.group.output.proofname.get(),
-            'footer': self.group.output.prooffooter.get()
+            'footer': self.group.output.prooffooter.get(),
+            'mode': self.proof_mode
         }
 
         return parameters
