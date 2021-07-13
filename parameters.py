@@ -243,11 +243,11 @@ class OCCParametersView:
         self.group.margins.paddinglabel = TextBox((OFFSET_LEFT + ENTRY_BOX_OFFSET + 200, OFFSET_TOP - 20, 100, 20), "Padding", sizeStyle="small")
 
         self.group.margins.linelabel = TextBox((OFFSET_LEFT + ENTRY_BOX_OFFSET + 165, OFFSET_TOP + 4, 30, 20), "Line", alignment="right", sizeStyle="mini")
-        self.group.margins.line = EditText((OFFSET_LEFT + ENTRY_BOX_OFFSET + 200, OFFSET_TOP, 100, 20), self.parameters['padding']['line'], sizeStyle="small", continuous=False, callback=self.triggerParametersListEdit)
+        self.group.margins.line = EditText((OFFSET_LEFT + ENTRY_BOX_OFFSET + 200, OFFSET_TOP, 125, 20), self.parameters['padding']['line'], sizeStyle="small", continuous=False, callback=self.triggerParametersListEdit)
 
         self.group.margins.blocklabel = TextBox((OFFSET_LEFT + ENTRY_BOX_OFFSET + 165, OFFSET_TOP + 24, 30, 20), "Block", alignment="right", sizeStyle="mini")
-        self.group.margins.block = EditText((OFFSET_LEFT + ENTRY_BOX_OFFSET + 200, OFFSET_TOP + 20, 100, 20), self.parameters['padding']['block'], sizeStyle="small", continuous=False, callback=self.triggerParametersListEdit)
-        self.group.margins.proofMode = SegmentedButton((OFFSET_LEFT + ENTRY_BOX_OFFSET + 200, OFFSET_TOP + 50, 100, 20), [dict(title="Waterfall"), dict(title="Paragraphs")], callback=self.triggerProofModeChange)
+        self.group.margins.block = EditText((OFFSET_LEFT + ENTRY_BOX_OFFSET + 200, OFFSET_TOP + 20, 125, 20), self.parameters['padding']['block'], sizeStyle="small", continuous=False, callback=self.triggerParametersListEdit)
+        self.group.margins.proofMode = SegmentedButton((OFFSET_LEFT + ENTRY_BOX_OFFSET + 200, OFFSET_TOP + 40, 125, 20), [dict(title="Waterfall"), dict(title="Paragraphs")], callback=self.triggerProofModeChange, sizeStyle="mini")
 
 
         self.group.margins.show(False)
@@ -279,13 +279,14 @@ class OCCParametersView:
         self.setActiveSection(0)
         self.setActiveGlobal(0)
 
-        if self.parametersChangedCallback is not None:
-            self.parametersChangedCallback(self.getParameterSet(), self.getGlyphSet())
-
         print(self.templates.data)
         if len(self.group.templates.list) > 0:
             self.group.templates.list.setSelection([0])
             self.loadSelectedTemplate([0])
+
+        if self.parametersChangedCallback is not None:
+            self.parametersChangedCallback(self.getParameterSet(), self.getGlyphSet())
+
 
 
     def printProof(self, sender):
@@ -358,6 +359,10 @@ class OCCParametersView:
             self.group.margins.line.set(tryParseInt(template['proof']['padding']['line'], 0))
 
             self.group.output.proofname.set(template["name"])
+
+            self.proof_mode = template['proof']['mode']
+            self.group.margins.proofMode.set(0 if self.proof_mode == 'waterfall' else 1)
+
 
 
 
