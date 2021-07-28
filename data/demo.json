@@ -1,9 +1,9 @@
 {
   "name": "Demo Proof",
   "lines": [
-    {"style": "Bold", "size": 50},
-    {"style": "Medium", "size": 50},
-    {"style": "Light", "size": 50}
+    {"style": "Extra Light", "size": 50},
+    {"style": "Regular", "size": 50},
+    {"style": "Black", "size": 50}
   ],
   "proof": {
     "margins": {
@@ -14,8 +14,9 @@
     },
     "padding": {
       "block": 20,
-      "line": 20
-    }
+      "line": 30
+    },
+    "mode": "waterfall"
   },
   "glyphs": [
     "A",

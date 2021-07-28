@@ -73,18 +73,8 @@ class OCCProofingParagraphLayout:
                     page_index += 1
 
                 glyph = self.glyphs[0][i]
-
-                if master.name in glyph.layers:
-                    # print('master style')
-                    orphan_layer = glyph.layers[master.name].copyDecomposedLayer() # using instances, so there's only one layer
-                else:
-                    # print('non-master style')
-                    instance_master = filter(lambda i: i.masters[0].name == master.name, INSTANCE_MASTERS)
-                    # print(instance_master)
-                    instance_master = instance_master[0]
-                    # print(instance_master)
-                    orphan_layer = instance_master.glyphs[glyph.name].layers[0].copyDecomposedLayer()
-                    # print(layer)
+                layer = self.get_layer(glyph, master)
+                orphan_layer = layer.copyDecomposedLayer()
 
                 transform = (
                     u_to_px, # x-axis scale factor,
@@ -110,6 +100,20 @@ class OCCProofingParagraphLayout:
 
 
         self.pages = pages
+
+    def get_layer(self, glyph, master):
+        if master.name in glyph.layers:
+            # print('master style')
+            orphan_layer = glyph.layers[master.name] # using instances, so there's only one layer
+        else:
+            # print('non-master style')
+            instance_master = filter(lambda i: i.masters[0].name == master.name, INSTANCE_MASTERS)
+            # print(instance_master)
+            instance_master = instance_master[0]
+            # print(instance_master)
+            orphan_layer = instance_master.glyphs[glyph.name].layers[0]
+
+        return orphan_layer
 
 
     def get_scalefactor(self, pts_per_em):
@@ -201,17 +205,8 @@ class OCCProofingLayout:
                 u_to_px = self.get_scalefactor(point_size)
                 for glyph in block_glyphs[font_index]:
 
-                    if master.name in glyph.layers:
-                        # print('master style')
-                        orphan_layer = glyph.layers[master.name].copyDecomposedLayer() # using instances, so there's only one layer
-                    else:
-                        # print('non-master style')
-                        instance_master = filter(lambda i: i.masters[0].name == master.name, INSTANCE_MASTERS)
-                        # print(instance_master)
-                        instance_master = instance_master[0]
-                        # print(instance_master)
-                        orphan_layer = instance_master.glyphs[glyph.name].layers[0].copyDecomposedLayer()
-                        # print(layer)
+                    layer = self.get_layer(glyph, master)
+                    orphan_layer = layer.copyDecomposedLayer()
 
                     transform = (
                         u_to_px, # x-axis scale factor,
@@ -238,6 +233,21 @@ class OCCProofingLayout:
         self.pages = pages
 
 
+    def get_layer(self, glyph, master):
+        if master.name in glyph.layers:
+            # print('master style')
+            orphan_layer = glyph.layers[master.name] # using instances, so there's only one layer
+        else:
+            # print('non-master style')
+            instance_master = filter(lambda i: i.masters[0].name == master.name, INSTANCE_MASTERS)
+            # print(instance_master)
+            instance_master = instance_master[0]
+            # print(instance_master)
+            orphan_layer = instance_master.glyphs[glyph.name].layers[0]
+
+        return orphan_layer
+
+
     def get_scalefactor(self, pts_per_em):
         return self.em_per_u * \
             self.in_per_pt * \
@@ -261,20 +271,8 @@ class OCCProofingLayout:
 
         while advance_px < available_space_px and self.block_glyph_index + glyph_count < len(self.glyphs[font_index]):
             glyph = self.glyphs[font_index][self.block_glyph_index + glyph_count]
-            # print(glyph)
-            # print(glyph.layers)
-            # print(master)
-            if master.name in glyph.layers:
-                # print('master style')
-                layer = glyph.layers[master.name] # using instances, so there's only one layer
-            else:
-                # print('non-master style')
-                instance_master = filter(lambda i: i.masters[0].name == master.name, INSTANCE_MASTERS)
-                # print(instance_master)
-                instance_master = instance_master[0]
-                # print(instance_master)
-                layer = instance_master.glyphs[glyph.name].layers[0]
-                # print(layer)
+
+            layer = self.get_layer(glyph, master)
 
             width_px = layer.width * u_to_px
             advance_px += width_px
