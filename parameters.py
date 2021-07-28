@@ -17,8 +17,6 @@ ELEMENT_PADDING = 5
 SECTION_SELECTOR_HEIGHT = 20
 MAIN_PANEL_HEIGHT_FACTOR = 0.6
 
-INSTANCE_MASTERS = map(lambda i: i.interpolatedFont, Glyphs.font.instances)
-
 def tryParseInt(value, default_value):
     try:
         return int(value)
@@ -67,6 +65,7 @@ class OCCParametersView:
         self.saveProofCallback = saveProofCallback
         self.printProofCallback = printProofCallback
         self.templates = OCCTemplatesView()
+        self.instance_masters = map(lambda i: i.interpolatedFont, Glyphs.font.instances)
 
         self.outputPath = None
 
@@ -140,8 +139,10 @@ class OCCParametersView:
         #
 
         # MASTERS_LIST = map(lambda m: m.name, Glyphs.font.masters)
-        # INSTANCE_MASTERS = map(lambda i: i.interpolatedFont.masters[0], Glyphs.font.instances)
-        MASTERS_LIST = map(lambda i: i.masters[0].name, INSTANCE_MASTERS)
+        # self.instance_masters = map(lambda i: i.interpolatedFont.masters[0], Glyphs.font.instances)
+        I_MASTERS_LIST = map(lambda i: i.masters[0].name, self.instance_masters)
+        M_MASTERS_LIST = map(lambda m: m.name, Glyphs.font.masters)
+        MASTERS_LIST = list(set(I_MASTERS_LIST + M_MASTERS_LIST))
         # MASTERS_LIST = get_font_masters_list()
 
         self.group.parameters = Group(primaryGroupPosSize)
@@ -498,7 +499,13 @@ class OCCParametersView:
             size_dirty = item['Point Size']
             size_clean = re.sub('[^0-9]', '', str(size_dirty))
             size = tryParseInt(size_clean, 72)
-            master = filter(lambda i: i.masters[0].name == item['Style'], INSTANCE_MASTERS) # NOTE: Changed from .masters to .instances
+
+            master = []
+            if len(self.instance_masters) > 0:
+                master = filter(lambda i: i.masters[0].name == item['Style'], self.instance_masters) # NOTE: Changed from .masters to .instances
+
+            if len(master) == 0:
+                master = filter(lambda m: m.name == item['Style'], Glyphs.font.masters)
 
             if len(master) == 1:
                 masters.append([0, master[0].masters[0]])
@@ -515,7 +522,7 @@ class OCCParametersView:
                 'block': tryParseInt(self.group.margins.block.get(), self.parameters['padding']['block'])
             },
             'masters': masters,
-            'instances': INSTANCE_MASTERS,
+            'instances': self.instance_masters,
             'point_sizes': map(int, point_sizes),
             'aligned': False,
             'document': {'width': 11, 'height': 8.5},
