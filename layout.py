@@ -2,9 +2,6 @@
 
 from math import ceil
 
-from GlyphsApp import *
-INSTANCE_MASTERS = map(lambda i: i.interpolatedFont, Glyphs.font.instances)
-
 class OCCProofingParagraphLayout:
     def __init__(self, glyphs, parameters, width, height, upm):
         self.width = width
@@ -107,7 +104,7 @@ class OCCProofingParagraphLayout:
             orphan_layer = glyph.layers[master.name] # using instances, so there's only one layer
         else:
             # print('non-master style')
-            instance_master = filter(lambda i: i.masters[0].name == master.name, INSTANCE_MASTERS)
+            instance_master = filter(lambda i: i.masters[0].name == master.name, self.parameters['instances'])
             # print(instance_master)
             instance_master = instance_master[0]
             # print(instance_master)
@@ -239,7 +236,7 @@ class OCCProofingLayout:
             orphan_layer = glyph.layers[master.name] # using instances, so there's only one layer
         else:
             # print('non-master style')
-            instance_master = filter(lambda i: i.masters[0].name == master.name, INSTANCE_MASTERS)
+            instance_master = filter(lambda i: i.masters[0].name == master.name, self.parameters['instances'])
             # print(instance_master)
             instance_master = instance_master[0]
             # print(instance_master)
