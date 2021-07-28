@@ -2,6 +2,9 @@
 
 from math import ceil
 
+from GlyphsApp import *
+INSTANCE_MASTERS = map(lambda i: i.interpolatedFont, Glyphs.font.instances)
+
 class OCCProofingParagraphLayout:
     def __init__(self, glyphs, parameters, width, height, upm):
         self.width = width
@@ -71,7 +74,18 @@ class OCCProofingParagraphLayout:
 
                 glyph = self.glyphs[0][i]
 
-                orphan_layer = glyph.layers[master_data.id].copyDecomposedLayer()
+                if master.name in glyph.layers:
+                    # print('master style')
+                    orphan_layer = glyph.layers[master.name].copyDecomposedLayer() # using instances, so there's only one layer
+                else:
+                    # print('non-master style')
+                    instance_master = filter(lambda i: i.masters[0].name == master.name, INSTANCE_MASTERS)
+                    # print(instance_master)
+                    instance_master = instance_master[0]
+                    # print(instance_master)
+                    orphan_layer = instance_master.glyphs[glyph.name].layers[0].copyDecomposedLayer()
+                    # print(layer)
+
                 transform = (
                     u_to_px, # x-axis scale factor,
                     0.0, # y-axis skew factor,
@@ -186,7 +200,19 @@ class OCCProofingLayout:
                 # Layout the current line.
                 u_to_px = self.get_scalefactor(point_size)
                 for glyph in block_glyphs[font_index]:
-                    orphan_layer = glyph.layers[master.id].copyDecomposedLayer()
+
+                    if master.name in glyph.layers:
+                        # print('master style')
+                        orphan_layer = glyph.layers[master.name].copyDecomposedLayer() # using instances, so there's only one layer
+                    else:
+                        # print('non-master style')
+                        instance_master = filter(lambda i: i.masters[0].name == master.name, INSTANCE_MASTERS)
+                        # print(instance_master)
+                        instance_master = instance_master[0]
+                        # print(instance_master)
+                        orphan_layer = instance_master.glyphs[glyph.name].layers[0].copyDecomposedLayer()
+                        # print(layer)
+
                     transform = (
                         u_to_px, # x-axis scale factor,
                         0.0, # y-axis skew factor,
@@ -235,7 +261,21 @@ class OCCProofingLayout:
 
         while advance_px < available_space_px and self.block_glyph_index + glyph_count < len(self.glyphs[font_index]):
             glyph = self.glyphs[font_index][self.block_glyph_index + glyph_count]
-            layer = glyph.layers[master.id]
+            # print(glyph)
+            # print(glyph.layers)
+            # print(master)
+            if master.name in glyph.layers:
+                # print('master style')
+                layer = glyph.layers[master.name] # using instances, so there's only one layer
+            else:
+                # print('non-master style')
+                instance_master = filter(lambda i: i.masters[0].name == master.name, INSTANCE_MASTERS)
+                # print(instance_master)
+                instance_master = instance_master[0]
+                # print(instance_master)
+                layer = instance_master.glyphs[glyph.name].layers[0]
+                # print(layer)
+
             width_px = layer.width * u_to_px
             advance_px += width_px
             glyph_count += 1

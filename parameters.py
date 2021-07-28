@@ -17,6 +17,7 @@ ELEMENT_PADDING = 5
 SECTION_SELECTOR_HEIGHT = 20
 MAIN_PANEL_HEIGHT_FACTOR = 0.6
 
+INSTANCE_MASTERS = map(lambda i: i.interpolatedFont.masters[0], Glyphs.font.instances)
 
 def tryParseInt(value, default_value):
     try:
@@ -138,7 +139,9 @@ class OCCParametersView:
         # Edit View List
         #
 
-        MASTERS_LIST = map(lambda m: m.name, Glyphs.font.masters)
+        # MASTERS_LIST = map(lambda m: m.name, Glyphs.font.masters)
+        # INSTANCE_MASTERS = map(lambda i: i.interpolatedFont.masters[0], Glyphs.font.instances)
+        MASTERS_LIST = map(lambda m: m.name, INSTANCE_MASTERS)
         # MASTERS_LIST = get_font_masters_list()
 
         self.group.parameters = Group(primaryGroupPosSize)
@@ -279,7 +282,6 @@ class OCCParametersView:
         self.setActiveSection(0)
         self.setActiveGlobal(0)
 
-        print(self.templates.data)
         if len(self.group.templates.list) > 0:
             self.group.templates.list.setSelection([0])
             self.loadSelectedTemplate([0])
@@ -496,7 +498,7 @@ class OCCParametersView:
             size_dirty = item['Point Size']
             size_clean = re.sub('[^0-9]', '', str(size_dirty))
             size = tryParseInt(size_clean, 72)
-            master = filter(lambda m: m.name == item['Style'], Glyphs.font.masters)
+            master = filter(lambda m: m.name == item['Style'], INSTANCE_MASTERS) # NOTE: Changed from .masters to .instances
 
             if len(master) == 1:
                 masters.append([0, master[0]])
