@@ -13,6 +13,7 @@ from AppKit import *
 from vanilla import *
 from vanilla.dialogs import putFile
 from GlyphsApp.UI import *
+from datetime import datetime
 
 from drawBot.drawBotDrawingTools import _drawBotDrawingTool
 from drawBot.context.drawBotContext import DrawBotContext
@@ -97,12 +98,12 @@ class OCCProofingTool:
         # ==
         # Render full document
         # ==
+        now = datetime.now()
+        text = now.strftime("%m/%d/%Y %H:%M")
         if self.parameters['title'] != '' and self.parameters['footer'] != '':
-            text = '%s - %s' % (self.parameters['title'], self.parameters['footer'])
+            text = ('%s - %s' % (self.parameters['title'], self.parameters['footer'])) + ' - ' + text
         elif self.parameters['title'] != '' or self.parameters['footer'] != '':
-            text = self.parameters['title'] + self.parameters['footer']
-        else:
-            text = ''
+            text = self.parameters['title'] + self.parameters['footer'] + ' - ' + text
 
         for i, page in enumerate(proof if preview else proof):
             _drawBotDrawingTool.newPage(self.width, self.height)
