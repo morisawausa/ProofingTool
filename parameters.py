@@ -448,7 +448,7 @@ class OCCParametersView:
 
         else:
             self.group.parameters.list.append({
-                "Style": MASTERS_LIST[0],
+                "Style": self.instance_masters[0].masters[0].name,
                 "Point Size": 24})
 
     def triggerRemoveSelectedFromParametersList(self, sender):
