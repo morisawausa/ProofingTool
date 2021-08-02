@@ -6,7 +6,7 @@ class OCCProofingParagraphLayout:
     def __init__(self, glyphs, parameters, width, height, upm):
         self.width = width
         self.height = height
-        self.glyphs = glyphs
+        self.glyphs = [ filter(lambda g: g.name is not None, glyphs[0]) ]
         self.parameters = parameters
         #
         # print(glyphs)
@@ -70,7 +70,7 @@ class OCCProofingParagraphLayout:
                     page_index += 1
 
                 glyph = self.glyphs[0][i]
-                layer = self.get_layer(glyph, master)
+                layer = self.get_layer(glyph, master[1])
                 orphan_layer = layer.copyDecomposedLayer()
 
                 transform = (
@@ -129,7 +129,7 @@ class OCCProofingLayout:
     def __init__(self, glyphs, parameters, width, height, upm):
         self.width = width
         self.height = height
-        self.glyphs = glyphs
+        self.glyphs = [ filter(lambda g: g.name is not None, glyphs[0]) ]
         self.parameters = parameters
         #
         # print(glyphs)
