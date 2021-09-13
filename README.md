@@ -8,7 +8,62 @@ For a items on our roadmap, look at [this document](https://docs.google.com/docu
 
 **⚠️ NOTE: ⚠️** Using instance geometry requires instances to be re-interpolated when the script starts up. Because of this, if you have a lot of instances, starting the proofing tool can take some time as instances are reinterpolated. At some point I'll optimize this so that it only reinterpolates the instances you need.
 
-## Templates
+## Using the Tool
+
+This tool can be used to format and output paragraphs and waterfalls of text set in an in-progress typeface from directly inside of Glyphs 2. It should help you quickly format for proofing use without needing to export font binaries, deal with font caching, or open InDesign. We made this tool with the hope that it might reduce the annoyance of producing proofs for in-progress work.
+
+The proofing tool is intendended for comparing runs of text in a typeface across styles and sizes. It can produce two different kinds of proofs: Waterfall proofs and paragraph proofs.
+
+**Waterfall** proofs are for line-by-line comparison. A waterfall proof prints _a single line of text_ per selected style.
+
+![Image of a waterfall-style proof in the proofing tool window](./docs/00-waterfall-1.png)
+
+The proof in the above image sets the text `ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz` in a waterfall style. The text is broken up into blocks of a single line per style or size (this image shows ). Any text that doesn't fit into the line is pushed to the next block. If the block doesn't fit entirely on the page, the entire block is shifted onto the next page.
+
+A **Paragraph** proof of the same text illustrates the difference.
+
+![Image of a paragraph-style proof in the proofing tool window](./docs/01-paragraph-1.png)
+
+In the paragraph proof, the entire text is displayed in a single paragraph, before we move on to the next style. (As you can tell from the above image, the Paragraph proof is best suited to longer paragraphs of text.)
+
+### Making a New Proof
+
+Along the top of the tool, you'll see three tabs: `Templates`, `Glyphs`, and `Edit`. We'll cover these from right to left, starting with `Edit`.
+
+The `Edit` tab allows you to set up your proof by selecting the styles and point sizes you'd like to compare. Each line in the list on the edit view corresponds to a style and point-size in your proof.
+
+![View of the tool showing the edit view with a waterfall of different point sizes visible](docs/02-edit-view.png)
+
+Here, the edit view is being used to set up a comparison across 7 different point sizes of the Black style of Stainless 2. Clicking on the Style Dropdown allows you to choose from between any instances in the current typeface.
+
+![View of the tool showing the edit view with a waterfall of different styles visible](docs/03-edit-view.png)
+
+The `Glyphs` tab lets you set the content of the proof by choosing which glyphs appear in it. You can do this either by selecting glyphs in the Font view in Glyphs.app, or by typing out a string of characters in an Edit Tab in Glyphs.app. Just select the glyphs, or set up your Glyphs.app Edit View, and then push the appropriate button in the `Glyphs` tab.
+
+![View of the tool showing the edit view with a waterfall of different styles visible](docs/04-glyphs-view.png)
+
+### Tweaking the Styles
+
+Below the `Templates`, `Glyphs`, and `Edit` views, You'll find two more tabs: `Layout` and `Output`. These tabs display UI that helps you edit the layout of the proof and the proof metadata, respectively.
+
+`Layout` is fairly self-explanitory; it helps you adjust the spacing in and around the blocks of text in the proof. All of the measurements in this section are specified in pixels. (At some point, we may change these into inches!). (In a previous version of the application, this was called `Margins & Padding`, so you may see that in images or documentation.)
+
+The `Output` section allows you to name the proof file, save it as a pdf, and open a system dialog box to print it out directly from the application. The name of the proof appears on the bottom of the document in gray text.
+
+![View of the tool showing the edit view with a waterfall of different styles visible](docs/05-output-pane.png)
+
+
+
+### Saving a Template
+
+Finally, the `Templates` tab allows you to save or load premade proof templates. Currently, one demo proof is shipped with the Proofing Tool. It lives in the `data` folder in this repository, and is loaded on startup. You can add additional proof templates to this folder, and they'll load on startup, too.
+
+Once you've used the `Edit` view and the `Glyphs` tab to get the proof looking how you want it, you can save the proof as a template for future use by clicking the `Save Proof as Template` system dialog box. This will open a window that allows you to save the template as a JSON file somewhere on your machine. We recommend saving it in the git repository along with the rest of your project files.
+
+Later, you can use the `Open Template` button to load a previously-saved template JSON file.
+
+
+## Customizing Templates
 
 This tool uses a JSON-based template format to store proof configurations on a pre-project basis. You can version control these JSON files together with the rest of your typeface sources, if you wish. The intention here is to provide a way of quickly rendering proofs, without having to configure the tool each time you want to use it.
 
