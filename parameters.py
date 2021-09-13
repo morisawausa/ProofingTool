@@ -213,7 +213,7 @@ class OCCParametersView:
 
         self.group.globals = SegmentedButton(
             (ELEMENT_PADDING, primaryGroupPosSize[3], self.window_width - 2 * ELEMENT_PADDING, SECTION_SELECTOR_HEIGHT),
-            [dict(title="Margins & Padding", width=(self.window_width - 2 * ELEMENT_PADDING) / 2), dict(title="Output", width=(self.window_width - 2 * ELEMENT_PADDING) / 2)],
+            [dict(title="Layout", width=(self.window_width - 2 * ELEMENT_PADDING) / 2), dict(title="Output", width=(self.window_width - 2 * ELEMENT_PADDING) / 2)],
             callback=self.triggerSetActiveGlobal)
 
         globalsGroupPosSize = (
