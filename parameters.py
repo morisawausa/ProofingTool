@@ -394,7 +394,7 @@ class OCCParametersView:
             }
         }
 
-        template['glyphs'] = map(lambda g: g.name, self.getGlyphSet())
+        template['glyphs'] = map(lambda g: g.name, self.glyphs)
 
         outfile = result = putFile(
             title="Save Template",
