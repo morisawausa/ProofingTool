@@ -104,9 +104,10 @@ class OCCProofingParagraphLayout:
             orphan_layer = glyph.layers[master.name] # using instances, so there's only one layer
         else:
             # print('non-master style')
-            instance_master = filter(lambda i: i.masters[0].name == master.name, self.parameters['instances'])
+            # instance_master = filter(lambda i: i.masters[0].name == master.name, self.parameters['instances'])
+            instance_master = self.parameters['instances'][ master.name ]
             # print(instance_master)
-            instance_master = instance_master[0]
+            # instance_master = instance_master[0]
             # print(instance_master)
             orphan_layer = instance_master.glyphs[glyph.name].layers[0]
 
@@ -236,9 +237,10 @@ class OCCProofingLayout:
             orphan_layer = glyph.layers[master.name] # using instances, so there's only one layer
         else:
             # print('non-master style')
-            instance_master = filter(lambda i: i.masters[0].name == master.name, self.parameters['instances'])
-            # print(instance_master)
-            instance_master = instance_master[0]
+            # instance_master = filter(lambda i: i.masters[0].name == master.name, self.parameters['instances'])
+            # # print(instance_master)
+            # instance_master = instance_master[0]
+            instance_master = self.parameters['instances'][ master.name ]
             # print(instance_master)
             orphan_layer = instance_master.glyphs[glyph.name].layers[0]
 

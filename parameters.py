@@ -24,25 +24,6 @@ def tryParseInt(value, default_value):
         return default_value
 
 
-def getAllCategories():
-    categories = {}
-    result = ['Any']
-
-    for g in Glyphs.font.glyphs:
-        if g.category is not None :
-            if g.category in categories and g.subCategory is not None:
-                categories[g.category].add(g.subCategory)
-            else:
-                categories[g.category] = set([g.subCategory] if g.subCategory is not None else [])
-
-    for category in sorted(categories.keys()):
-        result.append(category)
-        for subcategory in sorted(list(categories[category])):
-            result.append('  %s' % subcategory)
-
-    return result
-
-
 class OCCParametersView:
 
 
@@ -65,7 +46,13 @@ class OCCParametersView:
         self.saveProofCallback = saveProofCallback
         self.printProofCallback = printProofCallback
         self.templates = OCCTemplatesView()
-        self.instance_masters = map(lambda i: i.interpolatedFont, Glyphs.font.instances)
+
+
+        # self.instance_masters = map(lambda i: i.interpolatedFont, Glyphs.font.instances)
+        self.instance_masters = map(lambda i: i.name, Glyphs.font.instances)
+
+
+        self.interpolated_instances = {}
 
         self.outputPath = None
 
@@ -140,7 +127,8 @@ class OCCParametersView:
 
         # MASTERS_LIST = map(lambda m: m.name, Glyphs.font.masters)
         # self.instance_masters = map(lambda i: i.interpolatedFont.masters[0], Glyphs.font.instances)
-        I_MASTERS_LIST = map(lambda i: i.masters[0].name, self.instance_masters)
+        I_MASTERS_LIST = self.instance_masters
+        # I_MASTERS_LIST = map(lambda i: i.masters[0].name, self.instance_masters)
         M_MASTERS_LIST = map(lambda m: m.name, Glyphs.font.masters)
         MASTERS_LIST = list(set(I_MASTERS_LIST + M_MASTERS_LIST))
         # MASTERS_LIST = get_font_masters_list()
@@ -501,15 +489,34 @@ class OCCParametersView:
             size = tryParseInt(size_clean, 72)
 
             master = []
+
             if len(self.instance_masters) > 0:
-                master = filter(lambda i: i.masters[0].name == item['Style'], self.instance_masters) # NOTE: Changed from .masters to .instances
+                # master = filter(lambda i: i.masters[0].name == item['Style'], self.instance_masters) # NOTE: Changed from .masters to .instances
+
+                master = filter(lambda i: i == item['Style'], self.instance_masters)
+                print(master)
+
+                if len(master) > 0:
+                    master_name = master[0]
+
+                    if master_name not in self.interpolated_instances:
+                        instance = filter(lambda i: i.name == master_name, Glyphs.font.instances)
+                        self.interpolated_instances[master_name] = instance[0].interpolatedFont
+
+                    master = [ self.interpolated_instances[master_name].masters[0] ]
+
+                print(master)
+
 
             if len(master) == 0:
+                # Note: this case probably doesn't work with the following one...
                 master = filter(lambda m: m.name == item['Style'], Glyphs.font.masters)
 
             if len(master) == 1:
-                masters.append([0, master[0].masters[0]])
+                masters.append([0, master[0]])
                 point_sizes.append(size)
+
+        print(masters)
 
 
         parameters = {
@@ -522,7 +529,7 @@ class OCCParametersView:
                 'block': tryParseInt(self.group.margins.block.get(), self.parameters['padding']['block'])
             },
             'masters': masters,
-            'instances': self.instance_masters,
+            'instances': self.interpolated_instances,
             'point_sizes': map(int, point_sizes),
             'aligned': False,
             'document': {'width': 11, 'height': 8.5},
