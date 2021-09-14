@@ -19,7 +19,7 @@ from drawBot.drawBotDrawingTools import _drawBotDrawingTool
 from drawBot.context.drawBotContext import DrawBotContext
 from drawBot.ui.drawView import DrawView
 
-from layout import OCCProofingLayout, OCCProofingParagraphLayout
+from layout import PROOFING_LAYOUTS
 from parameters import OCCParametersView
 
 TEXT_PLACEMENT = 20
@@ -84,16 +84,15 @@ class OCCProofingTool:
 
 
     def draw(self, preview = True):
-        if self.parameters['mode'] == 'waterfall':
-            proof = OCCProofingLayout(self.glyphs, self.parameters, self.width, self.height, Glyphs.font.upm).get()
-        elif self.parameters['mode'] == 'paragraphs':
-            proof = OCCProofingParagraphLayout(self.glyphs, self.parameters, self.width, self.height, Glyphs.font.upm).get()
 
-        # proof = self.layout(self.width, self.height)
+        proof_mode = self.parameters['mode']
+        # choose the right layout class based on the layout mode: 'waterfall' or 'paragraphs'
+        proof = PROOFING_LAYOUTS[proof_mode](self.glyphs, self.parameters, self.width, self.height, Glyphs.font.upm).get()
+
         context = DrawBotContext()
 
         _drawBotDrawingTool.newDrawing()
-        _drawBotDrawingTool.fontSize(8)
+        _drawBotDrawingTool.fontSize(8) # used to specify the font-size for the metadata at the bottom of the page.
 
         # ==
         # Render full document

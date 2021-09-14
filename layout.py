@@ -2,15 +2,13 @@
 
 from math import ceil
 
-class OCCProofingParagraphLayout:
+
+class OCCProofingLayout(object):
     def __init__(self, glyphs, parameters, width, height, upm):
         self.width = width
         self.height = height
         self.glyphs = [ filter(lambda g: g.name is not None, glyphs[0]) ]
         self.parameters = parameters
-        #
-        # print(glyphs)
-        # print(parameters)
 
         # 0. Determine page constraints based on document size in inches.
         self.em_per_u = 1.0 / upm
@@ -19,16 +17,52 @@ class OCCProofingParagraphLayout:
         self.line_height_factor = 1.25
         self.line_padding = parameters['padding']['line']
         self.block_padding = parameters['padding']['block']
+        self.block_glyph_index = 0
+        self.pages = []
+
+
+    def get_layer(self, glyph, master):
+        if master.name in glyph.layers:
+            # print('master style')
+            orphan_layer = glyph.layers[master.name] # using instances, so there's only one layer
+        else:
+            # print('non-master style')
+            # instance_master = filter(lambda i: i.masters[0].name == master.name, self.parameters['instances'])
+            instance_master = self.parameters['instances'][ master.name ]
+            # print(instance_master)
+            # instance_master = instance_master[0]
+            # print(instance_master)
+            orphan_layer = instance_master.glyphs[glyph.name].layers[0]
+
+        return orphan_layer
+
+
+    def get_scalefactor(self, pts_per_em):
+        return self.em_per_u * \
+            self.in_per_pt * \
+            self.px_per_in * \
+            pts_per_em
+
+    def get(self):
+        return self.pages
+
+
+
+class OCCProofingParagraphLayout(OCCProofingLayout):
+    def __init__(self, glyphs, parameters, width, height, upm):
+        super(OCCProofingParagraphLayout, self).__init__(glyphs, parameters, width, height, upm)
 
         page_index = 0
         pages = [[]]
 
         # 1. determine which parameter group takes defines the shortest line.
         #    and define the block size.
-        self.block_glyph_index = 0
-
         parameter_rows = list(enumerate(zip(parameters['masters'], parameters['point_sizes'])))
         # If we don't have any rendering criteria, we can't render. Fail early.
+
+        if len(parameter_rows) == 0:
+            self.pages = []
+            return
 
         page_origin_x_px = parameters['padding']['left']
         available_space_x_px = self.width - self.parameters['padding']['right']
@@ -92,61 +126,15 @@ class OCCProofingParagraphLayout:
 
                 i += 1
 
-
             block_advance_position_y_px += self.block_padding
-
 
         self.pages = pages
 
-    def get_layer(self, glyph, master):
-        if master.name in glyph.layers:
-            # print('master style')
-            orphan_layer = glyph.layers[master.name] # using instances, so there's only one layer
-        else:
-            # print('non-master style')
-            # instance_master = filter(lambda i: i.masters[0].name == master.name, self.parameters['instances'])
-            instance_master = self.parameters['instances'][ master.name ]
-            # print(instance_master)
-            # instance_master = instance_master[0]
-            # print(instance_master)
-            orphan_layer = instance_master.glyphs[glyph.name].layers[0]
-
-        return orphan_layer
 
 
-    def get_scalefactor(self, pts_per_em):
-        return self.em_per_u * \
-            self.in_per_pt * \
-            self.px_per_in * \
-            pts_per_em
-
-    def get(self):
-        return self.pages
-
-
-
-
-class OCCProofingLayout:
+class OCCProofingWaterfallLayout(OCCProofingLayout):
     def __init__(self, glyphs, parameters, width, height, upm):
-        self.width = width
-        self.height = height
-        self.glyphs = [ filter(lambda g: g.name is not None, glyphs[0]) ]
-        self.parameters = parameters
-        #
-        # print(glyphs)
-        # print(parameters)
-
-        # 0. Determine page constraints based on document size in inches.
-        self.em_per_u = 1.0 / upm
-        self.in_per_pt = 0.0138889
-        self.px_per_in = width / parameters['document']['width']
-        self.line_height_factor = 1.25
-        self.line_padding = parameters['padding']['line']
-        self.block_padding = parameters['padding']['block']
-
-        # 1. determine which parameter group takes defines the shortest line.
-        #    and define the block size.
-        self.block_glyph_index = 0
+        super(OCCProofingWaterfallLayout, self).__init__(glyphs, parameters, width, height, upm)
 
         parameter_rows = list(enumerate(zip(parameters['masters'], parameters['point_sizes'])))
         # If we don't have any rendering criteria, we can't render. Fail early.
@@ -231,29 +219,6 @@ class OCCProofingLayout:
         self.pages = pages
 
 
-    def get_layer(self, glyph, master):
-        if master.name in glyph.layers:
-            # print('master style')
-            orphan_layer = glyph.layers[master.name] # using instances, so there's only one layer
-        else:
-            # print('non-master style')
-            # instance_master = filter(lambda i: i.masters[0].name == master.name, self.parameters['instances'])
-            # # print(instance_master)
-            # instance_master = instance_master[0]
-            instance_master = self.parameters['instances'][ master.name ]
-            # print(instance_master)
-            orphan_layer = instance_master.glyphs[glyph.name].layers[0]
-
-        return orphan_layer
-
-
-    def get_scalefactor(self, pts_per_em):
-        return self.em_per_u * \
-            self.in_per_pt * \
-            self.px_per_in * \
-            pts_per_em
-
-
     def get_line_heights(self, (line_index, ((font_index, master), point_size))):
         u_to_px = self.get_scalefactor(point_size)
         height_px = (master.ascender - master.descender) * u_to_px + self.line_padding
@@ -282,5 +247,8 @@ class OCCProofingLayout:
         return line_index, line_length
 
 
-    def get(self):
-        return self.pages
+
+PROOFING_LAYOUTS = {
+    'paragraphs': OCCProofingParagraphLayout,
+    'waterfall': OCCProofingWaterfallLayout
+}
