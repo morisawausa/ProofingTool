@@ -26,19 +26,10 @@ def tryParseInt(value, default_value):
 
 class OCCParametersView:
 
-
     def __init__(self, width_px, height_px, parent_window,
         parametersChangedCallback=None,
         saveProofCallback=None,
         printProofCallback=None):
-
-        # def paramsChangedValid(parameters, glyphs):
-        #     valid_sequences = len(parameters['masters']) > 0 and len(parameters['point_sizes']) > 0
-        #     sequences_match = len(parameters['masters']) == len(parameters['point_sizes'])
-        #     callback_valid = parametersChangedCallback is not None
-        #     if valid_sequences and sequences_match and callback_valid:
-        #         parametersChangedCallback(parameters, glyphs)
-
 
         self.window_width = width_px
         self.window_height = height_px
@@ -46,12 +37,7 @@ class OCCParametersView:
         self.saveProofCallback = saveProofCallback
         self.printProofCallback = printProofCallback
         self.templates = OCCTemplatesView()
-
-
-        # self.instance_masters = map(lambda i: i.interpolatedFont, Glyphs.font.instances)
         self.instance_masters = map(lambda i: i.name, Glyphs.font.instances)
-
-
         self.interpolated_instances = {}
 
         self.outputPath = None
@@ -124,14 +110,9 @@ class OCCParametersView:
         #
         # Edit View List
         #
-
-        # MASTERS_LIST = map(lambda m: m.name, Glyphs.font.masters)
-        # self.instance_masters = map(lambda i: i.interpolatedFont.masters[0], Glyphs.font.instances)
         I_MASTERS_LIST = self.instance_masters
-        # I_MASTERS_LIST = map(lambda i: i.masters[0].name, self.instance_masters)
         M_MASTERS_LIST = map(lambda m: m.name, Glyphs.font.masters)
         MASTERS_LIST = list(set(I_MASTERS_LIST + M_MASTERS_LIST))
-        # MASTERS_LIST = get_font_masters_list()
 
         self.group.parameters = Group(primaryGroupPosSize)
 
@@ -494,29 +475,35 @@ class OCCParametersView:
                 # master = filter(lambda i: i.masters[0].name == item['Style'], self.instance_masters) # NOTE: Changed from .masters to .instances
 
                 master = filter(lambda i: i == item['Style'], self.instance_masters)
-                print(master)
 
                 if len(master) > 0:
                     master_name = master[0]
 
                     if master_name not in self.interpolated_instances:
+                        # we haven't interpolated this instance yet.
+                        # interpolate the instance and store it in our shared instance cache for future use.
                         instance = filter(lambda i: i.name == master_name, Glyphs.font.instances)
-                        self.interpolated_instances[master_name] = instance[0].interpolatedFont
+
+                        # NOTE(nic): trying out `interpolatedFontProxy` here instead of `interpolatedFont`.
+                        # accoding to [the docs](https://docu.glyphsapp.com/#GSInstance.interpolatedFontProxy),
+                        # iterpolatedFontProxy interpolates glyphs on demand, rather than interpolating the entire instance.
+                        # This means we do work proportional to the glyphs in the proof, rather than in the font.
+                        self.interpolated_instances[master_name] = instance[0].interpolatedFontProxy
 
                     master = [ self.interpolated_instances[master_name].masters[0] ]
 
-                print(master)
-
 
             if len(master) == 0:
-                # Note: this case probably doesn't work with the following one...
+                # we didn't find any matching instance names, look up the name to see
+                # if it occurs in the masters.
                 master = filter(lambda m: m.name == item['Style'], Glyphs.font.masters)
 
             if len(master) == 1:
                 masters.append([0, master[0]])
                 point_sizes.append(size)
 
-        print(masters)
+            else:
+                print("[unknown style] couldn't find a unique style matching '%s'; skipping." % item['Style'] )
 
 
         parameters = {
