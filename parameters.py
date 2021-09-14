@@ -112,7 +112,7 @@ class OCCParametersView:
         #
         I_MASTERS_LIST = self.instance_masters
         M_MASTERS_LIST = map(lambda m: m.name, Glyphs.font.masters)
-        MASTERS_LIST = list(set(I_MASTERS_LIST + M_MASTERS_LIST))
+        MASTERS_LIST = sorted(list(set(I_MASTERS_LIST + M_MASTERS_LIST)))
 
         self.group.parameters = Group(primaryGroupPosSize)
 
