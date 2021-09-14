@@ -52,7 +52,7 @@ class OCCTemplatesView():
         default_size = 24
 
         if template.has_key('style'):
-            if len(filter(lambda m: m.name == template['style'], Glyphs.font.masters)) == 1:
+            if len(filter(lambda i: i.name == template['style'], Glyphs.font.instances)) == 1:
                 default_style = template['style']
             else:
                 print("[%s]\tthe template specifies a default style (%s), but it's not a style of the current typeface." % (template_name, template['style']))
@@ -90,7 +90,7 @@ class OCCTemplatesView():
                         print('[%s]\tline %i has no style specified and no default style is set.' % (template_name, linenum + 1))
                         continue
 
-                if len(filter(lambda m: m.name == line['style'], Glyphs.font.masters)) != 1:
+                if len(filter(lambda i: i.name == line['style'], Glyphs.font.instances)) != 1:
                     if default_style is not None:
                         print('[%s]\tline %i specifies "%s," which is not an instance in this typeface. Replacing with the default "%s."' % (template_name, linenum + 1, line['style'], default_style))
                         line['style'] = default_style
