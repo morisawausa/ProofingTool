@@ -119,6 +119,17 @@ class OCCProofingParagraphLayout(OCCProofingLayout):
                 pages[page_index].append(orphan_layer)
                 block_advance_position_x_px += (orphan_layer.width * u_to_px)
 
+                # apply a kerning transform here.
+                # interpolatedFontProxy doesn't have kerning :c :c :c
+                # if i < len(self.glyphs[0]) - 1:
+                #     next_glyph = self.glyphs[0][i + 1]
+                #     print(dir(master[1].font))
+                    # k = master[1].font.kerningForPair(master[1].id, glyph.rightKerningKey, next_glyph.leftKerningKey)
+                    # print(k)
+                    # print(k * u_to_px)
+                    # next_layer = self.get_layer(next_glyph, master[1])
+
+
                 # next step. Check whether the width is too big for the and wrap the advance height.
                 if block_advance_position_x_px > available_space_x_px:
                     block_advance_position_y_px += height_px
