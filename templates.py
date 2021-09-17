@@ -127,7 +127,6 @@ class OCCTemplatesView():
         }
 
         if template.has_key('proof'):
-            print('has proof key')
             if template['proof'].has_key('margins'):
                 proof['margins']['left'] = template['proof']['margins']['left'] if 'left' in template['proof']['margins'] else 20
                 proof['margins']['right'] = template['proof']['margins']['right'] if 'right' in template['proof']['margins'] else 70
@@ -144,8 +143,6 @@ class OCCTemplatesView():
 
         else:
             print('[%s]\t"%s" does not specify margin and padding information. Setting defaults. "' % (template_name, template_name))
-
-        print(proof)
 
         return {
             "name": name,
