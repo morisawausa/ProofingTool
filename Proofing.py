@@ -8,6 +8,7 @@ Starts the proofing environment
 # vendor_dir = os.path.join(parent_dir, 'lib')
 # sys.path.append(vendor_dir)
 
+from timeit import default_timer
 
 from AppKit import *
 from vanilla import *
@@ -24,6 +25,7 @@ from parameters import OCCParametersView
 
 TEXT_PLACEMENT = 20
 WINDOW_WIDTH = 400 # In PIXELS
+TIMING = True
 
 GLYPHS = filter(lambda g: g.subCategory == 'Uppercase' and g.script == 'latin',  Glyphs.font.glyphs)
 
@@ -80,10 +82,13 @@ class OCCProofingTool:
 
         proof_mode = self.parameters['mode']
         # choose the right layout class based on the layout mode: 'waterfall' or 'paragraphs'
+        pre_generate_proof = default_timer()
         proof = PROOFING_LAYOUTS[proof_mode](self.glyphs, self.parameters, self.width, self.height, Glyphs.font.upm).get()
+        post_generate_proof = default_timer()
 
         context = DrawBotContext()
 
+        pre_render_proof = default_timer()
         _drawBotDrawingTool.newDrawing()
         _drawBotDrawingTool.fontSize(8) # used to specify the font-size for the metadata at the bottom of the page.
 
@@ -122,6 +127,12 @@ class OCCProofingTool:
         _drawBotDrawingTool._drawInContext(context)
         pdfDocument = context.getNSPDFDocument()
         self.drawView.setPDFDocument(pdfDocument)
+
+        post_render_proof = default_timer()
+
+        print('[profile] time to compile: %.03f seconds' % (post_generate_proof - pre_generate_proof))
+        print('[profile] time to render: %.03f seconds' % (post_render_proof - pre_render_proof))
+        print('[profile] done.\n')
 
 
 OCCProofingTool()
