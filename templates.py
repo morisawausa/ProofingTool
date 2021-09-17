@@ -127,15 +127,16 @@ class OCCTemplatesView():
         }
 
         if template.has_key('proof'):
+            print('has proof key')
             if template['proof'].has_key('margins'):
-                proof['margins']['left'] = template['proof']['margins']['left'] if hasattr(template['proof']['margins'], 'left') else 20
-                proof['margins']['right'] = template['proof']['margins']['right'] if hasattr(template['proof']['margins'], 'right') else 70
-                proof['margins']['top'] = template['proof']['margins']['top'] if hasattr(template['proof']['margins'], 'top') else 20
-                proof['margins']['bottom'] = template['proof']['margins']['bottom'] if hasattr(template['proof']['margins'], 'bottom') else 100
+                proof['margins']['left'] = template['proof']['margins']['left'] if 'left' in template['proof']['margins'] else 20
+                proof['margins']['right'] = template['proof']['margins']['right'] if 'right' in template['proof']['margins'] else 70
+                proof['margins']['top'] = template['proof']['margins']['top'] if 'top' in template['proof']['margins'] else 20
+                proof['margins']['bottom'] = template['proof']['margins']['bottom'] if 'bottom' in template['proof']['margins']else 100
 
             if template['proof'].has_key('padding'):
-                proof['padding']['line'] = template['proof']['padding']['line'] if hasattr(template['proof']['padding'], 'line') else 20
-                proof['padding']['block'] = template['proof']['padding']['block'] if hasattr(template['proof']['padding'], 'block') else 20
+                proof['padding']['line'] = template['proof']['padding']['line'] if 'line' in template['proof']['padding'] else 20
+                proof['padding']['block'] = template['proof']['padding']['block'] if 'block' in template['proof']['padding'] else 20
 
             if template['proof'].has_key('mode'):
                 proof['mode'] = template['proof']['mode']
@@ -143,6 +144,8 @@ class OCCTemplatesView():
 
         else:
             print('[%s]\t"%s" does not specify margin and padding information. Setting defaults. "' % (template_name, template_name))
+
+        print(proof)
 
         return {
             "name": name,
