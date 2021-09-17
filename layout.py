@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
 
 from math import ceil
+from multiprocessing import Pool
+import cProfile
+from pstats import Stats, SortKey
 
+PROFILE = False
 
 class OCCProofingLayout(object):
     def __init__(self, glyphs, parameters, width, height, upm):
@@ -147,6 +151,10 @@ class OCCProofingWaterfallLayout(OCCProofingLayout):
     def __init__(self, glyphs, parameters, width, height, upm):
         super(OCCProofingWaterfallLayout, self).__init__(glyphs, parameters, width, height, upm)
 
+        if PROFILE:
+            __profile = cProfile.Profile()
+            __profile.enable()
+
         parameter_rows = list(enumerate(zip(parameters['masters'], parameters['point_sizes'])))
         # If we don't have any rendering criteria, we can't render. Fail early.
         if len(parameter_rows) == 0:
@@ -179,6 +187,12 @@ class OCCProofingWaterfallLayout(OCCProofingLayout):
         # in the parameters file, perhaps supplying notdef or space
         # as a glyph when once glyph is present in one font, and not in the
         # other one.
+
+        # Helper Methods for Profiling
+        def select_second_element(a):
+            return a[1]
+
+
         while len(self.glyphs[0][self.block_glyph_index:]) > 0:
 
             # If we have a block-size that fits onto a single page, check for when a block runs off the page,
@@ -197,10 +211,13 @@ class OCCProofingWaterfallLayout(OCCProofingLayout):
 
             # First, get the line-length for this line
             bounds_per_line = map(self.get_line_lengths, parameter_rows)
-            block_line_length = min(map(lambda a: a[1], bounds_per_line))
+            block_line_length = min(map(select_second_element, bounds_per_line))
+
+            def get_block_glyphs(g):
+                return g[ self.block_glyph_index : self.block_glyph_index + block_line_length ]
 
             # Then layout the line with this length
-            block_glyphs = map( lambda g: g[ self.block_glyph_index : self.block_glyph_index + block_line_length ], self.glyphs)
+            block_glyphs = map(get_block_glyphs, self.glyphs)
 
 
             for i, ((font_index, master), point_size) in parameter_rows:
@@ -247,6 +264,11 @@ class OCCProofingWaterfallLayout(OCCProofingLayout):
             block_index += 1
 
         self.pages = pages
+
+        if PROFILE:
+            __profile.disable()
+            __stats = Stats(__profile)
+            __stats.sort_stats(SortKey.CUMULATIVE).print_stats()
 
 
     def get_line_heights(self, (line_index, ((font_index, master), point_size))):
