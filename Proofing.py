@@ -67,13 +67,6 @@ class OCCProofingTool:
         self.glyphs = glyphs
         self.draw(preview=True)
 
-    def calculate_scale(self, pts_per_em):
-        return self.em_per_u * \
-            self.in_per_pt * \
-            self.px_per_in * \
-            pts_per_em
-
-
     def saveProof(self, filename):
         self.draw(preview=False)
         _drawBotDrawingTool.saveImage(filename)

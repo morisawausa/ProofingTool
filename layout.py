@@ -150,8 +150,8 @@ class OCCProofingWaterfallLayout(OCCProofingLayout):
 
         # 2. layout each block.
         pages = [[]]
-
         page_index = 0
+
         page_origin_x_px = parameters['padding']['left']
         page_origin_y_px = self.height - parameters['padding']['top']
 
@@ -170,13 +170,19 @@ class OCCProofingWaterfallLayout(OCCProofingLayout):
         # other one.
         while len(self.glyphs[0][self.block_glyph_index:]) > 0:
 
-            if block_origin_y_px - self.block_height < parameters['padding']['bottom']:
+            # If we have a block-size that fits onto a single page, check for when a block runs off the page,
+            # and advance it to the next page.
+            if block_origin_y_px - self.block_height < parameters['padding']['bottom'] and self.block_glyph_index > 0:
                 # This block overshoots the end of the page.
                 # time to create a new page, and reset the block data.
                 pages.append([])
                 page_index += 1
                 block_origin_y_px = page_origin_y_px
                 block_advance_position_y_px = self.block_line_origin
+
+            # we need to know what the line offset is, so that we can shift to
+            # the next page, if we need to.
+
 
             # First, get the line-length for this line
             bounds_per_line = map(self.get_line_lengths, parameter_rows)
@@ -187,8 +193,13 @@ class OCCProofingWaterfallLayout(OCCProofingLayout):
 
 
             for i, ((font_index, master), point_size) in parameter_rows:
+                # print('master = %d' % (i + 1))
+                # print('page = %d' % (page_index + 1))
+                # print('origin = %d\n' % (block_origin_y_px - block_advance_position_y_px))
+
                 # Layout the current line.
                 u_to_px = self.get_scalefactor(point_size)
+
                 for glyph in block_glyphs[font_index]:
 
                     layer = self.get_layer(glyph, master)
@@ -206,8 +217,16 @@ class OCCProofingWaterfallLayout(OCCProofingLayout):
                     pages[page_index].append(orphan_layer)
                     block_advance_position_x_px += (orphan_layer.width * u_to_px)
 
+
                 block_advance_position_y_px += self.block_line_heights[i + 1] if len(self.block_line_heights) > i + 1 else 0
                 block_advance_position_x_px = 0
+
+                # I need something here to advance the page pointer.
+                if block_origin_y_px - block_advance_position_y_px <= parameters['padding']['bottom']:
+                    pages.append([])
+                    page_index += 1
+                    block_origin_y_px = page_origin_y_px
+                    block_advance_position_y_px = self.block_line_origin
 
 
             # Dec/Increment parameters for the next block

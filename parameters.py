@@ -284,10 +284,6 @@ class OCCParametersView:
             self.saveProofCallback(result)
 
 
-    def setProofTitle(self, sender):
-        pass
-        # print(sender.get())
-
     def triggerParametersListEdit(self, sender):
         if self.parametersChangedCallback is not None:
             self.parametersChangedCallback(self.getParameterSet(), self.getGlyphSet())
@@ -319,8 +315,6 @@ class OCCParametersView:
 
             lines = map(lambda row: {"Style": row['style'], "Point Size": row['size']}, template['lines'])
 
-            self.group.parameters.list.set(lines)
-
             # margins
             self.group.margins.left.set(tryParseInt(template['proof']['margins']['left'], 0))
             self.group.margins.right.set(tryParseInt(template['proof']['margins']['right'], 0))
@@ -331,9 +325,14 @@ class OCCParametersView:
             self.group.margins.line.set(tryParseInt(template['proof']['padding']['line'], 0))
 
             self.group.output.proofname.set(template["name"])
+            # self.group.output.prooffooter.get()
 
             self.proof_mode = template['proof']['mode']
             self.group.margins.proofMode.set(0 if self.proof_mode == 'waterfall' else 1)
+
+            self.group.parameters.list.set(lines)
+
+
 
 
 
