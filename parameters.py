@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from timeit import default_timer
+
 import re
 import os
 import json
@@ -22,7 +24,6 @@ def tryParseInt(value, default_value):
         return int(value)
     except ValueError as e:
         return default_value
-
 
 class OCCParametersView:
 
@@ -88,7 +89,7 @@ class OCCParametersView:
             (0, 0, -0, self.window_height * MAIN_PANEL_HEIGHT_FACTOR),
             map(lambda x: self.formatTemplateForDisplayList(x), self.templates.data),
             columnDescriptions=[{"title": "Name"}],
-            selectionCallback=self.triggerTemplatesListSelection,
+            selectionCallback=self.triggerLoadSelectedTemplate,
             drawFocusRing=False,
             allowsSorting=False,
             allowsEmptySelection=True,
@@ -130,7 +131,6 @@ class OCCParametersView:
                 }
             ],
             editCallback=self.triggerParametersListEdit,
-            selectionCallback=self.triggerParametersListSelection,
             drawFocusRing=False,
             allowsSorting=False,
             allowsEmptySelection=True,
@@ -256,9 +256,6 @@ class OCCParametersView:
             self.group.templates.list.setSelection([0])
             self.loadSelectedTemplate([0])
 
-        if self.parametersChangedCallback is not None:
-            self.parametersChangedCallback(self.getParameterSet(), self.getGlyphSet())
-
 
 
     def printProof(self, sender):
@@ -291,9 +288,6 @@ class OCCParametersView:
     def triggerParametersListSelection(self, sender):
         self.group.parameters.removeRow.enable(len(sender.getSelection()) > 0)
 
-    def triggerTemplatesListSelection(self, sender):
-        self.triggerLoadSelectedTemplate(sender)
-
     def triggerLoadSelectedTemplate(self, sender):
         self.loadSelectedTemplate(self.group.templates.list.getSelection())
 
@@ -324,17 +318,19 @@ class OCCParametersView:
             self.group.margins.block.set(tryParseInt(template['proof']['padding']['block'], 0))
             self.group.margins.line.set(tryParseInt(template['proof']['padding']['line'], 0))
 
-            self.group.output.proofname.set(template["name"])
-            # self.group.output.prooffooter.get()
 
             self.proof_mode = template['proof']['mode']
             self.group.margins.proofMode.set(0 if self.proof_mode == 'waterfall' else 1)
 
+            # NOTE(nic): we need to disable the callback when we update the list,
+            # otherwise the editCallback will be called multiple times, resulting
+            # in unnecessary re-renders.
+            self.group.parameters.list._editCallback = None
             self.group.parameters.list.set(lines)
+            self.group.parameters.list._editCallback = self.triggerParametersListEdit
 
-
-
-
+        if self.parametersChangedCallback is not None:
+            self.parametersChangedCallback(self.getParameterSet(), self.getGlyphSet())
 
 
     def formatTemplateForDisplayList(self, template):
@@ -463,6 +459,8 @@ class OCCParametersView:
         masters = []
         point_sizes = []
 
+        pre_interpolation = default_timer()
+
         for i, item in enumerate(self.group.parameters.list):
             size_dirty = item['Point Size']
             size_clean = re.sub('[^0-9]', '', str(size_dirty))
@@ -504,6 +502,7 @@ class OCCParametersView:
             else:
                 print("[unknown style] couldn't find a unique style matching '%s'; skipping." % item['Style'] )
 
+        print('[profile] time to interpolate: %.03f' % (default_timer() - pre_interpolation))
 
         parameters = {
             'padding': {
@@ -517,7 +516,7 @@ class OCCParametersView:
             'masters': masters,
             'instances': self.interpolated_instances,
             'point_sizes': map(int, point_sizes),
-            'aligned': False,
+            'aligned': True,
             'document': {'width': 11, 'height': 8.5},
             'title': self.group.output.proofname.get(),
             'footer': self.group.output.prooffooter.get(),
