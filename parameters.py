@@ -61,7 +61,8 @@ class OCCParametersView:
             'document': {'width': 11, 'height': 8.5},
             'title': '',
             'footer': '',
-            'mode': 'waterfall'
+            'mode': 'waterfall',
+            'glyphs': [[]]
         }
 
 
@@ -282,8 +283,7 @@ class OCCParametersView:
 
 
     def triggerParametersListEdit(self, sender):
-        if self.parametersChangedCallback is not None:
-            self.parametersChangedCallback(self.getParameterSet(), self.getGlyphSet())
+        self.tryRerender()
 
     def triggerParametersListSelection(self, sender):
         self.group.parameters.removeRow.enable(len(sender.getSelection()) > 0)
@@ -294,9 +294,7 @@ class OCCParametersView:
     def triggerProofModeChange(self, sender):
         index = int(sender.get())
         self.proof_mode = 'waterfall' if index == 0 else 'paragraphs'
-
-        if self.parametersChangedCallback is not None:
-            self.parametersChangedCallback(self.getParameterSet(), self.getGlyphSet())
+        self.tryRerender()
 
 
     def loadSelectedTemplate(self, indices):
@@ -329,8 +327,7 @@ class OCCParametersView:
             self.group.parameters.list.set(lines)
             self.group.parameters.list._editCallback = self.triggerParametersListEdit
 
-        if self.parametersChangedCallback is not None:
-            self.parametersChangedCallback(self.getParameterSet(), self.getGlyphSet())
+        self.tryRerender()
 
 
     def formatTemplateForDisplayList(self, template):
@@ -394,8 +391,7 @@ class OCCParametersView:
             if len(modified_indices) > 0:
                 self.loadSelectedTemplate([modified_indices[-1]])
                 self.group.templates.list.setSelection([modified_indices[-1]])
-            # self.parametersChangedCallback(self.getParameterSet(), self.getGlyphSet())
-            # self.loadSelectedTemplate([len(self.group.templates.list) - 1])
+
 
 
     def triggerSetActiveSection(self, sender):
@@ -421,17 +417,46 @@ class OCCParametersView:
 
     def triggerSetGlyphsFromSelection(self, sender):
         self.glyphs = filter(lambda g: g.selected, Glyphs.font.glyphs)
+        self.tryRerender()
 
-        # add normalizing term for any other masters in the font
-
-        if self.parametersChangedCallback is not None:
-            self.parametersChangedCallback(self.getParameterSet(), self.getGlyphSet())
 
     def triggerSetGlyphsFromEditView(self, sender):
         if Glyphs.font.currentTab is not None:
             self.glyphs = map(lambda l: l.parent, Glyphs.font.currentTab.layers)
-            if self.parametersChangedCallback is not None:
-                self.parametersChangedCallback(self.getParameterSet(), self.getGlyphSet())
+            self.tryRerender()
+
+
+    def parametersChanged(self, parameters, glyphs):
+        glyphsChanged = glyphs[0] != self.parameters['glyphs'][0]
+
+        layoutChanged = parameters['padding'] != self.parameters['padding']
+        mastersChanged = parameters['masters'] != self.parameters['masters']
+        sizesChanged = parameters['point_sizes'] != self.parameters['point_sizes']
+        titleChanged = parameters['title'] != self.parameters['title']
+        footerChanged = parameters['footer'] != self.parameters['footer']
+        modeChanged = parameters['mode'] != self.parameters['mode']
+
+        paramsChanged = layoutChanged or mastersChanged or sizesChanged or modeChanged
+        metadataChanged = titleChanged or footerChanged
+
+        return glyphsChanged or paramsChanged or metadataChanged
+
+
+    def tryRerender(self):
+        if self.parametersChangedCallback is not None:
+
+            newParamSet = self.getParameterSet()
+            newGlyphSet = self.getGlyphSet()
+
+            # check to see if the parameters actually changed.
+            if self.parametersChanged(newParamSet, newGlyphSet):
+
+                # cache latest parameter state.
+                self.parameters = newParamSet
+                self.parameters['glyphs'] = newGlyphSet
+
+                self.parametersChangedCallback(newParamSet, newGlyphSet)
+
 
 
     def setActiveSection(self, index):
