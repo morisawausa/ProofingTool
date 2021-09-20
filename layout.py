@@ -3,7 +3,7 @@
 from math import ceil
 from multiprocessing import Pool
 import cProfile
-from pstats import Stats, SortKey
+from pstats import Stats
 
 PROFILE = False
 
@@ -268,7 +268,7 @@ class OCCProofingWaterfallLayout(OCCProofingLayout):
         if PROFILE:
             __profile.disable()
             __stats = Stats(__profile)
-            __stats.sort_stats(SortKey.CUMULATIVE).print_stats()
+            __stats.sort_stats('cumulative').print_stats()
 
 
     def get_line_heights(self, (line_index, ((font_index, master), point_size))):

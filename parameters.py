@@ -502,7 +502,7 @@ class OCCParametersView:
             else:
                 print("[unknown style] couldn't find a unique style matching '%s'; skipping." % item['Style'] )
 
-        print('[profile] time to interpolate: %.03f' % (default_timer() - pre_interpolation))
+        print('[profile] time to interpolate: %.03f seconds' % (default_timer() - pre_interpolation))
 
         parameters = {
             'padding': {
