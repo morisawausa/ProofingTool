@@ -336,8 +336,13 @@ class OCCParametersView:
 
     def triggerSaveProofAsTemplate(self, sender):
         name = self.group.output.proofname.get()
-        name = name if name is not "" else "Proof"
+        print(name)
+        print(name != "")
+        name = name if name != "" else "Proof"
+        print(name)
         filename = '-'.join(name.lower().split(' ')) + '.json'
+
+        print(filename)
 
         template = OrderedDict()
         template['name'] = name
@@ -352,18 +357,20 @@ class OCCParametersView:
             "padding": {
                 "block": int(self.group.margins.block.get()),
                 "line": int(self.group.margins.line.get())
-            }
+            },
+            "mode": self.proof_mode
         }
 
         template['glyphs'] = map(lambda g: g.name, self.glyphs)
 
-        outfile = result = putFile(
+        outfile = putFile(
             title="Save Template",
             messageText="Save Proof As Template...",
             fileName=filename)
 
-        with open(outfile, 'w') as file:
-            json.dump(template, file, indent=4)
+        if outfile is not None:
+            with open(outfile, 'w') as file:
+                json.dump(template, file, indent=4)
 
 
 
