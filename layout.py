@@ -110,6 +110,14 @@ class OCCProofingParagraphLayout(OCCProofingLayout):
                 glyph = self.glyphs[0][i]
                 layer = self.get_layer(glyph, master[1])
                 orphan_layer = layer.copyDecomposedLayer()
+                width_px = (orphan_layer.width * u_to_px)
+
+                # if this glyph would knock us over the end of the line,
+                # reset the height and x position, and retry.
+                if block_advance_position_x_px + width_px > available_space_x_px:
+                    block_advance_position_y_px += height_px
+                    block_advance_position_x_px = 0
+                    continue
 
                 transform = (
                     u_to_px, # x-axis scale factor,
@@ -121,7 +129,7 @@ class OCCProofingParagraphLayout(OCCProofingLayout):
                 )
                 orphan_layer.applyTransform(transform)
                 pages[page_index].append(orphan_layer)
-                block_advance_position_x_px += (orphan_layer.width * u_to_px)
+                block_advance_position_x_px += width_px
 
                 # apply a kerning transform here.
                 # interpolatedFontProxy doesn't have kerning :c :c :c
