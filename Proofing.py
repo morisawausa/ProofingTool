@@ -27,7 +27,7 @@ TEXT_PLACEMENT = 20
 WINDOW_WIDTH = 400 # In PIXELS
 TIMING = True
 
-GLYPHS = filter(lambda g: g.subCategory == 'Uppercase' and g.script == 'latin',  Glyphs.font.glyphs)
+GLYPHS = list(filter(lambda g: g.subCategory == 'Uppercase' and g.script == 'latin',  Glyphs.font.glyphs))
 
 
 class OCCProofingTool:
