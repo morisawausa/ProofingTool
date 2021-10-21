@@ -38,12 +38,12 @@ class OCCParametersView:
         self.saveProofCallback = saveProofCallback
         self.printProofCallback = printProofCallback
         self.templates = OCCTemplatesView()
-        self.instance_masters = map(lambda i: i.name, Glyphs.font.instances)
+        self.instance_masters = list(map(lambda i: i.name, Glyphs.font.instances))
         self.interpolated_instances = {}
 
         self.outputPath = None
 
-        self.glyphs = filter(lambda g: g.category == 'Letter' and g.subCategory == 'Uppercase' and g.script == 'latin', Glyphs.font.glyphs)
+        self.glyphs = list(filter(lambda g: g.category == 'Letter' and g.subCategory == 'Uppercase' and g.script == 'latin', Glyphs.font.glyphs))
 
         self.proof_mode = 'waterfall'
         self.parameters = {
@@ -113,7 +113,7 @@ class OCCParametersView:
         # Edit View List
         #
         I_MASTERS_LIST = self.instance_masters
-        M_MASTERS_LIST = map(lambda m: m.name, Glyphs.font.masters)
+        M_MASTERS_LIST = list(map(lambda m: m.name, Glyphs.font.masters))
         MASTERS_LIST = sorted(list(set(I_MASTERS_LIST + M_MASTERS_LIST)))
 
         self.group.parameters = Group(primaryGroupPosSize)
@@ -302,10 +302,10 @@ class OCCParametersView:
 
             # set this first
             template = self.templates.data[i]
-            valid_names = filter(lambda n: n in Glyphs.font.glyphs, template['glyphs'])
-            self.glyphs = map(lambda n: Glyphs.font.glyphs[n], valid_names)
+            valid_names = list(filter(lambda n: n in Glyphs.font.glyphs, template['glyphs']))
+            self.glyphs = list(map(lambda n: Glyphs.font.glyphs[n], valid_names))
 
-            lines = map(lambda row: {"Style": row['style'], "Point Size": row['size']}, template['lines'])
+            lines = list(map(lambda row: {"Style": row['style'], "Point Size": row['size']}, template['lines']))
 
             # margins
             self.group.margins.left.set(tryParseInt(template['proof']['margins']['left'], 0))
@@ -346,7 +346,7 @@ class OCCParametersView:
 
         template = OrderedDict()
         template['name'] = name
-        template['lines'] = map(lambda l: {"style": l["Style"], "size": int(l["Point Size"])}, self.group.parameters.list)
+        template['lines'] = list(map(lambda l: {"style": l["Style"], "size": int(l["Point Size"])}, self.group.parameters.list))
         template['proof'] = {
             "margins": {
                 "left": int(self.group.margins.left.get()),
@@ -361,7 +361,7 @@ class OCCParametersView:
             "mode": self.proof_mode
         }
 
-        template['glyphs'] = map(lambda g: g.name, self.glyphs)
+        template['glyphs'] = list(map(lambda g: g.name, self.glyphs))
 
         outfile = putFile(
             title="Save Template",
@@ -423,13 +423,13 @@ class OCCParametersView:
             del self.group.parameters.list[index]
 
     def triggerSetGlyphsFromSelection(self, sender):
-        self.glyphs = filter(lambda g: g.selected, Glyphs.font.glyphs)
+        self.glyphs = list(filter(lambda g: g.selected, Glyphs.font.glyphs))
         self.tryRerender()
 
 
     def triggerSetGlyphsFromEditView(self, sender):
         if Glyphs.font.currentTab is not None:
-            self.glyphs = map(lambda l: l.parent, Glyphs.font.currentTab.layers)
+            self.glyphs = list(map(lambda l: l.parent, Glyphs.font.currentTab.layers))
             self.tryRerender()
 
 
@@ -503,7 +503,7 @@ class OCCParametersView:
             if len(self.instance_masters) > 0:
                 # master = filter(lambda i: i.masters[0].name == item['Style'], self.instance_masters) # NOTE: Changed from .masters to .instances
 
-                master = filter(lambda i: i == item['Style'], self.instance_masters)
+                master = list(filter(lambda i: i == item['Style'], self.instance_masters))
 
                 if len(master) > 0:
                     master_name = master[0]
@@ -511,7 +511,7 @@ class OCCParametersView:
                     if master_name not in self.interpolated_instances:
                         # we haven't interpolated this instance yet.
                         # interpolate the instance and store it in our shared instance cache for future use.
-                        instance = filter(lambda i: i.name == master_name, Glyphs.font.instances)
+                        instance = list(filter(lambda i: i.name == master_name, Glyphs.font.instances))
 
                         # NOTE(nic): trying out `interpolatedFontProxy` here instead of `interpolatedFont`.
                         # accoding to [the docs](https://docu.glyphsapp.com/#GSInstance.interpolatedFontProxy),
@@ -525,7 +525,7 @@ class OCCParametersView:
             if len(master) == 0:
                 # we didn't find any matching instance names, look up the name to see
                 # if it occurs in the masters.
-                master = filter(lambda m: m.name == item['Style'], Glyphs.font.masters)
+                master = list(filter(lambda m: m.name == item['Style'], Glyphs.font.masters))
 
             if len(master) == 1:
                 masters.append([0, master[0]])
@@ -547,7 +547,7 @@ class OCCParametersView:
             },
             'masters': masters,
             'instances': self.interpolated_instances,
-            'point_sizes': map(int, point_sizes),
+            'point_sizes': list(map(int, point_sizes)),
             'aligned': True,
             'document': {'width': 11, 'height': 8.5},
             'title': self.group.output.proofname.get(),
