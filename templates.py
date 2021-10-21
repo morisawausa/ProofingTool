@@ -13,7 +13,7 @@ class OCCTemplatesView():
     def parseTemplateDirectory(self, directory):
         if not os.path.isdir(directory): return []
 
-        templates_files = filter(lambda f: '.json' in f, os.listdir(directory))
+        templates_files = list(filter(lambda f: '.json' in f, os.listdir(directory)))
         templates = []
 
         for i, template_name in enumerate(templates_files):
@@ -42,7 +42,7 @@ class OCCTemplatesView():
 
     def validateAndFormatTemplate(self, template_name, template):
 
-        if template.has_key('name'):
+        if 'name' in template:
             name = template['name']
         else:
             print('[%s]\t"%s" does not have a template name specified. Naming it "%s"' % (template_name, template_name, template_name))
@@ -51,15 +51,15 @@ class OCCTemplatesView():
         default_style = None
         default_size = 24
 
-        if template.has_key('style'):
-            if len(filter(lambda i: i.name == template['style'], Glyphs.font.instances)) == 1:
+        if 'style' in template:
+            if len(list(filter(lambda i: i.name == template['style'], Glyphs.font.instances))) == 1:
                 default_style = template['style']
             else:
                 print("[%s]\tthe template specifies a default style (%s), but it's not a style of the current typeface." % (template_name, template['style']))
         else:
             print("[%s]\tthe template does not specify a default style." % template_name)
 
-        if template.has_key('size'):
+        if 'size' in template:
             if isinstance(template['size'], int):
                 default_size = template['size']
             else:
@@ -70,7 +70,7 @@ class OCCTemplatesView():
 
         glyphs = []
 
-        if template.has_key("glyphs"):
+        if 'glyphs' in template:
             if isinstance(template['glyphs'], list):
                 glyphs = template['glyphs']
 
@@ -80,17 +80,17 @@ class OCCTemplatesView():
             print('[%s]\tthe template does not provide a "glyphs" key.' % (template_name))
 
 
-        if template.has_key('lines'):
+        if 'lines' in template:
             lines = []
             for linenum, line in enumerate(template['lines']):
-                if not line.has_key('style'):
+                if not ('style' in line):
                     if default_style is not None:
                         line['style'] = default_style
                     else:
                         print('[%s]\tline %i has no style specified and no default style is set.' % (template_name, linenum + 1))
                         continue
 
-                if len(filter(lambda i: i.name == line['style'], Glyphs.font.instances)) != 1:
+                if len(list(filter(lambda i: i.name == line['style'], Glyphs.font.instances))) != 1:
                     if default_style is not None:
                         print('[%s]\tline %i specifies "%s," which is not an instance in this typeface. Replacing with the default "%s."' % (template_name, linenum + 1, line['style'], default_style))
                         line['style'] = default_style
@@ -98,7 +98,7 @@ class OCCTemplatesView():
                         print('[%s]\tline %i specifies "%s," which is not an instance in this typeface. Since no valid default style is specified, I\'m skipping the line.' % (template_name, linenum + 1, line['style']))
                         continue
 
-                if not line.has_key('size'):
+                if not ('size' in line):
                     print('[%s]\tline %i has no size specified, setting default of %s.' % (template_name, linenum + 1, default_size))
                     line['size'] = default_size
 
@@ -126,18 +126,18 @@ class OCCTemplatesView():
             "mode": "waterfall"
         }
 
-        if template.has_key('proof'):
-            if template['proof'].has_key('margins'):
+        if 'proof' in template:
+            if 'margins' in template['proof']:
                 proof['margins']['left'] = template['proof']['margins']['left'] if 'left' in template['proof']['margins'] else 20
                 proof['margins']['right'] = template['proof']['margins']['right'] if 'right' in template['proof']['margins'] else 70
                 proof['margins']['top'] = template['proof']['margins']['top'] if 'top' in template['proof']['margins'] else 20
                 proof['margins']['bottom'] = template['proof']['margins']['bottom'] if 'bottom' in template['proof']['margins']else 100
 
-            if template['proof'].has_key('padding'):
+            if 'padding' in template['proof']:
                 proof['padding']['line'] = template['proof']['padding']['line'] if 'line' in template['proof']['padding'] else 20
                 proof['padding']['block'] = template['proof']['padding']['block'] if 'block' in template['proof']['padding'] else 20
 
-            if template['proof'].has_key('mode'):
+            if 'mode' in template['proof']:
                 proof['mode'] = template['proof']['mode']
 
 
