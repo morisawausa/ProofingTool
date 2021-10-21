@@ -11,7 +11,7 @@ class OCCProofingLayout(object):
     def __init__(self, glyphs, parameters, width, height, upm):
         self.width = width
         self.height = height
-        self.glyphs = [ filter(lambda g: g.name is not None, glyphs[0]) ]
+        self.glyphs = [ list(filter(lambda g: g.name is not None, glyphs[0])) ]
         self.parameters = parameters
 
         # 0. Determine page constraints based on document size in inches.
@@ -169,9 +169,9 @@ class OCCProofingWaterfallLayout(OCCProofingLayout):
             self.pages = []
             return
 
-        heights_per_line = map(self.get_line_heights, parameter_rows)
+        heights_per_line = list(map(self.get_line_heights, parameter_rows))
 
-        self.block_line_heights = map(lambda a: int(a[1]), heights_per_line)
+        self.block_line_heights = list(map(lambda a: int(a[1]), heights_per_line))
         self.block_line_origin = (self.block_line_heights[0] - self.line_padding) if len(self.block_line_heights) > 0 else 0
         self.block_height = sum(self.block_line_heights) + self.block_padding
 
@@ -218,14 +218,14 @@ class OCCProofingWaterfallLayout(OCCProofingLayout):
 
 
             # First, get the line-length for this line
-            bounds_per_line = map(self.get_line_lengths, parameter_rows)
-            block_line_length = min(map(select_second_element, bounds_per_line))
+            bounds_per_line = list(map(self.get_line_lengths, parameter_rows))
+            block_line_length = min(list(map(select_second_element, bounds_per_line)))
 
             def get_block_glyphs(g):
                 return g[ self.block_glyph_index : self.block_glyph_index + block_line_length ]
 
             # Then layout the line with this length
-            block_glyphs = map(get_block_glyphs, self.glyphs)
+            block_glyphs = list(map(get_block_glyphs, self.glyphs))
 
 
             for i, ((font_index, master), point_size) in parameter_rows:
