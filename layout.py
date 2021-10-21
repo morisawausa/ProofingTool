@@ -279,14 +279,16 @@ class OCCProofingWaterfallLayout(OCCProofingLayout):
             __stats.sort_stats('cumulative').print_stats()
 
 
-    def get_line_heights(self, (line_index, ((font_index, master), point_size))):
+    def get_line_heights(self, data):
+        line_index, ((font_index, master), point_size) = data
         u_to_px = self.get_scalefactor(point_size)
         height_px = (master.ascender - master.descender) * u_to_px + self.line_padding
 
         return line_index, height_px
 
 
-    def get_line_lengths(self, (line_index, ((font_index, master), point_size))):
+    def get_line_lengths(self, data):
+        line_index, ((font_index, master), point_size) = data
 
         u_to_px = self.get_scalefactor(point_size)
         advance_px = self.parameters['padding']['left']
