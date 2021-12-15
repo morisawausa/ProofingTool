@@ -8,7 +8,7 @@ import json
 from collections import OrderedDict
 
 from GlyphsApp import *
-from AppKit import *
+# from AppKit import *
 from vanilla import *
 from vanilla.dialogs import putFile, getFile
 from GlyphsApp.UI import *

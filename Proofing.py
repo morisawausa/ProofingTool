@@ -10,7 +10,7 @@ Starts the proofing environment
 
 from timeit import default_timer
 
-from AppKit import *
+# from AppKit import *
 from vanilla import *
 from vanilla.dialogs import putFile
 from GlyphsApp.UI import *
