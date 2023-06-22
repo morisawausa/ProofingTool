@@ -102,6 +102,8 @@ class OCCProofingTool:
         elif self.parameters['title'] != '' or self.parameters['footer'] != '':
             text = self.parameters['title'] + self.parameters['footer'] + ' - ' + text
 
+        #print('PROOF', proof)
+
         for i, page in enumerate(proof if preview else proof):
             _drawBotDrawingTool.newPage(self.width, self.height)
             _drawBotDrawingTool.fontSize(8)

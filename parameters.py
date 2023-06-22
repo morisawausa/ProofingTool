@@ -38,7 +38,7 @@ class OCCParametersView:
         self.saveProofCallback = saveProofCallback
         self.printProofCallback = printProofCallback
         self.templates = OCCTemplatesView()
-        self.instance_masters = list(map(lambda i: i.name, Glyphs.font.instances))
+        self.instances = list(map(lambda i: i.name, Glyphs.font.instances))
         self.interpolated_instances = {}
 
         self.outputPath = None
@@ -55,7 +55,7 @@ class OCCParametersView:
                 'line': 20,
                 'block': 20
             },
-            'masters': [],
+            'instances': [],
             'point_sizes': [],
             'aligned': False,
             'document': {'width': 11, 'height': 8.5},
@@ -112,19 +112,19 @@ class OCCParametersView:
         #
         # Edit View List
         #
-        I_MASTERS_LIST = self.instance_masters
-        M_MASTERS_LIST = list(map(lambda m: m.name, Glyphs.font.masters))
-        MASTERS_LIST = sorted(list(set(I_MASTERS_LIST + M_MASTERS_LIST)))
+        I_instances_LIST = self.instances
+        #M_instances_LIST = list(map(lambda m: m.name, Glyphs.font.instances))
+        instances_LIST = sorted(I_instances_LIST)
 
         self.group.parameters = Group(primaryGroupPosSize)
 
         self.group.parameters.list = List(
             (0, 0, -0, self.window_height * MAIN_PANEL_HEIGHT_FACTOR),
-            [{"Style": MASTERS_LIST[0], "Point Size": 72}],
+            [{"Style": instances_LIST[0], "Point Size": 72}],
             columnDescriptions=[
                 {
                     "title": "Style",
-                    "cell": PopUpButtonListCell(MASTERS_LIST),
+                    "cell": PopUpButtonListCell(instances_LIST),
                     "binding": "selectedValue"
                 },
                 {
@@ -415,7 +415,7 @@ class OCCParametersView:
 
         else:
             self.group.parameters.list.append({
-                "Style": self.instance_masters[0],
+                "Style": self.instances[0],
                 "Point Size": 24})
 
     def triggerRemoveSelectedFromParametersList(self, sender):
@@ -437,13 +437,13 @@ class OCCParametersView:
         glyphsChanged = glyphs[0] != self.parameters['glyphs'][0]
 
         layoutChanged = parameters['padding'] != self.parameters['padding']
-        mastersChanged = parameters['masters'] != self.parameters['masters']
+        instancesChanged = parameters['instances'] != self.parameters['instances']
         sizesChanged = parameters['point_sizes'] != self.parameters['point_sizes']
         titleChanged = parameters['title'] != self.parameters['title']
         footerChanged = parameters['footer'] != self.parameters['footer']
         modeChanged = parameters['mode'] != self.parameters['mode']
 
-        paramsChanged = layoutChanged or mastersChanged or sizesChanged or modeChanged
+        paramsChanged = layoutChanged or instancesChanged or sizesChanged or modeChanged
         metadataChanged = titleChanged or footerChanged
 
         return glyphsChanged or paramsChanged or metadataChanged
@@ -488,7 +488,7 @@ class OCCParametersView:
 
     def getParameterSet(self):
 
-        masters = []
+        instances = []
         point_sizes = []
 
         pre_interpolation = default_timer()
@@ -498,37 +498,25 @@ class OCCParametersView:
             size_clean = re.sub('[^0-9]', '', str(size_dirty))
             size = tryParseInt(size_clean, 72)
 
-            master = []
+            styles = []
 
-            if len(self.instance_masters) > 0:
-                # master = filter(lambda i: i.masters[0].name == item['Style'], self.instance_masters) # NOTE: Changed from .masters to .instances
+            if len(self.instances) > 0:
+                # styles = filter(lambda i: i.instances[0].name == item['Style'], self.instances) # NOTE: Changed from .instances to .instances
+                styles = list(filter(lambda i: i == item['Style'], self.instances))
 
-                master = list(filter(lambda i: i == item['Style'], self.instance_masters))
+                if len(styles) > 0:
+                    style_name = styles[0]
+                    instances.append( style_name )
+                    if style_name not in self.interpolated_instances:
+                #        # we haven't interpolated this instance yet.
+                #        # interpolate the instance and store it in our shared instance cache for future use.
+                        instance = list(filter(lambda i: i.name == style_name, Glyphs.font.instances))
 
-                if len(master) > 0:
-                    master_name = master[0]
-
-                    if master_name not in self.interpolated_instances:
-                        # we haven't interpolated this instance yet.
-                        # interpolate the instance and store it in our shared instance cache for future use.
-                        instance = list(filter(lambda i: i.name == master_name, Glyphs.font.instances))
-
-                        # NOTE(nic): trying out `interpolatedFontProxy` here instead of `interpolatedFont`.
-                        # accoding to [the docs](https://docu.glyphsapp.com/#GSInstance.interpolatedFontProxy),
-                        # iterpolatedFontProxy interpolates glyphs on demand, rather than interpolating the entire instance.
-                        # This means we do work proportional to the glyphs in the proof, rather than in the font.
-                        self.interpolated_instances[master_name] = instance[0].interpolatedFontProxy
-
-                    master = [ self.interpolated_instances[master_name].masters[0] ]
-
-
-            if len(master) == 0:
-                # we didn't find any matching instance names, look up the name to see
-                # if it occurs in the masters.
-                master = list(filter(lambda m: m.name == item['Style'], Glyphs.font.masters))
-
-            if len(master) == 1:
-                masters.append([0, master[0]])
+                #        # NOTE(nic): trying out `interpolatedFontProxy` here instead of `interpolatedFont`.
+                #        # accoding to [the docs](https://docu.glyphsapp.com/#GSInstance.interpolatedFontProxy),
+                #        # iterpolatedFontProxy interpolates glyphs on demand, rather than interpolating the entire instance.
+                #        # This means we do work proportional to the glyphs in the proof, rather than in the font.
+                        self.interpolated_instances[style_name] = instance[0].interpolatedFont             
                 point_sizes.append(size)
 
             else:
@@ -545,8 +533,8 @@ class OCCParametersView:
                 'line': tryParseInt(self.group.margins.line.get(), self.parameters['padding']['line']),
                 'block': tryParseInt(self.group.margins.block.get(), self.parameters['padding']['block'])
             },
-            'masters': masters,
-            'instances': self.interpolated_instances,
+            'instances': instances,
+            'exports': self.interpolated_instances,
             'point_sizes': list(map(int, point_sizes)),
             'aligned': True,
             'document': {'width': 11, 'height': 8.5},
@@ -554,5 +542,5 @@ class OCCParametersView:
             'footer': self.group.output.prooffooter.get(),
             'mode': self.proof_mode
         }
-
+        print('PARAMS', parameters)
         return parameters

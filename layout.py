@@ -11,7 +11,7 @@ class OCCProofingLayout(object):
     def __init__(self, glyphs, parameters, width, height, upm):
         self.width = width
         self.height = height
-        self.glyphs = [ list(filter(lambda g: g.name is not None, glyphs[0])) ]
+        self.glyphs = list(filter(lambda g: g.name is not None, glyphs[0]))
         self.parameters = parameters
 
         # 0. Determine page constraints based on document size in inches.
@@ -25,20 +25,11 @@ class OCCProofingLayout(object):
         self.pages = []
 
 
-    def get_layer(self, glyph, master):
-        if master.name in glyph.layers:
-            # print('master style')
-            orphan_layer = glyph.layers[master.name] # using instances, so there's only one layer
-        else:
-            # print('non-master style')
-            # instance_master = filter(lambda i: i.masters[0].name == master.name, self.parameters['instances'])
-            instance_master = self.parameters['instances'][ master.name ]
-            # print(instance_master)
-            # instance_master = instance_master[0]
-            # print(instance_master)
-            orphan_layer = instance_master.glyphs[glyph.name].layers[0]
-
-        return orphan_layer
+    def get_layer(self, glyph, style_name):
+        interpolatedFont = self.parameters['exports'][style_name]
+        layerid = interpolatedFont.masters[0].id
+        layer = interpolatedFont.glyphs[glyph].layers[layerid]
+        return layer
 
 
     def get_scalefactor(self, pts_per_em):
@@ -58,10 +49,10 @@ class OCCProofingParagraphLayout(OCCProofingLayout):
 
         page_index = 0
         pages = [[]]
-
+        
         # 1. determine which parameter group takes defines the shortest line.
         #    and define the block size.
-        parameter_rows = list(enumerate(zip(parameters['masters'], parameters['point_sizes'])))
+        parameter_rows = list(enumerate(zip(parameters['instances'], parameters['point_sizes'])))
         # If we don't have any rendering criteria, we can't render. Fail early.
 
         if len(parameter_rows) == 0:
@@ -70,18 +61,17 @@ class OCCProofingParagraphLayout(OCCProofingLayout):
 
         page_origin_x_px = parameters['padding']['left']
         available_space_x_px = self.width - self.parameters['padding']['right']
-
         page_origin_y_px = self.height - parameters['padding']['top']
 
 
         block_advance_position_x_px = 0
         block_advance_position_y_px = 0
 
-        for i, (master, point_size) in parameter_rows:
-            master_index, master_data = master
+        for i, (style_name, point_size) in parameter_rows:
+            master = self.parameters['exports'][style_name].masters[0] 
             # each of these represents a paragraph.
             u_to_px = self.get_scalefactor(point_size)
-            height_px = (master_data.ascender - master_data.descender) * u_to_px + self.line_padding
+            height_px = (master.ascender - master.descender) * u_to_px + self.line_padding
 
             block_advance_position_x_px = 0
             block_advance_position_y_px += height_px
@@ -90,7 +80,7 @@ class OCCProofingParagraphLayout(OCCProofingLayout):
             backtracked = False
             i = 0
 
-            while i < len(self.glyphs[0]):
+            while i < len(self.glyphs):
 
                 if page_origin_y_px - block_advance_position_y_px < self.parameters['padding']['bottom']:
                     # we've fallen off the end of the page, time to add another one.
@@ -107,9 +97,10 @@ class OCCProofingParagraphLayout(OCCProofingLayout):
                     page_start_index = 0
                     page_index += 1
 
-                glyph = self.glyphs[0][i]
-                layer = self.get_layer(glyph, master[1])
+                glyph_name = self.glyphs[i].name
+                layer = self.get_layer(glyph_name, style_name)
                 orphan_layer = layer.copyDecomposedLayer()
+                orphan_layer.parent = layer.parent
                 width_px = (orphan_layer.width * u_to_px)
 
                 # if this glyph would knock us over the end of the line,
@@ -163,7 +154,7 @@ class OCCProofingWaterfallLayout(OCCProofingLayout):
             __profile = cProfile.Profile()
             __profile.enable()
 
-        parameter_rows = list(enumerate(zip(parameters['masters'], parameters['point_sizes'])))
+        parameter_rows = list(enumerate(zip(parameters['instances'], parameters['point_sizes'])))
         # If we don't have any rendering criteria, we can't render. Fail early.
         if len(parameter_rows) == 0:
             self.pages = []
@@ -201,7 +192,7 @@ class OCCProofingWaterfallLayout(OCCProofingLayout):
             return a[1]
 
 
-        while len(self.glyphs[0][self.block_glyph_index:]) > 0:
+        while len(self.glyphs[self.block_glyph_index:]) > 0:
 
             # If we have a block-size that fits onto a single page, check for when a block runs off the page,
             # and advance it to the next page.
@@ -221,14 +212,15 @@ class OCCProofingWaterfallLayout(OCCProofingLayout):
             bounds_per_line = list(map(self.get_line_lengths, parameter_rows))
             block_line_length = min(list(map(select_second_element, bounds_per_line)))
 
-            def get_block_glyphs(g):
-                return g[ self.block_glyph_index : self.block_glyph_index + block_line_length ]
+            # def get_block_glyphs(g):
+            #     print(g, self.block_glyph_index, block_line_length)
+            #     return g[ self.block_glyph_index : self.block_glyph_index + block_line_length ]
 
             # Then layout the line with this length
-            block_glyphs = list(map(get_block_glyphs, self.glyphs))
+            block_glyphs = list( self.glyphs[ self.block_glyph_index : self.block_glyph_index + block_line_length ])
 
 
-            for i, ((font_index, master), point_size) in parameter_rows:
+            for i, (style_name, point_size) in parameter_rows:
                 # print('master = %d' % (i + 1))
                 # print('page = %d' % (page_index + 1))
                 # print('origin = %d\n' % (block_origin_y_px - block_advance_position_y_px))
@@ -236,10 +228,12 @@ class OCCProofingWaterfallLayout(OCCProofingLayout):
                 # Layout the current line.
                 u_to_px = self.get_scalefactor(point_size)
 
-                for glyph in block_glyphs[font_index]:
+                for glyph in block_glyphs:
 
-                    layer = self.get_layer(glyph, master)
+                    layer = self.get_layer(glyph.name, style_name)
+                    # orphan_layer = layer.copyDecomposedLayer()
                     orphan_layer = layer.copyDecomposedLayer()
+                    orphan_layer.parent = layer.parent
 
                     transform = (
                         u_to_px, # x-axis scale factor,
@@ -280,26 +274,27 @@ class OCCProofingWaterfallLayout(OCCProofingLayout):
 
 
     def get_line_heights(self, data):
-        line_index, ((font_index, master), point_size) = data
+        line_index, (style_name, point_size) = data
         u_to_px = self.get_scalefactor(point_size)
+        master = self.parameters['exports'][style_name].masters[0] 
+        #GSinterpolatedFont outputs only one master and one instance.        
         height_px = (master.ascender - master.descender) * u_to_px + self.line_padding
 
         return line_index, height_px
 
 
     def get_line_lengths(self, data):
-        line_index, ((font_index, master), point_size) = data
+        # line_index, ((font_index, style_name), point_size) = data
+        line_index, (style_name, point_size) = data
 
         u_to_px = self.get_scalefactor(point_size)
         advance_px = self.parameters['padding']['left']
         glyph_count = 0
         available_space_px = self.width - self.parameters['padding']['right']
 
-        while advance_px < available_space_px and self.block_glyph_index + glyph_count < len(self.glyphs[font_index]):
-            glyph = self.glyphs[font_index][self.block_glyph_index + glyph_count]
-
-            layer = self.get_layer(glyph, master)
-
+        while advance_px < available_space_px and self.block_glyph_index + glyph_count < len(self.glyphs):
+            glyph_name = self.glyphs[self.block_glyph_index + glyph_count].name
+            layer = self.get_layer( glyph_name, style_name)
             width_px = layer.width * u_to_px
             advance_px += width_px
             glyph_count += 1
