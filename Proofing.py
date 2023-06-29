@@ -103,6 +103,7 @@ class OCCProofingTool:
             text = self.parameters['title'] + self.parameters['footer'] + ' - ' + text
 
         #print('PROOF', proof)
+        #print('CANVAS', self.width, self.height)
 
         for i, page in enumerate(proof if preview else proof):
             _drawBotDrawingTool.newPage(self.width, self.height)
@@ -113,7 +114,10 @@ class OCCProofingTool:
             _drawBotDrawingTool.fill(0,0,0)
 
             for layer in page:
-                _drawBotDrawingTool.drawPath(layer.completeBezierPath)
+                path = _drawBotDrawingTool.BezierPath( layer['path'].completeBezierPath )
+                path.scale(layer['scale'])
+                path.translate( layer['x'], layer['y'] )
+                _drawBotDrawingTool.drawPath(path)
 
             _drawBotDrawingTool.fill(0.5, 0.5, 0.5)
 

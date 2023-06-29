@@ -2,9 +2,9 @@
 
 This Glyphs Plugin helps you output proofs directly from Glyphs. The plugin focuses on generating form comparison proofs like waterfalls, rather than proofs that help you proof typesetting and opentype features. These capabilities may be added at some point in the future.
 
-For a items on our roadmap, look at [this document](https://docs.google.com/document/d/1z0BD3hXVslzn5acJ_5KomH_WkwnMeQ9gEiJh3z79fHE/edit).
+For a items on our roadmap and a changelog, look at [this document](https://docs.google.com/document/d/1z0BD3hXVslzn5acJ_5KomH_WkwnMeQ9gEiJh3z79fHE/edit).
 
-**⚠️ NOTE: ⚠️** This application was recently converted to render instances, rather than masters. If you don't have any instances in your font, the tool *might* not work.
+**⚠️ NOTE: ⚠️** This application was recently converted to render instances. You must have `exports` setup in your Font Information for the tool to work.
 
 **⚠️ NOTE: ⚠️** Using instance geometry requires instances to be re-interpolated when the script starts up. Because of this, if you have a lot of instances, starting the proofing tool can take some time as instances are reinterpolated. At some point I'll optimize this so that it only reinterpolates the instances you need.
 

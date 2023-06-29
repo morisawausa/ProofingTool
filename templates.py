@@ -6,7 +6,8 @@ TEMPLATE_DIRECTORY = 'data'
 
 
 class OCCTemplatesView():
-	def __init__(self):
+
+	def __init__(self ):
 		self.data = self.parseTemplateDirectory(TEMPLATE_DIRECTORY)
 
 	def parseTemplateDirectory(self, directory):
@@ -40,6 +41,10 @@ class OCCTemplatesView():
 
 
 	def validateAndFormatTemplate(self, template_name, template):
+		instance_names = []
+		for instance in Glyphs.font.instances:
+		    if instance.type == 0: #check for static instances, 0 is static, 1 is variable
+		       instance_names.append(instance.name)
 
 		if 'name' in template:
 			name = template['name']
@@ -49,9 +54,10 @@ class OCCTemplatesView():
 
 		default_style = None
 		default_size = 24
-		print( 'TEMPLATE', template)
+
 		if 'style' in template:
-			if len(list(filter(lambda i: i.name == template['style'], Glyphs.font.instances))) == 1:
+			# if len(list(filter(lambda i: i.name == template['style'], Glyphs.font.instance_names))) == 1:
+			if template['style'] in instance_names:
 				default_style = template['style']
 			else:
 				print("[%s]\tthe template specifies a default style (%s), but it's not a style of the current typeface." % (template_name, template['style']))

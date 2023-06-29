@@ -4,6 +4,7 @@ from math import ceil
 from multiprocessing import Pool
 import cProfile
 from pstats import Stats
+from AppKit import NSAffineTransform
 
 PROFILE = False
 
@@ -27,8 +28,8 @@ class OCCProofingLayout(object):
 
     def get_layer(self, glyph, style_name):
         interpolatedFont = self.parameters['exports'][style_name]
-        layerid = interpolatedFont.masters[0].id
-        layer = interpolatedFont.glyphs[glyph].layers[layerid]
+        interpolatedGlyph = interpolatedFont.glyphs[glyph]
+        layer = interpolatedGlyph.layers[interpolatedFont.masters[0].id]
         return layer
 
 
@@ -99,7 +100,7 @@ class OCCProofingParagraphLayout(OCCProofingLayout):
 
                 glyph_name = self.glyphs[i].name
                 layer = self.get_layer(glyph_name, style_name)
-                orphan_layer = layer.copyDecomposedLayer()
+                orphan_layer = layer.copy()
                 orphan_layer.parent = layer.parent
                 width_px = (orphan_layer.width * u_to_px)
 
@@ -110,16 +111,14 @@ class OCCProofingParagraphLayout(OCCProofingLayout):
                     block_advance_position_x_px = 0
                     continue
 
-                transform = (
-                    u_to_px, # x-axis scale factor,
-                    0.0, # y-axis skew factor,
-                    0.0, # x-axis skew factor,
-                    u_to_px, # y-axis scale factor,
-                    page_origin_x_px + block_advance_position_x_px, # x-axis translation
-                    page_origin_y_px - block_advance_position_y_px  # y-axis translation
-                )
-                orphan_layer.applyTransform(transform)
-                pages[page_index].append(orphan_layer)
+                draw = {
+                    'path': orphan_layer,
+                    'scale': u_to_px,
+                    'x': page_origin_x_px + block_advance_position_x_px,
+                    'y': page_origin_y_px - block_advance_position_y_px
+                }
+
+                pages[page_index].append(draw)
                 block_advance_position_x_px += width_px
 
                 # apply a kerning transform here.
@@ -231,20 +230,17 @@ class OCCProofingWaterfallLayout(OCCProofingLayout):
                 for glyph in block_glyphs:
 
                     layer = self.get_layer(glyph.name, style_name)
-                    # orphan_layer = layer.copyDecomposedLayer()
-                    orphan_layer = layer.copyDecomposedLayer()
+                    orphan_layer = layer.copy()            
                     orphan_layer.parent = layer.parent
+                    #print(orphan_layer)
+                    draw = {
+                        'path': orphan_layer,
+                        'scale': u_to_px,
+                        'x': block_origin_x_px + block_advance_position_x_px,
+                        'y': block_origin_y_px - block_advance_position_y_px
+                    }
 
-                    transform = (
-                        u_to_px, # x-axis scale factor,
-                        0.0, # y-axis skew factor,
-                        0.0, # x-axis skew factor,
-                        u_to_px, # y-axis scale factor,
-                        block_origin_x_px + block_advance_position_x_px, # x-axis translation
-                        block_origin_y_px - block_advance_position_y_px  # y-axis translation
-                    )
-                    orphan_layer.applyTransform(transform)
-                    pages[page_index].append(orphan_layer)
+                    pages[page_index].append(draw)
                     block_advance_position_x_px += (orphan_layer.width * u_to_px)
 
 

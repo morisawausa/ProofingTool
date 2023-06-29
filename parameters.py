@@ -37,8 +37,14 @@ class OCCParametersView:
         self.parametersChangedCallback = parametersChangedCallback
         self.saveProofCallback = saveProofCallback
         self.printProofCallback = printProofCallback
+        
+        self.instances = {}
+        for instance in Glyphs.font.instances:
+            if instance.type == 0: #check for static instances, 0 is static, 1 is variable
+                self.instances[instance.name] = instance
+
         self.templates = OCCTemplatesView()
-        self.instances = list(map(lambda i: i.name, Glyphs.font.instances))
+
         self.interpolated_instances = {}
 
         self.outputPath = None
@@ -502,21 +508,18 @@ class OCCParametersView:
 
             if len(self.instances) > 0:
                 # styles = filter(lambda i: i.instances[0].name == item['Style'], self.instances) # NOTE: Changed from .instances to .instances
-                styles = list(filter(lambda i: i == item['Style'], self.instances))
-
-                if len(styles) > 0:
-                    style_name = styles[0]
+                if item['Style'] in self.instances.keys():
+                    style_name = item['Style']
                     instances.append( style_name )
                     if style_name not in self.interpolated_instances:
-                #        # we haven't interpolated this instance yet.
-                #        # interpolate the instance and store it in our shared instance cache for future use.
-                        instance = list(filter(lambda i: i.name == style_name, Glyphs.font.instances))
-
-                #        # NOTE(nic): trying out `interpolatedFontProxy` here instead of `interpolatedFont`.
-                #        # accoding to [the docs](https://docu.glyphsapp.com/#GSInstance.interpolatedFontProxy),
-                #        # iterpolatedFontProxy interpolates glyphs on demand, rather than interpolating the entire instance.
-                #        # This means we do work proportional to the glyphs in the proof, rather than in the font.
-                        self.interpolated_instances[style_name] = instance[0].interpolatedFont             
+                        # we haven't interpolated this instance yet.
+                        # interpolate the instance and store it in our shared instance cache for future use.
+                        instance = self.instances[style_name]
+                        # NOTE(nic): trying out `interpolatedFontProxy` here instead of `interpolatedFont`.
+                        # accoding to [the docs](https://docu.glyphsapp.com/#GSInstance.interpolatedFontProxy),
+                        # iterpolatedFontProxy interpolates glyphs on demand, rather than interpolating the entire instance.
+                        # This means we do work proportional to the glyphs in the proof, rather than in the font.
+                        self.interpolated_instances[style_name] = instance.interpolatedFont            
                 point_sizes.append(size)
 
             else:
@@ -542,5 +545,5 @@ class OCCParametersView:
             'footer': self.group.output.prooffooter.get(),
             'mode': self.proof_mode
         }
-        print('PARAMS', parameters)
+        #print('PARAMS', parameters)
         return parameters
