@@ -519,12 +519,13 @@ class OCCParametersView:
                         # accoding to [the docs](https://docu.glyphsapp.com/#GSInstance.interpolatedFontProxy),
                         # iterpolatedFontProxy interpolates glyphs on demand, rather than interpolating the entire instance.
                         # This means we do work proportional to the glyphs in the proof, rather than in the font.
-                        self.interpolated_instances[style_name] = instance.interpolatedFont            
+                        self.interpolated_instances[style_name] = instance.interpolatedFontProxy            
                 point_sizes.append(size)
 
             else:
-                print("[unknown style] couldn't find a unique style matching '%s'; skipping." % item['Style'] )
+                print("[unknown style] couldn’t find a unique style matching '%s'; skipping." % item['Style'] )
 
+        print( self.interpolated_instances )       
         print('[profile] time to interpolate: %.03f seconds' % (default_timer() - pre_interpolation))
 
         parameters = {
