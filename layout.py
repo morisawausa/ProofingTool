@@ -28,9 +28,13 @@ class OCCProofingLayout(object):
 
     def get_layer(self, glyph, style_name):
         interpolatedFont = self.parameters['exports'][style_name]
-        interpolatedGlyph = interpolatedFont.glyphs[glyph]
-        layer = interpolatedGlyph.layers[interpolatedFont.masters[0].id]
-        return layer
+        if glyph in interpolatedFont.glyphs:
+            interpolatedGlyph = interpolatedFont.glyphs[glyph]
+            layer = interpolatedGlyph.layers[interpolatedFont.masters[0].id]
+            return layer
+        else:
+            print( glyph, "does not exist in the instance" )
+            
 
 
     def get_scalefactor(self, pts_per_em):
