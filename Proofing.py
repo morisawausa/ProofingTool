@@ -25,7 +25,7 @@ from parameters import OCCParametersView
 
 TEXT_PLACEMENT = 20
 WINDOW_WIDTH = 500 # In PIXELS
-TIMING = True
+TIMING = False
 
 GLYPHS = list(filter(lambda g: g.subCategory == 'Uppercase' and g.script == 'latin',  Glyphs.font.glyphs))
 
@@ -134,11 +134,10 @@ class OCCProofingTool:
         pdfDocument = context.getNSPDFDocument()
         self.drawView.setPDFDocument(pdfDocument)
 
-        post_render_proof = default_timer()
-
-        print('[profile] time to compile: %.03f seconds' % (post_generate_proof - pre_generate_proof))
-        print('[profile] time to render: %.03f seconds' % (post_render_proof - pre_render_proof))
-        print('[profile] done.\n')
+        # post_render_proof = default_timer()
+        # print('[profile] time to compile: %.03f seconds' % (post_generate_proof - pre_generate_proof))
+        # print('[profile] time to render: %.03f seconds' % (post_render_proof - pre_render_proof))
+        # print('[profile] done.\n')
 
 
 OCCProofingTool()

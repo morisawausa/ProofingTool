@@ -1,9 +1,9 @@
 {
   "name": "Basic Letters",
   "style": "Regular",
-  "size": 50,
+  "size": 48,
   "lines": [
-    {"style": "Regular", "size": 50}
+    {"style": "Regular", "size": 48}
   ],
   "proof": {
     "margins": {
@@ -13,8 +13,8 @@
       "bottom": 50
     },
     "padding": {
-      "block": 10,
-      "line": 20
+      "line": 10,
+      "block": 20      
     },
     "mode": "waterfall"
   },

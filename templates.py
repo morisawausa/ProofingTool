@@ -9,8 +9,23 @@ class OCCTemplatesView( ):
 	def __init__(self):
 		prefs = OCCTemplatePreferences()
 		self.data = self.parseTemplateDirectory('data')
+		self.instanceList = self.getInstanceList()
 		# directory = prefs.getDirectoryPath()
 		# self.data = self.parseTemplateDirectory(directory)
+
+	def getInstanceList(self):
+		instances = {}
+		for instance in Glyphs.font.instances:
+			if instance.type == 0: #check for static instances, 0 is static, 1 is variable
+				name = instance.name
+				if instance.preferredFamilyName:
+					name = instance.preferredFamilyName
+					if instance.preferredSubfamilyName:
+						name += " " + instance.preferredSubfamilyName
+					else:
+						name += " " + instance.name
+				instances[name] = instance
+		return instances
 
 	def parseTemplateDirectory(self, directory):
 		if not os.path.isdir(directory): return []
@@ -43,10 +58,8 @@ class OCCTemplatesView( ):
 
 
 	def validateAndFormatTemplate(self, template_name, template):
-		instance_names = []
-		for instance in Glyphs.font.instances:
-		    if instance.type == 0: #check for static instances, 0 is static, 1 is variable
-		       instance_names.append(instance.name)
+		instances = self.getInstanceList()
+		instance_names = instances.keys()
 
 		if 'name' in template:
 			name = template['name']
@@ -62,7 +75,7 @@ class OCCTemplatesView( ):
 			if template['style'] in instance_names:
 				default_style = template['style']
 			else:
-				print("[%s]\tthe template specifies a default style (%s), but it's not a style of the current typeface." % (template_name, template['style']))
+				print("[%s]\tthe template specifies a default style (%s), but it’s not a style of the current typeface." % (template_name, template['style']))
 		else:
 			print("[%s]\t the template does not specify a default style." % template_name)
 
@@ -70,7 +83,7 @@ class OCCTemplatesView( ):
 			if isinstance(template['size'], int):
 				default_size = template['size']
 			else:
-				print("[%s]\tthe proof specifies a default size (%s), but it's not a whole number." % (template_name, template['size']))
+				print("[%s]\tthe proof specifies a default size (%s), but it’s not a whole number." % (template_name, template['size']))
 		else:
 			print("[%s]\tthe template does not specify a default size." % template_name)
 
@@ -97,12 +110,12 @@ class OCCTemplatesView( ):
 						print('[%s]\tline %i has no style specified and no default style is set.' % (template_name, linenum + 1))
 						continue
 
-				if len(list(filter(lambda i: i.name == line['style'], Glyphs.font.instances))) != 1:
+				if len(list(filter(lambda i: i == line['style'], instances))) != 1:
 					if default_style is not None:
-						print('[%s]\tline %i specifies "%s," which is not an instance in this typeface. Replacing with the default "%s."' % (template_name, linenum + 1, line['style'], default_style))
+						print(u'[%s]\t⚠️ line %i specifies "%s," which is not an instance in this typeface. Replacing with the default "%s."' % (template_name, linenum + 1, line['style'], default_style))
 						line['style'] = default_style
 					else:
-						print('[%s]\tline %i specifies "%s," which is not an instance in this typeface. Since no valid default style is specified, I\'m skipping the line.' % (template_name, linenum + 1, line['style']))
+						print(u'[%s]\t⚠️ line %i specifies "%s," which is not an instance in this typeface. Since no valid default style is specified, we’re skipping the line.' % (template_name, linenum + 1, line['style']))
 						continue
 
 				if not ('size' in line):
@@ -146,7 +159,6 @@ class OCCTemplatesView( ):
 
 			if 'mode' in template['proof']:
 				proof['mode'] = template['proof']['mode']
-
 
 		else:
 			print('[%s]\t"%s" does not specify margin and padding information. Setting defaults. "' % (template_name, template_name))
