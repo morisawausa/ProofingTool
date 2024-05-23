@@ -10,7 +10,7 @@ For a items on our roadmap and a changelog, look at [this document](https://docs
 
 ## Using the Tool
 
-This tool can be used to format and output paragraphs and waterfalls of text set in an in-progress typeface from directly inside of Glyphs 2. It should help you quickly format for proofing use without needing to export font binaries, deal with font caching, or open InDesign. We made this tool with the hope that it might reduce the annoyance of producing proofs for in-progress work.
+This tool can be used to format and output paragraphs and waterfalls of text set in an in-progress typeface from directly inside of Glyphs 3. It should help you quickly format for proofing use without needing to export font binaries, deal with font caching, or open InDesign. We made this tool with the hope that it might reduce the annoyance of producing proofs for in-progress work.
 
 The proofing tool is intendended for comparing runs of text in a typeface across styles and sizes. It can produce two different kinds of proofs: Waterfall proofs and paragraph proofs.
 
