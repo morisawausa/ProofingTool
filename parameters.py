@@ -236,7 +236,7 @@ class OCCParametersView:
 		X_POS = ELEMENT_PADDING
 		self.group.edit.layout.paddinglabel = TextBox((X_POS, BOX_POS+5, WIDTH_TEXTBOX, HEIGHT_LABEL), "Padding", sizeStyle="small")
 		X_POS += WIDTH_TEXTBOX + ELEMENT_PADDING
-		self.group.edit.layout.linelabel = TextBox((X_POS, BOX_POS+5, WIDTH_LABEL, HEIGHT_LABEL), "Line", sizeStyle="mini")
+		self.group.edit.layout.linelabel = TextBox((X_POS, BOX_POS+5, WIDTH_LABEL, HEIGHT_LABEL), "Lineheight", sizeStyle="mini")
 		X_POS += WIDTH_LABEL
 		self.group.edit.layout.line = EditText((X_POS, BOX_POS, WIDTH_INPUT_NO, HEIGHT_LABEL), self.parameters['padding']['line'], sizeStyle="small", continuous=False, callback=self.triggerParametersListEdit)
 		X_POS += WIDTH_INPUT_NO + ELEMENT_PADDING
@@ -298,22 +298,16 @@ class OCCParametersView:
 		if self.printProofCallback is not None:
 			self.printProofCallback()
 
-	def saveProof(self, sender):
-		if self.outputPath is not None:
-			self.saveProofCallback(self.outputPath)
 
 	def saveProofAs(self, sender):
 		name = self.group.templates.proofname.get()
 		name = name + '.pdf' if name != '' else 'Untitled.pdf'
-
 		result = putFile(
 			title="Save Proof",
 			messageText="Save Proof As...",
 			fileName=name)
-
 		if self.saveProofCallback is not None and result is not None:
 			self.outputPath = result
-			self.group.templates.saveproof.enable(True)
 			self.saveProofCallback(result)
 
 
