@@ -1,4 +1,4 @@
-#MenuTitle: Modular Proof
+#MenuTitle: OCC Proofing Tool
 # -*- coding: utf-8 -*-
 __doc__="""
 Starts the proofing environment

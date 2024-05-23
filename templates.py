@@ -2,13 +2,15 @@ import os
 import json
 from GlyphsApp import *
 
-TEMPLATE_DIRECTORY = 'data'
+from preferences import OCCTemplatePreferences
 
+class OCCTemplatesView( ):
 
-class OCCTemplatesView():
-
-	def __init__(self ):
-		self.data = self.parseTemplateDirectory(TEMPLATE_DIRECTORY)
+	def __init__(self):
+		prefs = OCCTemplatePreferences()
+		self.data = self.parseTemplateDirectory('data')
+		# directory = prefs.getDirectoryPath()
+		# self.data = self.parseTemplateDirectory(directory)
 
 	def parseTemplateDirectory(self, directory):
 		if not os.path.isdir(directory): return []

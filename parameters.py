@@ -10,17 +10,19 @@ from collections import OrderedDict
 from GlyphsApp import *
 # from AppKit import *
 from vanilla import *
-from vanilla.dialogs import putFile, getFile
+from vanilla.dialogs import putFile, getFile, getFolder
 from GlyphsApp.UI import *
 
 from templates import OCCTemplatesView
+from preferences import OCCTemplatePreferences
 
-ELEMENT_PADDING = 5
+ELEMENT_PADDING = 8
 MAIN_PANEL_HEIGHT_FACTOR = 0.5
 LINE_POS = 10
 LINE_HEIGHT = 30
 HEIGHT_DIVIDER = 40
 HEIGHT_BUTTON = 30
+HEIGHT_SQBUTTON = 40
 HEIGHT_LABEL = 20
 WIDTH_LABEL = 30
 WIDTH_TEXTBOX = 60
@@ -51,6 +53,9 @@ class OCCParametersView:
 			if instance.type == 0: #check for static instances, 0 is static, 1 is variable
 				self.instances[instance.name] = instance
 
+		self.preferences = OCCTemplatePreferences()
+		self.rootFolder = self.preferences.getDirectoryPath()
+
 		self.templates = OCCTemplatesView()
 
 		self.interpolated_instances = {}
@@ -58,6 +63,9 @@ class OCCParametersView:
 		self.outputPath = None
 
 		self.glyphs = list(filter(lambda g: g.category == 'Letter' and g.subCategory == 'Uppercase' and g.script == 'latin', Glyphs.font.glyphs))
+		self.templateGlyphs = []
+
+		print('init glyphs', self.glyphs)
 
 		self.proof_mode = 'waterfall'
 		self.parameters = {
@@ -70,12 +78,14 @@ class OCCParametersView:
 				'block': 20
 			},
 			'instances': [],
+			'exports': [],
 			'point_sizes': [],
 			'aligned': False,
 			'document': {'width': 11, 'height': 8.5},
 			'title': '',
 			'footer': '',
 			'mode': 'waterfall',
+			'reinterpolate': False,
 			'glyphs': [[]]
 		}
 
@@ -100,6 +110,7 @@ class OCCParametersView:
 
 		WIDTH_FULL = windowSize[2]
 		WIDTH_HALF = windowSize[2]/2 - ELEMENT_PADDING/2
+		WIDTH_THIRD = windowSize[2]/3 - ELEMENT_PADDING
 
 
 		#
@@ -120,26 +131,40 @@ class OCCParametersView:
 		)
 
 		self.group.templates.openTemplate = Button(
-			(0, self.window_height * MAIN_PANEL_HEIGHT_FACTOR, WIDTH_HALF, HEIGHT_BUTTON), "Open Template",
+			(0, self.window_height * MAIN_PANEL_HEIGHT_FACTOR, WIDTH_HALF, HEIGHT_BUTTON), "Open Template(s)",
 			callback=self.triggerOpenTemplate)
 
-		self.group.templates.loadTemplate = Button(
-			(WIDTH_HALF + ELEMENT_PADDING, self.window_height * MAIN_PANEL_HEIGHT_FACTOR, WIDTH_HALF, HEIGHT_BUTTON), "Save Proof as Template",
-			callback=self.triggerSaveProofAsTemplate)
+		self.group.templates.openFolder = Button(
+			(WIDTH_HALF + ELEMENT_PADDING, self.window_height * MAIN_PANEL_HEIGHT_FACTOR, WIDTH_HALF, HEIGHT_BUTTON), "Open Folder",
+			callback=self.triggerLoadTemplateFolder)
 
+		LINE_POS = self.window_height * MAIN_PANEL_HEIGHT_FACTOR + HEIGHT_DIVIDER
+
+		self.group.templates.loadTemplate = SquareButton(
+		(0, LINE_POS, WIDTH_FULL, HEIGHT_SQBUTTON),
+		"Apply Selected Template", callback=self.triggerApplyTemplate, sizeStyle="regular" );
+
+	
 		#
 		# Output Settings
 		#
-		LINE_POS = self.window_height * MAIN_PANEL_HEIGHT_FACTOR + HEIGHT_BUTTON + LINE_HEIGHT
+		LINE_POS += HEIGHT_SQBUTTON + HEIGHT_DIVIDER
+
+		self.group.templates.outputdivider = HorizontalLine((0, LINE_POS, -0, 1))
 
 
-		self.group.templates.proofnamelabel = TextBox((0, LINE_POS,  WIDTH_TEXTBOX, HEIGHT_LABEL), "Filename", sizeStyle="small")
+		LINE_POS += LINE_HEIGHT
+
+		self.group.templates.proofnamelabel = TextBox((0, LINE_POS,  WIDTH_TEXTBOX, HEIGHT_LABEL), "Filename", sizeStyle="regular")
 		self.group.templates.proofname = EditText((ELEMENT_PADDING + WIDTH_TEXTBOX, LINE_POS, WIDTH_FULL - WIDTH_TEXTBOX - ELEMENT_PADDING, HEIGHT_LABEL), continuous=False, callback=self.triggerParametersListEdit)
 
 		LINE_POS += HEIGHT_DIVIDER
 
-		self.group.templates.saveproofas = SquareButton((0, LINE_POS, WIDTH_HALF, HEIGHT_BUTTON+20), "Save As PDF", callback=self.saveProofAs, sizeStyle="regular")
-		self.group.templates.printproof = SquareButton((WIDTH_HALF+ELEMENT_PADDING, LINE_POS, WIDTH_HALF, HEIGHT_BUTTON+20), "Print", callback=self.printProof, sizeStyle="regular")
+		self.group.templates.saveTemplate = SquareButton(
+			(0, LINE_POS, WIDTH_THIRD, HEIGHT_SQBUTTON), "Save Template",
+			callback=self.triggerSaveProofAsTemplate)
+		self.group.templates.saveproofas = SquareButton((WIDTH_THIRD+ELEMENT_PADDING, LINE_POS, WIDTH_THIRD, HEIGHT_SQBUTTON), "Save Proof PDF", callback=self.saveProofAs, sizeStyle="regular")
+		self.group.templates.printproof = SquareButton((WIDTH_THIRD*2+ELEMENT_PADDING*2, LINE_POS, WIDTH_THIRD, HEIGHT_SQBUTTON), "Print Proof", callback=self.printProof, sizeStyle="regular")
 
 		self.group.templates.show(False)
 
@@ -147,7 +172,6 @@ class OCCParametersView:
 		#
 		# EDIT TAB
 		#
-
 		self.group.edit = Group(windowSize)
 		LINE_POS = 0
 
@@ -171,7 +195,7 @@ class OCCParametersView:
 					"title": "Point Size"
 				}
 			],
-			editCallback=self.triggerParametersListEdit,
+			selectionCallback=self.triggerInstanceListEdit,
 			drawFocusRing=False,
 			allowsSorting=False,
 			allowsEmptySelection=True,
@@ -181,11 +205,11 @@ class OCCParametersView:
 		LINE_POS += self.window_height * MAIN_PANEL_HEIGHT_FACTOR
 
 		self.group.edit.addRow = Button(
-			(0, LINE_POS - HEIGHT_BUTTON, 50, HEIGHT_BUTTON), "+",
+			(-100-ELEMENT_PADDING, LINE_POS - HEIGHT_BUTTON, 50, HEIGHT_BUTTON), "+",
 			callback=self.triggerAddRowToParametersList)
 
 		self.group.edit.removeRow = Button(
-			(50 + ELEMENT_PADDING, LINE_POS - HEIGHT_BUTTON, 50, HEIGHT_BUTTON), "-",
+			(-50-ELEMENT_PADDING, LINE_POS - HEIGHT_BUTTON, 50, HEIGHT_BUTTON), "-",
 			callback=self.triggerRemoveSelectedFromParametersList)
 
 		LINE_POS += 10
@@ -194,7 +218,7 @@ class OCCParametersView:
 		# Glyph Selection
 		#
 		# self.group.edit.glyphsLabel = TextBox((ELEMENT_PADDING, LINE_POS, WIDTH_TEXTBOX, HEIGHT_BUTTON), "Glyphs")
-		self.group.edit.glyphSelection = SegmentedButton((0, LINE_POS, WIDTH_FULL - ELEMENT_PADDING, HEIGHT_BUTTON), [dict(title="Glyphs from Grid Selection"), dict(title="Glyphs from active Edit View")], callback=self.triggerGlyphSelectionChange, sizeStyle="regular")
+		self.group.edit.glyphSelection = SegmentedButton((0, LINE_POS, WIDTH_FULL - ELEMENT_PADDING, HEIGHT_BUTTON), [dict(title="Template Glyphs"), dict(title="Grid Selection"), dict(title="Edit View")], callback=self.triggerParametersListEdit, sizeStyle="regular")
 
 		LINE_POS += LINE_HEIGHT + 7
 
@@ -240,7 +264,7 @@ class OCCParametersView:
 		self.group.edit.layout.right = EditText((X_POS, BOX_POS, WIDTH_INPUT_NO, HEIGHT_LABEL), self.parameters['padding']['right'], sizeStyle="small", continuous=False, callback=self.triggerParametersListEdit)
 		X_POS += WIDTH_INPUT_NO + ELEMENT_PADDING
 
-		self.group.edit.layout.botlabel = TextBox((X_POS, BOX_POS+5, WIDTH_LABEL, HEIGHT_LABEL), "Bot", sizeStyle="mini")
+		self.group.edit.layout.botlabel = TextBox((X_POS, BOX_POS+5, WIDTH_LABEL, HEIGHT_LABEL), "Bottom", sizeStyle="mini")
 		X_POS += WIDTH_LABEL
 		self.group.edit.layout.bottom = EditText((X_POS, BOX_POS, WIDTH_INPUT_NO, HEIGHT_LABEL), self.parameters['padding']['bottom'], sizeStyle="small", continuous=False, callback=self.triggerParametersListEdit)
 
@@ -249,33 +273,15 @@ class OCCParametersView:
 		self.group.edit.layout.prooffooterlabel = TextBox((ELEMENT_PADDING, BOX_POS, WIDTH_TEXTBOX, HEIGHT_LABEL), "Footer", sizeStyle="small")
 		self.group.edit.layout.prooffooter = EditText(( WIDTH_TEXTBOX + ELEMENT_PADDING, BOX_POS, WIDTH_FULL - WIDTH_TEXTBOX - ELEMENT_PADDING, HEIGHT_LABEL), continuous=False, callback=self.triggerParametersListEdit)
 
-		LINE_POS += LINE_HEIGHT + 90
+		LINE_POS += 110		
+		self.group.edit.refreshInstances =  CheckBox(
+			(0, LINE_POS, -0, HEIGHT_LABEL), "Reinterpolate", callback=self.triggerParametersListEdit, value=False)
+		LINE_POS += LINE_HEIGHT
 
 		self.group.edit.refreshProof = SquareButton(
-		(0, LINE_POS, WIDTH_FULL, HEIGHT_BUTTON + 20),
+		(0, LINE_POS, WIDTH_FULL, HEIGHT_SQBUTTON),
 		"Update Proof", callback=self.triggerProofUpdate, sizeStyle="regular" );
-
-
-
-
 		self.group.edit.show(False)
-
-
-		# #
-		# # Globals Tabbed View
-		# #
-
-		# self.group.globals = SegmentedButton(
-		#     (ELEMENT_PADDING, windowSize[3], self.window_width - 2 * ELEMENT_PADDING, LINE_HEIGHT),
-		#     [dict(title="Layout", width=(self.window_width - 2 * ELEMENT_PADDING) / 2), dict(title="Output", width=(self.window_width - 2 * ELEMENT_PADDING) / 2)],
-		#     callback=self.triggerSetActiveGlobal)
-
-		# globalsGroupPosSize = (
-		#     ELEMENT_PADDING,
-		#     windowSize[3] + LINE_HEIGHT + ELEMENT_PADDING,
-		#     self.window_width - 2 * ELEMENT_PADDING,
-		#     self.window_height * 0.2)
-
 
 		parent_window.g = self.group
 
@@ -285,6 +291,7 @@ class OCCParametersView:
 		if len(self.group.templates.list) > 0:
 			self.group.templates.list.setSelection([0])
 			self.loadSelectedTemplate([0])
+
 
 
 	def printProof(self, sender):
@@ -314,6 +321,9 @@ class OCCParametersView:
 		# self.tryRerender()
 		print( 'updated proof parameters')
 
+	def triggerInstanceListEdit(self, sender):
+		self.group.edit.refreshInstances.set(1)
+
 	def triggerParametersListSelection(self, sender):
 		self.group.edit.removeRow.enable(len(sender.getSelection()) > 0)
 
@@ -325,16 +335,20 @@ class OCCParametersView:
 		self.proof_mode = 'waterfall' if index == 0 else 'paragraphs'
 		# self.tryRerender()
 
-	def triggerProofUpdate( self, sender):
+	def triggerApplyTemplate(self, sender):
+		self.loadSelectedTemplate(self.group.templates.list.getSelection())
+		self.tryRerender()
+
+	def triggerProofUpdate( self, sender ):
 		self.tryRerender()
 
 	def loadSelectedTemplate(self, indices):
 		for i in indices:
-
 			# set this first
 			template = self.templates.data[i]
 			valid_names = list(filter(lambda n: n in Glyphs.font.glyphs, template['glyphs']))
 			self.glyphs = list(map(lambda n: Glyphs.font.glyphs[n], valid_names))
+			self.templateGlyphs = self.glyphs.copy() #store for refrence
 
 			lines = list(map(lambda row: {"Style": row['style'], "Point Size": row['size']}, template['lines']))
 
@@ -349,13 +363,13 @@ class OCCParametersView:
 
 			self.proof_mode = template['proof']['mode']
 			self.group.edit.proofMode.set(0 if self.proof_mode == 'waterfall' else 1)
-			self.group.edit.glyphSelection.set(0 if self.proof_mode == 'waterfall' else 1)
+			self.group.edit.glyphSelection.set(0)
 
 			self.group.edit.list._editCallback = None
 			self.group.edit.list.set(lines)
 			self.group.edit.list._editCallback = self.triggerParametersListEdit
 
-		self.tryRerender()
+		# self.tryRerender()
 
 
 	def formatTemplateForDisplayList(self, template):
@@ -401,10 +415,28 @@ class OCCParametersView:
 				json.dump(template, file, indent=4)
 
 
+	def triggerLoadTemplateFolder(self, sender):
+		folder = getFolder()		
+		# no folder selected
+		if folder is None:
+			 return
+		# get folder
+		else:
+			self.rootFolder = folder[0]
+			self.preferences.setDirectoryPath( self.rootFolder )
+
+			json_files = [os.path.join(self.rootFolder, f) for f in os.listdir(self.rootFolder) if f.endswith('.json')]
+			if len(json_files ) > 0:
+				self.processTemplateFiles( json_files )
+			else:
+				self.group.templates.list.set([])
 
 	def triggerOpenTemplate(self, sender):
-
 		template_files = GetFile("Choose a Proof Template file (ending in '.json')", True, ["json"])
+		# self.preferences.setDirectoryPath( template_files )
+		self.processTemplateFiles( template_files )
+
+	def processTemplateFiles(self, template_files ):
 		modified_indices = []
 		if template_files is not None and len(template_files) > 0:
 			for filepath in template_files:
@@ -426,14 +458,9 @@ class OCCParametersView:
 			if len(modified_indices) > 0:
 				self.loadSelectedTemplate([modified_indices[-1]])
 				self.group.templates.list.setSelection([modified_indices[-1]])
-
-
-
+ 
 	def triggerSetActiveSection(self, sender):
 		self.setActiveSection(int(sender.get()))
-
-	# def triggerSetActiveGlobal(self, sender):
-	#     self.setActiveGlobal(int(sender.get()))
 
 	def triggerAddRowToParametersList(self, sender):
 		if len(self.group.edit.list) > 0:
@@ -450,17 +477,11 @@ class OCCParametersView:
 		for index in reversed(self.group.edit.list.getSelection()):
 			del self.group.edit.list[index]
 
-	def triggerGlyphSelectionChange( self, sender):
-		index = int(sender.get())
-		if index == 0:
-			self.glyphs = list(filter(lambda g: g.selected, Glyphs.font.glyphs))
-		else:
-			if Glyphs.font.currentTab is not None:
-				self.glyphs = list(map(lambda l: l.parent, Glyphs.font.currentTab.layers))
+	# def triggerGlyphSelectionChange(self, sender):
+	# 	self.triggerParametersListEdit()
 
 	def parametersChanged(self, parameters, glyphs):
-		glyphsChanged = glyphs[0] != self.parameters['glyphs'][0]
-
+		glyphsChanged = parameters['glyphs'][0] != self.parameters['glyphs'][0]
 		layoutChanged = parameters['padding'] != self.parameters['padding']
 		instancesChanged = parameters['instances'] != self.parameters['instances']
 		sizesChanged = parameters['point_sizes'] != self.parameters['point_sizes']
@@ -482,7 +503,6 @@ class OCCParametersView:
 
 			# check to see if the parameters actually changed.
 			if self.parametersChanged(newParamSet, newGlyphSet):
-
 				# cache latest parameter state.
 				self.parameters = newParamSet
 				self.parameters['glyphs'] = newGlyphSet
@@ -499,12 +519,21 @@ class OCCParametersView:
 
 
 	def getGlyphSet(self):
+		index = int(self.group.edit.glyphSelection.get())
+		if index == 1:
+			self.glyphs = list(filter(lambda g: g.selected, Glyphs.font.glyphs))
+		elif index == 2:
+			if Glyphs.font.currentTab is not None:
+				self.glyphs = list(map(lambda l: l.parent, Glyphs.font.currentTab.layers))
+		else:
+			self.glyphs = self.templateGlyphs
 		return [self.glyphs]
 
-
 	def getParameterSet(self):
-
-		instances = []
+		if( self.group.edit.refreshInstances.get() == 1 ):
+			instances = []
+		else:
+			instances = self.parameters['instances']
 		point_sizes = []
 
 		pre_interpolation = default_timer()
@@ -517,7 +546,6 @@ class OCCParametersView:
 			styles = []
 
 			if len(self.instances) > 0:
-				# styles = filter(lambda i: i.instances[0].name == item['Style'], self.instances) # NOTE: Changed from .instances to .instances
 				if item['Style'] in self.instances.keys():
 					style_name = item['Style']
 					instances.append( style_name )
@@ -535,7 +563,7 @@ class OCCParametersView:
 			else:
 				print("[unknown style] couldn’t find a unique style matching '%s'; skipping." % item['Style'] )
 
-		print( self.interpolated_instances )       
+		# print( self.interpolated_instances )       
 		print('[profile] time to interpolate: %.03f seconds' % (default_timer() - pre_interpolation))
 
 		parameters = {
@@ -547,6 +575,7 @@ class OCCParametersView:
 				'line': tryParseInt(self.group.edit.layout.line.get(), self.parameters['padding']['line']),
 				'block': tryParseInt(self.group.edit.layout.block.get(), self.parameters['padding']['block'])
 			},
+			'glyphs': self.glyphs,
 			'instances': instances,
 			'exports': self.interpolated_instances,
 			'point_sizes': list(map(int, point_sizes)),
@@ -554,7 +583,8 @@ class OCCParametersView:
 			'document': {'width': 11, 'height': 8.5},
 			'title': self.group.templates.proofname.get(),
 			'footer': self.group.edit.layout.prooffooter.get(),
-			'mode': self.proof_mode
+			'mode': self.proof_mode,
+			'reinterpolate': self.group.edit.refreshInstances.get()
 		}
 		#print('PARAMS', parameters)
 		return parameters
