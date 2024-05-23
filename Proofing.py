@@ -24,7 +24,7 @@ from layout import PROOFING_LAYOUTS
 from parameters import OCCParametersView
 
 TEXT_PLACEMENT = 20
-WINDOW_WIDTH = 400 # In PIXELS
+WINDOW_WIDTH = 500 # In PIXELS
 TIMING = True
 
 GLYPHS = list(filter(lambda g: g.subCategory == 'Uppercase' and g.script == 'latin',  Glyphs.font.glyphs))
@@ -43,7 +43,7 @@ class OCCProofingTool:
 
         self.mainWindow = Window(
             (self.window_width * 2, self.window_height),
-            "Modular Proof",
+            "Proofing Tool",
             textured=False)
 
         self.drawView = DrawView((0, 0, self.window_width, -0))
