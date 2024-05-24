@@ -7,12 +7,14 @@ from pstats import Stats
 from AppKit import NSAffineTransform
 
 PROFILE = False
+SPACE = 1000
 
 class OCCProofingLayout(object):
     def __init__(self, glyphs, parameters, width, height, upm):
         self.width = width
         self.height = height
-        self.glyphs = list(filter(lambda g: g.name is not None, glyphs[0]))
+        # self.glyphs = list(filter(lambda g: g.name is not None, glyphs[0]))
+        self.glyphs = glyphs[0]
         self.parameters = parameters
 
         # 0. Determine page constraints based on document size in inches.
@@ -102,28 +104,35 @@ class OCCProofingParagraphLayout(OCCProofingLayout):
                     page_start_index = 0
                     page_index += 1
 
-                glyph_name = self.glyphs[i].name
-                layer = self.get_layer(glyph_name, style_name)
-                orphan_layer = layer.copy()
-                orphan_layer.parent = layer.parent
-                width_px = (orphan_layer.width * u_to_px)
+                this_glyph = self.glyphs[i]
+                glyph_name = this_glyph.name
 
-                # if this glyph would knock us over the end of the line,
-                # reset the height and x position, and retry.
-                if block_advance_position_x_px + width_px > available_space_x_px:
+                if( glyph_name == 'newGlyph'):
+                    # print('paragraph break')
                     block_advance_position_y_px += height_px
                     block_advance_position_x_px = 0
-                    continue
+                else:
+                    layer = self.get_layer(glyph_name, style_name)
+                    orphan_layer = layer.copy()
+                    orphan_layer.parent = layer.parent
+                    width_px = (orphan_layer.width * u_to_px)
 
-                draw = {
-                    'path': orphan_layer,
-                    'scale': u_to_px,
-                    'x': page_origin_x_px + block_advance_position_x_px,
-                    'y': page_origin_y_px - block_advance_position_y_px
-                }
+                    # if this glyph would knock us over the end of the line,
+                    # reset the height and x position, and retry.
+                    if block_advance_position_x_px + width_px > available_space_x_px:
+                        block_advance_position_y_px += height_px
+                        block_advance_position_x_px = 0
+                        continue
 
-                pages[page_index].append(draw)
-                block_advance_position_x_px += width_px
+                    draw = {
+                        'path': orphan_layer,
+                        'scale': u_to_px,
+                        'x': page_origin_x_px + block_advance_position_x_px,
+                        'y': page_origin_y_px - block_advance_position_y_px
+                    }
+
+                    pages[page_index].append(draw)
+                    block_advance_position_x_px += width_px
 
                 # apply a kerning transform here.
                 # interpolatedFontProxy doesn't have kerning :c :c :c
@@ -134,7 +143,6 @@ class OCCProofingParagraphLayout(OCCProofingLayout):
                     # print(k)
                     # print(k * u_to_px)
                     # next_layer = self.get_layer(next_glyph, master[1])
-
 
                 # next step. Check whether the width is too big for the and wrap the advance height.
                 if block_advance_position_x_px > available_space_x_px:
@@ -215,9 +223,6 @@ class OCCProofingWaterfallLayout(OCCProofingLayout):
             bounds_per_line = list(map(self.get_line_lengths, parameter_rows))
             block_line_length = min(list(map(select_second_element, bounds_per_line)))
 
-            # def get_block_glyphs(g):
-            #     print(g, self.block_glyph_index, block_line_length)
-            #     return g[ self.block_glyph_index : self.block_glyph_index + block_line_length ]
 
             # Then layout the line with this length
             block_glyphs = list( self.glyphs[ self.block_glyph_index : self.block_glyph_index + block_line_length ])
@@ -232,20 +237,20 @@ class OCCProofingWaterfallLayout(OCCProofingLayout):
                 u_to_px = self.get_scalefactor(point_size)
 
                 for glyph in block_glyphs:
-
-                    layer = self.get_layer(glyph.name, style_name)
-                    orphan_layer = layer.copy()            
-                    orphan_layer.parent = layer.parent
-                    #print(orphan_layer)
-                    draw = {
-                        'path': orphan_layer,
-                        'scale': u_to_px,
-                        'x': block_origin_x_px + block_advance_position_x_px,
-                        'y': block_origin_y_px - block_advance_position_y_px
-                    }
-
-                    pages[page_index].append(draw)
-                    block_advance_position_x_px += (orphan_layer.width * u_to_px)
+                    glyph_name = glyph.name
+                    if glyph_name != 'newGlyph':
+                        layer = self.get_layer(glyph.name, style_name)
+                        orphan_layer = layer.copy()            
+                        orphan_layer.parent = layer.parent
+                        #print(orphan_layer)
+                        draw = {
+                            'path': orphan_layer,
+                            'scale': u_to_px,
+                            'x': block_origin_x_px + block_advance_position_x_px,
+                            'y': block_origin_y_px - block_advance_position_y_px
+                        }
+                        pages[page_index].append(draw)
+                        block_advance_position_x_px += (orphan_layer.width * u_to_px)
 
 
                 block_advance_position_y_px += self.block_line_heights[i + 1] if len(self.block_line_heights) > i + 1 else 0
@@ -293,9 +298,15 @@ class OCCProofingWaterfallLayout(OCCProofingLayout):
         available_space_px = self.width - self.parameters['padding']['right']
 
         while advance_px < available_space_px and self.block_glyph_index + glyph_count < len(self.glyphs):
-            glyph_name = self.glyphs[self.block_glyph_index + glyph_count].name
-            layer = self.get_layer( glyph_name, style_name)
-            width_px = layer.width * u_to_px
+            this_glyph = self.glyphs[self.block_glyph_index + glyph_count]
+            glyph_name = this_glyph.name
+
+            if glyph_name == 'newGlyph':
+                width_px = 0
+                advance_px = available_space_px
+            else:
+                layer = self.get_layer( glyph_name, style_name)
+                width_px = layer.width * u_to_px
             advance_px += width_px
             glyph_count += 1
 

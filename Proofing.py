@@ -48,6 +48,7 @@ class OCCProofingTool:
 
         self.drawView = DrawView((0, 0, self.window_width, -0))
         self.mainWindow.drawing = self.drawView;
+        self.mainWindow.drawing.introText = TextBox((0, self.window_height/2, self.window_width, 50), "Select a template or load a new template (+) to apply.", sizeStyle="regular", alignment = "center")
         self.kerning = False
         self.debug = False
 
@@ -80,6 +81,7 @@ class OCCProofingTool:
 
 
     def draw(self, preview = True):
+        self.mainWindow.drawing.introText.show(0)
 
         proof_mode = self.parameters['mode']
         # choose the right layout class based on the layout mode: 'waterfall' or 'paragraphs'

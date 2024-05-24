@@ -132,12 +132,12 @@ class OCCParametersView:
 		self.group.templates.addTemplate = Button(
 			(-100-ELEMENT_PADDING, LINE_POS - HEIGHT_BUTTON, 50, HEIGHT_BUTTON), "+",
 			callback=self.triggerOpenTemplate)
-		self.group.templates.addTemplate.setToolTip("Load a new template to list")
+		self.group.templates.addTemplate.setToolTip("Load new template(s) to list")
 
 		self.group.templates.removeTemplate = Button(
 			(-50-ELEMENT_PADDING, LINE_POS - HEIGHT_BUTTON, 50, HEIGHT_BUTTON), "-",
 			callback=self.triggerRemoveTemplate)
-		self.group.templates.addTemplate.setToolTip("Remove selected template(s) from the list")
+		self.group.templates.removeTemplate.setToolTip("Remove selected template(s) from the list")
 
 
 		LINE_POS += LINE_HEIGHT
@@ -341,10 +341,17 @@ class OCCParametersView:
 
 	def loadSelectedTemplate(self, indices):
 		for i in indices:
-			# set this first
 			template = self.templates.data[i]
-			valid_names = list(filter(lambda n: n in Glyphs.font.glyphs, template['glyphs']))
-			self.glyphs = list(map(lambda n: Glyphs.font.glyphs[n], valid_names))
+			self.glyphs = list()
+
+			for n in template["glyphs"]:
+				if n == "newGlyph": #linebreak 
+					newGlyph = GSControlLayer(10)
+					newGlyph.name = 'newGlyph'
+					self.glyphs.append( newGlyph )
+				else:
+					self.glyphs.append( Glyphs.font.glyphs[n] )
+			# self.glyphs = list(map(lambda n: Glyphs.font.glyphs[n], valid_names))
 			self.templateGlyphs = self.glyphs.copy() #store for refrence
 
 			lines = list(map(lambda row: {"Style": row['style'], "Point Size": row['size']}, template['lines']))
