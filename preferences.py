@@ -4,24 +4,18 @@ from GlyphsApp import *
 
 class OCCTemplatePreferences( ):
 	def __init__(self):
-		self.rootFolder = 'data'
-
-	def getDirectoryPath( self ):
-		self.loadPreferences( )
-		return self.rootFolder
-
-	def setDirectoryPath( self, path ):		
-		self.rootFolder = path
-		self.savePreferences()
-
-	def savePreferences( self ):
-		Glyphs.defaults["com.motsuka.OCCProofingTool.directory"] = self.rootFolder
-		return True
+		self.templatePaths = []
+		self.loadPreferences()
 
 	def loadPreferences( self ):
-		Glyphs.registerDefault("com.motsuka.OCCProofingTool.directory", 'data')
+		Glyphs.registerDefault("com.motsuka.OCCProofingTool.templatefiles", ['data/demo.json'])
 		try:
-			self.rootFolder = Glyphs.defaults["com.motsuka.OCCProofingTool.directory"]
+			# self.templatePaths = ['data/demo.json']
+			self.templatePaths = Glyphs.defaults["com.motsuka.OCCProofingTool.templatefiles"]
 		except:
 			return False
+		return True
+
+	def savePreferences( self, files ):
+		Glyphs.defaults["com.motsuka.OCCProofingTool.templatefiles"] = files
 		return True

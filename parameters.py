@@ -8,9 +8,8 @@ import json
 from collections import OrderedDict
 
 from GlyphsApp import *
-# from AppKit import *
 from vanilla import *
-from vanilla.dialogs import putFile, getFile, getFolder
+from vanilla.dialogs import putFile, getFile
 from GlyphsApp.UI import *
 
 from templates import OCCTemplatesView
@@ -49,9 +48,11 @@ class OCCParametersView:
 		self.printProofCallback = printProofCallback
 		
 		self.preferences = OCCTemplatePreferences()
-		self.rootFolder = self.preferences.getDirectoryPath()
+		self.templateFiles = []
+		self.templateFiles.extend( self.preferences.templatePaths )
 
 		self.templates = OCCTemplatesView()
+
 		self.instances = self.templates.instanceList
 
 		self.interpolated_instances = {}
@@ -117,22 +118,29 @@ class OCCParametersView:
 			map(lambda x: self.formatTemplateForDisplayList(x), self.templates.data),
 			columnDescriptions=[{"title": "Templates"}],
 			selectionCallback=self.triggerLoadSelectedTemplate,
+			editCallback=self.triggerTemplateListEdit,
 			drawFocusRing=False,
 			allowsSorting=False,
 			allowsEmptySelection=True,
-			allowsMultipleSelection=False,
+			allowsMultipleSelection=True,
 			rowHeight=20.0
 		)
 
-		self.group.templates.openTemplate = Button(
-			(0, self.window_height * MAIN_PANEL_HEIGHT_FACTOR, WIDTH_HALF, HEIGHT_BUTTON), "Open Template(s)",
+
+		LINE_POS = self.window_height * MAIN_PANEL_HEIGHT_FACTOR
+
+		self.group.templates.addTemplate = Button(
+			(-100-ELEMENT_PADDING, LINE_POS - HEIGHT_BUTTON, 50, HEIGHT_BUTTON), "+",
 			callback=self.triggerOpenTemplate)
+		self.group.templates.addTemplate.setToolTip("Load a new template to list")
 
-		self.group.templates.openFolder = Button(
-			(WIDTH_HALF + ELEMENT_PADDING, self.window_height * MAIN_PANEL_HEIGHT_FACTOR, WIDTH_HALF, HEIGHT_BUTTON), "Open Folder",
-			callback=self.triggerLoadTemplateFolder)
+		self.group.templates.removeTemplate = Button(
+			(-50-ELEMENT_PADDING, LINE_POS - HEIGHT_BUTTON, 50, HEIGHT_BUTTON), "-",
+			callback=self.triggerRemoveTemplate)
+		self.group.templates.addTemplate.setToolTip("Remove selected template(s) from the list")
 
-		LINE_POS = self.window_height * MAIN_PANEL_HEIGHT_FACTOR + HEIGHT_DIVIDER
+
+		LINE_POS += LINE_HEIGHT
 
 		self.group.templates.loadTemplate = SquareButton(
 		(0, LINE_POS, WIDTH_FULL, HEIGHT_SQBUTTON),
@@ -313,6 +321,9 @@ class OCCParametersView:
 	def triggerInstanceListEdit(self, sender):
 		self.group.edit.refreshInstances.set(1)
 
+	def triggerTemplateListEdit(self, sender):
+		self.preferences.savePreferences(self.templateFiles)
+
 	def triggerLoadSelectedTemplate(self, sender):
 		self.loadSelectedTemplate(self.group.templates.list.getSelection())
 
@@ -322,6 +333,8 @@ class OCCParametersView:
 
 	def triggerApplyTemplate(self, sender):
 		self.loadSelectedTemplate(self.group.templates.list.getSelection())
+		self.group.edit.refreshInstances.set(1)
+		self.tryRerender()
 
 	def triggerProofUpdate( self, sender ):
 		self.tryRerender()
@@ -353,7 +366,7 @@ class OCCParametersView:
 			self.group.edit.list.set(lines)
 			self.group.edit.list._editCallback = self.triggerParametersListEdit
 
-		self.tryRerender()
+		# self.tryRerender()
 
 
 	def formatTemplateForDisplayList(self, template):
@@ -387,32 +400,25 @@ class OCCParametersView:
 			title="Save Template",
 			messageText="Save Proof As Template...",
 			fileName=filename)
-
+		
 		if outfile is not None:
 			with open(outfile, 'w') as file:
 				json.dump(template, file, indent=4)
 
+			self.processTemplateFiles([outfile])
 
-	def triggerLoadTemplateFolder(self, sender):
-		folder = getFolder()		
-		# no folder selected
-		if folder is None:
-			 return
-		# get folder
-		else:
-			self.rootFolder = folder[0]
-			self.preferences.setDirectoryPath( self.rootFolder )
-
-			json_files = [os.path.join(self.rootFolder, f) for f in os.listdir(self.rootFolder) if f.endswith('.json')]
-			if len(json_files ) > 0:
-				self.processTemplateFiles( json_files )
-			else:
-				self.group.templates.list.set([])
 
 	def triggerOpenTemplate(self, sender):
 		template_files = GetFile("Choose a Proof Template file (ending in '.json')", True, ["json"])
 		# self.preferences.setDirectoryPath( template_files )
 		self.processTemplateFiles( template_files )
+
+	def triggerRemoveTemplate(self, sender):
+		for index in reversed(self.group.templates.list.getSelection()):
+			del self.group.templates.list[index]
+			filepathRemove = self.templateFiles[index]
+			self.templateFiles.remove(filepathRemove)
+			self.preferences.savePreferences(self.templateFiles)
 
 	def processTemplateFiles(self, template_files ):
 		modified_indices = []
@@ -423,6 +429,9 @@ class OCCParametersView:
 					template = self.templates.parseTemplateFile(name, template_file)
 					if template is not None:
 						display = self.formatTemplateForDisplayList(template);
+						
+						self.templateFiles.append(filepath)
+
 						try:
 							i = self.group.templates.list.index(display)
 							self.templates.data[i] = template
@@ -431,11 +440,11 @@ class OCCParametersView:
 						except ValueError:
 							self.templates.data.append(template)
 							self.group.templates.list.append(display)
-							modified_indices.append(len(self.group.templates.list) - 1)
-
+							modified_indices.append(len(self.group.templates.list) - 1)							
 			if len(modified_indices) > 0:
 				self.loadSelectedTemplate([modified_indices[-1]])
 				self.group.templates.list.setSelection([modified_indices[-1]])
+
  
 	def triggerSetActiveSection(self, sender):
 		self.setActiveSection(int(sender.get()))
