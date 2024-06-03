@@ -155,7 +155,7 @@ class OCCParametersView:
 		LINE_POS += LINE_HEIGHT
 
 		self.group.templates.proofnamelabel = TextBox((0, LINE_POS,  WIDTH_TEXTBOX+20, HEIGHT_LABEL), "Proof Name", sizeStyle="regular")
-		self.group.templates.proofname = EditText((ELEMENT_PADDING + WIDTH_TEXTBOX+20, LINE_POS, -ELEMENT_PADDING, HEIGHT_LABEL), continuous=False, callback=self.triggerParametersListEdit)
+		self.group.templates.proofname = EditText((ELEMENT_PADDING + WIDTH_TEXTBOX+20, LINE_POS, -ELEMENT_PADDING, HEIGHT_LABEL), continuous=False)
 
 		LINE_POS += HEIGHT_DIVIDER
 
@@ -215,7 +215,7 @@ class OCCParametersView:
 		#
 		# Glyph Selection
 		#
-		self.group.edit.glyphSelection = SegmentedButton((0, LINE_POS, WIDTH_FULL - ELEMENT_PADDING, HEIGHT_BUTTON), [dict(title="Template Glyphs"), dict(title="Grid Selection"), dict(title="Edit View")], callback=self.triggerParametersListEdit, sizeStyle="regular")
+		self.group.edit.glyphSelection = SegmentedButton((0, LINE_POS, WIDTH_FULL - ELEMENT_PADDING, HEIGHT_BUTTON), [dict(title="Template Glyphs"), dict(title="Grid Selection"), dict(title="Edit View")], sizeStyle="regular")
 		self.group.edit.glyphSelection.setToolTip("Choose which glyphs to use.")
 
 		LINE_POS += LINE_HEIGHT + 7
@@ -240,11 +240,11 @@ class OCCParametersView:
 		X_POS += WIDTH_TEXTBOX + ELEMENT_PADDING
 		self.group.edit.layout.linelabel = TextBox((X_POS, BOX_POS+5, 115, HEIGHT_LABEL), "Line Gap", sizeStyle="mini")
 		X_POS += 115 + ELEMENT_PADDING
-		self.group.edit.layout.line = EditText((X_POS, BOX_POS, WIDTH_INPUT_NO, HEIGHT_LABEL), self.parameters['padding']['line'], sizeStyle="small", continuous=False, callback=self.triggerParametersListEdit)
+		self.group.edit.layout.line = EditText((X_POS, BOX_POS, WIDTH_INPUT_NO, HEIGHT_LABEL), self.parameters['padding']['line'], sizeStyle="small", continuous=False)
 		X_POS += WIDTH_INPUT_NO + ELEMENT_PADDING
 		self.group.edit.layout.blocklabel = TextBox((X_POS, BOX_POS+5, 115, HEIGHT_LABEL), "Paragraph Gap", sizeStyle="mini")
 		X_POS += 115 + ELEMENT_PADDING
-		self.group.edit.layout.block = EditText((X_POS, BOX_POS, WIDTH_INPUT_NO, HEIGHT_LABEL), self.parameters['padding']['block'], sizeStyle="small", continuous=False, callback=self.triggerParametersListEdit)
+		self.group.edit.layout.block = EditText((X_POS, BOX_POS, WIDTH_INPUT_NO, HEIGHT_LABEL), self.parameters['padding']['block'], sizeStyle="small", continuous=False)
 		
 		BOX_POS += LINE_HEIGHT
 
@@ -253,31 +253,31 @@ class OCCParametersView:
 		X_POS += WIDTH_TEXTBOX + ELEMENT_PADDING
 		self.group.edit.layout.toplabel = TextBox((X_POS, BOX_POS+5, WIDTH_LABEL, HEIGHT_LABEL), "Top", sizeStyle="mini")
 		X_POS += WIDTH_LABEL
-		self.group.edit.layout.top = EditText((X_POS, BOX_POS, WIDTH_INPUT_NO, HEIGHT_LABEL), self.parameters['padding']['top'], sizeStyle="small", continuous=False, callback=self.triggerParametersListEdit)
+		self.group.edit.layout.top = EditText((X_POS, BOX_POS, WIDTH_INPUT_NO, HEIGHT_LABEL), self.parameters['padding']['top'], sizeStyle="small", continuous=False)
 		X_POS += WIDTH_INPUT_NO + ELEMENT_PADDING
 
 		self.group.edit.layout.leftlabel = TextBox((X_POS, BOX_POS+5, WIDTH_LABEL, HEIGHT_LABEL), "Left", sizeStyle="mini")
 		X_POS += WIDTH_LABEL
-		self.group.edit.layout.left = EditText((X_POS, BOX_POS, WIDTH_INPUT_NO, HEIGHT_LABEL), self.parameters['padding']['left'], sizeStyle="small", continuous=False, callback=self.triggerParametersListEdit)
+		self.group.edit.layout.left = EditText((X_POS, BOX_POS, WIDTH_INPUT_NO, HEIGHT_LABEL), self.parameters['padding']['left'], sizeStyle="small", continuous=False)
 		X_POS += WIDTH_INPUT_NO + ELEMENT_PADDING
 
 		self.group.edit.layout.rightlabel = TextBox((X_POS, BOX_POS+5, WIDTH_LABEL, HEIGHT_LABEL), "Right", alignment="left", sizeStyle="mini")
 		X_POS += WIDTH_LABEL
-		self.group.edit.layout.right = EditText((X_POS, BOX_POS, WIDTH_INPUT_NO, HEIGHT_LABEL), self.parameters['padding']['right'], sizeStyle="small", continuous=False, callback=self.triggerParametersListEdit)
+		self.group.edit.layout.right = EditText((X_POS, BOX_POS, WIDTH_INPUT_NO, HEIGHT_LABEL), self.parameters['padding']['right'], sizeStyle="small", continuous=False)
 		X_POS += WIDTH_INPUT_NO + ELEMENT_PADDING
 
 		self.group.edit.layout.botlabel = TextBox((X_POS, BOX_POS+5, WIDTH_LABEL, HEIGHT_LABEL), "Bottom", sizeStyle="mini")
 		X_POS += WIDTH_LABEL
-		self.group.edit.layout.bottom = EditText((X_POS, BOX_POS, WIDTH_INPUT_NO, HEIGHT_LABEL), self.parameters['padding']['bottom'], sizeStyle="small", continuous=False, callback=self.triggerParametersListEdit)
+		self.group.edit.layout.bottom = EditText((X_POS, BOX_POS, WIDTH_INPUT_NO, HEIGHT_LABEL), self.parameters['padding']['bottom'], sizeStyle="small", continuous=False)
 
 		BOX_POS += LINE_HEIGHT + 3
 
 		self.group.edit.layout.prooffooterlabel = TextBox((ELEMENT_PADDING, BOX_POS, WIDTH_TEXTBOX, HEIGHT_LABEL), "Footer", sizeStyle="small")
-		self.group.edit.layout.prooffooter = EditText(( WIDTH_TEXTBOX + ELEMENT_PADDING, BOX_POS, -ELEMENT_PADDING, HEIGHT_LABEL), continuous=False, callback=self.triggerParametersListEdit)
+		self.group.edit.layout.prooffooter = EditText(( WIDTH_TEXTBOX + ELEMENT_PADDING, BOX_POS, -ELEMENT_PADDING, HEIGHT_LABEL), continuous=False)
 
 		LINE_POS += 110		
 		self.group.edit.refreshInstances =  CheckBox(
-			(0, LINE_POS, -0, HEIGHT_LABEL), "Re-export Instances", callback=self.triggerParametersListEdit, value=False)
+			(0, LINE_POS, -0, HEIGHT_LABEL), "Re-export Instances", value=False)
 		self.group.edit.refreshInstances.setToolTip("Uncheck this to adjust the proof layout with existing styles. Keep checked for any changes in the list of styles.")
 
 		LINE_POS += LINE_HEIGHT
@@ -311,10 +311,6 @@ class OCCParametersView:
 		if self.saveProofCallback is not None and result is not None:
 			self.outputPath = result
 			self.saveProofCallback(result)
-
-	def triggerParametersListEdit(self, sender):
-		#self.tryRerender()
-		print( 'updated proof parameters')
 
 	def triggerInstanceListEdit(self, sender):
 		self.group.edit.refreshInstances.set(1)
@@ -369,8 +365,7 @@ class OCCParametersView:
 
 			self.group.edit.list._editCallback = None
 			self.group.edit.list.set(lines)
-			self.group.edit.list._editCallback = self.triggerParametersListEdit
-
+			
 		# self.tryRerender()
 
 
