@@ -19,12 +19,11 @@ ELEMENT_PADDING = 8
 MAIN_PANEL_HEIGHT_FACTOR = 0.5
 LINE_POS = 10
 LINE_HEIGHT = 30
-HEIGHT_DIVIDER = 40
+HEIGHT_DIVIDER = 30
 HEIGHT_BUTTON = 30
-HEIGHT_SQBUTTON = 40
 HEIGHT_LABEL = 20
 WIDTH_LABEL = 40
-WIDTH_TEXTBOX = 60
+WIDTH_TEXTBOX = 65
 WIDTH_INPUT_NO = 35
 
 
@@ -139,31 +138,30 @@ class OCCParametersView:
 			callback=self.triggerRemoveTemplate)
 		self.group.templates.removeTemplate.setToolTip("Remove selected template(s) from the list")
 
+		LINE_POS += 10
 
-		LINE_POS += LINE_HEIGHT
-
-		self.group.templates.loadTemplate = SquareButton(
-		(0, LINE_POS, WIDTH_FULL, HEIGHT_SQBUTTON),
+		self.group.templates.loadTemplate = Button(
+		(0, LINE_POS, WIDTH_FULL, HEIGHT_BUTTON),
 		"Apply Selected Template", callback=self.triggerApplyTemplate, sizeStyle="regular" );
-		self.group.templates.loadTemplate.setToolTip("Overrides edits to revert back to the template")
+		self.group.templates.loadTemplate.setToolTip("Note: any edits to the proof will be reverted back to the saved template.")
 		#
 		# Output Settings
 		#
-		LINE_POS += HEIGHT_SQBUTTON + HEIGHT_DIVIDER
+		LINE_POS += HEIGHT_BUTTON + HEIGHT_DIVIDER
 
 		self.group.templates.outputdivider = HorizontalLine((0, LINE_POS, -0, 1))
 
 
 		LINE_POS += LINE_HEIGHT
 
-		self.group.templates.proofnamelabel = TextBox((0, LINE_POS,  WIDTH_TEXTBOX, HEIGHT_LABEL), "Filename", sizeStyle="regular")
-		self.group.templates.proofname = EditText((ELEMENT_PADDING + WIDTH_TEXTBOX, LINE_POS, WIDTH_FULL - WIDTH_TEXTBOX - ELEMENT_PADDING, HEIGHT_LABEL), continuous=False, callback=self.triggerParametersListEdit)
+		self.group.templates.proofnamelabel = TextBox((0, LINE_POS,  WIDTH_TEXTBOX+20, HEIGHT_LABEL), "Proof Name", sizeStyle="regular")
+		self.group.templates.proofname = EditText((ELEMENT_PADDING + WIDTH_TEXTBOX+20, LINE_POS, -ELEMENT_PADDING, HEIGHT_LABEL), continuous=False, callback=self.triggerParametersListEdit)
 
 		LINE_POS += HEIGHT_DIVIDER
 
-		self.group.templates.saveTemplate = SquareButton((0, LINE_POS, WIDTH_THIRD, HEIGHT_SQBUTTON), "Save New Template", callback=self.triggerSaveProofAsTemplate)
-		self.group.templates.saveproofas = SquareButton((WIDTH_THIRD+ELEMENT_PADDING, LINE_POS, WIDTH_THIRD, HEIGHT_SQBUTTON), "Save Proof PDF", callback=self.saveProofAs, sizeStyle="regular")
-		self.group.templates.printproof = SquareButton((WIDTH_THIRD*2+ELEMENT_PADDING*2, LINE_POS, WIDTH_THIRD, HEIGHT_SQBUTTON), "Print Proof", callback=self.printProof, sizeStyle="regular")
+		self.group.templates.saveTemplate = Button((0, LINE_POS, WIDTH_THIRD, HEIGHT_BUTTON), "Save New Template", callback=self.triggerSaveProofAsTemplate)
+		self.group.templates.saveproofas = Button((WIDTH_THIRD+ELEMENT_PADDING, LINE_POS, WIDTH_THIRD, HEIGHT_BUTTON), "Save Proof PDF", callback=self.saveProofAs, sizeStyle="regular")
+		self.group.templates.printproof = Button((WIDTH_THIRD*2+ELEMENT_PADDING*2, LINE_POS, WIDTH_THIRD, HEIGHT_BUTTON), "Print Proof", callback=self.printProof, sizeStyle="regular")
 
 		self.group.templates.show(False)
 
@@ -275,7 +273,7 @@ class OCCParametersView:
 		BOX_POS += LINE_HEIGHT + 3
 
 		self.group.edit.layout.prooffooterlabel = TextBox((ELEMENT_PADDING, BOX_POS, WIDTH_TEXTBOX, HEIGHT_LABEL), "Footer", sizeStyle="small")
-		self.group.edit.layout.prooffooter = EditText(( WIDTH_TEXTBOX + ELEMENT_PADDING, BOX_POS, WIDTH_FULL - WIDTH_TEXTBOX - ELEMENT_PADDING, HEIGHT_LABEL), continuous=False, callback=self.triggerParametersListEdit)
+		self.group.edit.layout.prooffooter = EditText(( WIDTH_TEXTBOX + ELEMENT_PADDING, BOX_POS, -ELEMENT_PADDING, HEIGHT_LABEL), continuous=False, callback=self.triggerParametersListEdit)
 
 		LINE_POS += 110		
 		self.group.edit.refreshInstances =  CheckBox(
@@ -284,8 +282,8 @@ class OCCParametersView:
 
 		LINE_POS += LINE_HEIGHT
 
-		self.group.edit.refreshProof = SquareButton(
-		(0, LINE_POS, WIDTH_FULL, HEIGHT_SQBUTTON),
+		self.group.edit.refreshProof = Button(
+		(0, LINE_POS, WIDTH_FULL, HEIGHT_BUTTON),
 		"Update Proof", callback=self.triggerProofUpdate, sizeStyle="regular" );
 
 		self.group.edit.refreshProof.setToolTip("Apply edits to the proof.")
@@ -315,7 +313,7 @@ class OCCParametersView:
 			self.saveProofCallback(result)
 
 	def triggerParametersListEdit(self, sender):
-		# self.tryRerender()
+		#self.tryRerender()
 		print( 'updated proof parameters')
 
 	def triggerInstanceListEdit(self, sender):
@@ -556,7 +554,7 @@ class OCCParametersView:
 				point_sizes.append(size)
 
 			else:
-				print("[unknown style] couldn’t find a unique style matching '%s'; skipping." % item['Style'] )
+				print(f"[unknown style] couldn’t find a unique style matching '{item['Style']}'; skipping.")
 
 		# print('[profile] time to interpolate: %.03f seconds' % (default_timer() - pre_interpolation))
 
