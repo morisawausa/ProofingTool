@@ -100,7 +100,7 @@ class OCCTemplatesView:
 				glyphs = template['glyphs']
 			else:
 				if DEBUG:
-					print(f'[{template_name}]\tthe template provides a "glyphs" key, but it\'s not a list of glyph names.')
+					print(f'[{template_name}]\tthe template provides a "glyphs" key, but it’s not a list of glyph names.')
 		else:
 			if DEBUG:
 				print(f'[{template_name}]\tthe template does not provide a "glyphs" key.')
@@ -153,22 +153,26 @@ class OCCTemplatesView:
 				"line": 20,
 				"block": 20
 			},
-			"mode": "waterfall"
+			"mode": "waterfall",
+			"footer" : ""
 		}
 
 		if 'proof' in template:
 			if 'margins' in template['proof']:
-				proof['margins']['left'] = template['proof']['margins'].get('left', 20)
-				proof['margins']['right'] = template['proof']['margins'].get('right', 70)
-				proof['margins']['top'] = template['proof']['margins'].get('top', 20)
-				proof['margins']['bottom'] = template['proof']['margins'].get('bottom', 100)
+				proof['margins']['left'] = template['proof']['margins']['left']
+				proof['margins']['right'] = template['proof']['margins']['right']
+				proof['margins']['top'] = template['proof']['margins']['top']
+				proof['margins']['bottom'] = template['proof']['margins']['bottom']
 
 			if 'padding' in template['proof']:
-				proof['padding']['line'] = template['proof']['padding'].get('line', 20)
-				proof['padding']['block'] = template['proof']['padding'].get('block', 20)
+				proof['padding']['line'] = template['proof']['padding']['line']
+				proof['padding']['block'] = template['proof']['padding']['block']
 
 			if 'mode' in template['proof']:
 				proof['mode'] = template['proof']['mode']
+
+			if 'footer' in template['proof']:
+				proof['footer'] = template['proof']['footer']
 		else:
 			if DEBUG:
 				print(f'[{template_name}]\t"{template_name}" does not specify margin and padding information. Setting defaults.')

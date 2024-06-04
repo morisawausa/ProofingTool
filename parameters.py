@@ -33,6 +33,12 @@ def tryParseInt(value, default_value):
 	except ValueError as e:
 		return default_value
 
+def tryString(value, default_value):
+	try:
+		return value
+	except ValueError as e:
+		return default_value
+
 class OCCParametersView:
 
 	def __init__(self, width_px, height_px, parent_window,
@@ -89,7 +95,7 @@ class OCCParametersView:
 
 		#
 		# Segmented Button at the top of View:
-		# Lets you switch between templates, edit, and glyphs.
+		# Lets you switch between Template List and Template Editing Mode
 		#
 
 		self.group.sections = SegmentedButton(
@@ -140,10 +146,11 @@ class OCCParametersView:
 
 		LINE_POS += 10
 
-		self.group.templates.loadTemplate = Button(
+		self.group.templates.applyTemplate = Button(
 		(0, LINE_POS, WIDTH_FULL, HEIGHT_BUTTON),
-		"Apply Selected Template", callback=self.triggerApplyTemplate, sizeStyle="regular" );
-		self.group.templates.loadTemplate.setToolTip("Note: any edits to the proof will be reverted back to the saved template.")
+		"Apply Selected Template", callback=self.triggerApplyTemplate, sizeStyle="regular" )
+		self.group.templates.applyTemplate.setToolTip("Note: any edits to the proof will be reverted back to the saved template.")
+		self.group.templates.applyTemplate.enable( False )
 		#
 		# Output Settings
 		#
@@ -155,7 +162,7 @@ class OCCParametersView:
 		LINE_POS += LINE_HEIGHT
 
 		self.group.templates.proofnamelabel = TextBox((0, LINE_POS,  WIDTH_TEXTBOX+20, HEIGHT_LABEL), "Proof Name", sizeStyle="regular")
-		self.group.templates.proofname = EditText((ELEMENT_PADDING + WIDTH_TEXTBOX+20, LINE_POS, -ELEMENT_PADDING, HEIGHT_LABEL), continuous=False)
+		self.group.templates.proofname = EditText((ELEMENT_PADDING + WIDTH_TEXTBOX+20, LINE_POS, -ELEMENT_PADDING, HEIGHT_LABEL), self.parameters['title'], continuous=False, callback=self.triggerParametersEdit)
 
 		LINE_POS += HEIGHT_DIVIDER
 
@@ -240,11 +247,11 @@ class OCCParametersView:
 		X_POS += WIDTH_TEXTBOX + ELEMENT_PADDING
 		self.group.edit.layout.linelabel = TextBox((X_POS, BOX_POS+5, 115, HEIGHT_LABEL), "Line Gap", sizeStyle="mini")
 		X_POS += 115 + ELEMENT_PADDING
-		self.group.edit.layout.line = EditText((X_POS, BOX_POS, WIDTH_INPUT_NO, HEIGHT_LABEL), self.parameters['padding']['line'], sizeStyle="small", continuous=False)
+		self.group.edit.layout.line = EditText((X_POS, BOX_POS, WIDTH_INPUT_NO, HEIGHT_LABEL), self.parameters['padding']['line'], sizeStyle="small", continuous=False, callback=self.triggerParametersEdit)
 		X_POS += WIDTH_INPUT_NO + ELEMENT_PADDING
 		self.group.edit.layout.blocklabel = TextBox((X_POS, BOX_POS+5, 115, HEIGHT_LABEL), "Paragraph Gap", sizeStyle="mini")
 		X_POS += 115 + ELEMENT_PADDING
-		self.group.edit.layout.block = EditText((X_POS, BOX_POS, WIDTH_INPUT_NO, HEIGHT_LABEL), self.parameters['padding']['block'], sizeStyle="small", continuous=False)
+		self.group.edit.layout.block = EditText((X_POS, BOX_POS, WIDTH_INPUT_NO, HEIGHT_LABEL), self.parameters['padding']['block'], sizeStyle="small", continuous=False, callback=self.triggerParametersEdit)
 		
 		BOX_POS += LINE_HEIGHT
 
@@ -253,27 +260,27 @@ class OCCParametersView:
 		X_POS += WIDTH_TEXTBOX + ELEMENT_PADDING
 		self.group.edit.layout.toplabel = TextBox((X_POS, BOX_POS+5, WIDTH_LABEL, HEIGHT_LABEL), "Top", sizeStyle="mini")
 		X_POS += WIDTH_LABEL
-		self.group.edit.layout.top = EditText((X_POS, BOX_POS, WIDTH_INPUT_NO, HEIGHT_LABEL), self.parameters['padding']['top'], sizeStyle="small", continuous=False)
+		self.group.edit.layout.top = EditText((X_POS, BOX_POS, WIDTH_INPUT_NO, HEIGHT_LABEL), self.parameters['padding']['top'], sizeStyle="small", continuous=False, callback=self.triggerParametersEdit)
 		X_POS += WIDTH_INPUT_NO + ELEMENT_PADDING
 
 		self.group.edit.layout.leftlabel = TextBox((X_POS, BOX_POS+5, WIDTH_LABEL, HEIGHT_LABEL), "Left", sizeStyle="mini")
 		X_POS += WIDTH_LABEL
-		self.group.edit.layout.left = EditText((X_POS, BOX_POS, WIDTH_INPUT_NO, HEIGHT_LABEL), self.parameters['padding']['left'], sizeStyle="small", continuous=False)
+		self.group.edit.layout.left = EditText((X_POS, BOX_POS, WIDTH_INPUT_NO, HEIGHT_LABEL), self.parameters['padding']['left'], sizeStyle="small", continuous=False, callback=self.triggerParametersEdit)
 		X_POS += WIDTH_INPUT_NO + ELEMENT_PADDING
 
 		self.group.edit.layout.rightlabel = TextBox((X_POS, BOX_POS+5, WIDTH_LABEL, HEIGHT_LABEL), "Right", alignment="left", sizeStyle="mini")
 		X_POS += WIDTH_LABEL
-		self.group.edit.layout.right = EditText((X_POS, BOX_POS, WIDTH_INPUT_NO, HEIGHT_LABEL), self.parameters['padding']['right'], sizeStyle="small", continuous=False)
+		self.group.edit.layout.right = EditText((X_POS, BOX_POS, WIDTH_INPUT_NO, HEIGHT_LABEL), self.parameters['padding']['right'], sizeStyle="small", continuous=False, callback=self.triggerParametersEdit)
 		X_POS += WIDTH_INPUT_NO + ELEMENT_PADDING
 
 		self.group.edit.layout.botlabel = TextBox((X_POS, BOX_POS+5, WIDTH_LABEL, HEIGHT_LABEL), "Bottom", sizeStyle="mini")
 		X_POS += WIDTH_LABEL
-		self.group.edit.layout.bottom = EditText((X_POS, BOX_POS, WIDTH_INPUT_NO, HEIGHT_LABEL), self.parameters['padding']['bottom'], sizeStyle="small", continuous=False)
+		self.group.edit.layout.bottom = EditText((X_POS, BOX_POS, WIDTH_INPUT_NO, HEIGHT_LABEL), self.parameters['padding']['bottom'], sizeStyle="small", continuous=False, callback=self.triggerParametersEdit)
 
 		BOX_POS += LINE_HEIGHT + 3
 
 		self.group.edit.layout.prooffooterlabel = TextBox((ELEMENT_PADDING, BOX_POS, WIDTH_TEXTBOX, HEIGHT_LABEL), "Footer", sizeStyle="small")
-		self.group.edit.layout.prooffooter = EditText(( WIDTH_TEXTBOX + ELEMENT_PADDING, BOX_POS, -ELEMENT_PADDING, HEIGHT_LABEL), continuous=False)
+		self.group.edit.layout.prooffooter = EditText(( WIDTH_TEXTBOX + ELEMENT_PADDING, BOX_POS, -ELEMENT_PADDING, HEIGHT_LABEL), self.parameters['footer'], continuous=False, callback=self.triggerParametersEdit)
 
 		LINE_POS += 110		
 		self.group.edit.refreshInstances =  CheckBox(
@@ -295,7 +302,7 @@ class OCCParametersView:
 
 		if len(self.group.templates.list) > 0:
 			self.group.templates.list.setSelection([0])
-			self.loadSelectedTemplate([0])
+			self.loadSelectedTemplate(0)
 
 	def printProof(self, sender):
 		if self.printProofCallback is not None:
@@ -303,7 +310,7 @@ class OCCParametersView:
 
 	def saveProofAs(self, sender):
 		name = self.group.templates.proofname.get()
-		name = name + '.pdf' if name != '' else 'Untitled.pdf'
+		name = name + '.pdf' if name != '' else 'UntitledProof.pdf'
 		result = putFile(
 			title="Save Proof",
 			messageText="Save Proof As...",
@@ -312,6 +319,9 @@ class OCCParametersView:
 			self.outputPath = result
 			self.saveProofCallback(result)
 
+	def triggerParametersEdit(self, sender):
+		self.parameters = self.getParameterSet()
+
 	def triggerInstanceListEdit(self, sender):
 		self.group.edit.refreshInstances.set(1)
 
@@ -319,54 +329,58 @@ class OCCParametersView:
 		self.preferences.savePreferences(self.templateFiles)
 
 	def triggerLoadSelectedTemplate(self, sender):
-		self.loadSelectedTemplate(self.group.templates.list.getSelection())
+		selectionIndices = self.group.templates.list.getSelection()
+		if len(selectionIndices) > 0:
+			selectedIndex = selectionIndices[-1]
+			self.loadSelectedTemplate(selectedIndex)
+			self.group.templates.applyTemplate.enable( True )
+		else:
+			self.group.templates.applyTemplate.enable( False )
 
 	def triggerProofModeChange(self, sender):
 		index = int(sender.get())
 		self.proof_mode = 'waterfall' if index == 0 else 'paragraphs'
 
 	def triggerApplyTemplate(self, sender):
-		self.loadSelectedTemplate(self.group.templates.list.getSelection())
 		self.group.edit.refreshInstances.set(1)
 		self.tryRerender()
 
 	def triggerProofUpdate( self, sender ):
 		self.tryRerender()
 
-	def loadSelectedTemplate(self, indices):
-		for i in indices:
-			template = self.templates.data[i]
-			self.glyphs = list()
+	def loadSelectedTemplate(self, selectedIndex):
+		template = self.templates.data[selectedIndex]
+		self.glyphs = list()
+		for n in template["glyphs"]:
+			if n == "newGlyph": #linebreak 
+				newGlyph = GSControlLayer(10)
+				newGlyph.name = 'newGlyph'
+				self.glyphs.append( newGlyph )
+			else:
+				self.glyphs.append( Glyphs.font.glyphs[n] )
 
-			for n in template["glyphs"]:
-				if n == "newGlyph": #linebreak 
-					newGlyph = GSControlLayer(10)
-					newGlyph.name = 'newGlyph'
-					self.glyphs.append( newGlyph )
-				else:
-					self.glyphs.append( Glyphs.font.glyphs[n] )
-			# self.glyphs = list(map(lambda n: Glyphs.font.glyphs[n], valid_names))
-			self.templateGlyphs = self.glyphs.copy() #store for refrence
+		self.templateGlyphs = self.glyphs.copy() #store for refrence
+		lines = list(map(lambda row: {"Style": row['style'], "Point Size": row['size']}, template['lines']))
 
-			lines = list(map(lambda row: {"Style": row['style'], "Point Size": row['size']}, template['lines']))
+		# settings
+		self.group.templates.proofname.set(tryString(template['name'], ''))
+		# margins
+		self.group.edit.layout.left.set(tryParseInt(template['proof']['margins']['left'], 0))
+		self.group.edit.layout.right.set(tryParseInt(template['proof']['margins']['right'], 0))
+		self.group.edit.layout.top.set(tryParseInt(template['proof']['margins']['top'], 0))
+		self.group.edit.layout.bottom.set(tryParseInt(template['proof']['margins']['bottom'], 0))
 
-			# margins
-			self.group.edit.layout.left.set(tryParseInt(template['proof']['margins']['left'], 0))
-			self.group.edit.layout.right.set(tryParseInt(template['proof']['margins']['right'], 0))
-			self.group.edit.layout.top.set(tryParseInt(template['proof']['margins']['top'], 0))
-			self.group.edit.layout.bottom.set(tryParseInt(template['proof']['margins']['bottom'], 0))
+		self.group.edit.layout.block.set(tryParseInt(template['proof']['padding']['block'], 0))
+		self.group.edit.layout.line.set(tryParseInt(template['proof']['padding']['line'], 0))
 
-			self.group.edit.layout.block.set(tryParseInt(template['proof']['padding']['block'], 0))
-			self.group.edit.layout.line.set(tryParseInt(template['proof']['padding']['line'], 0))
+		self.proof_mode = template['proof']['mode']
+		self.group.edit.proofMode.set(0 if self.proof_mode == 'waterfall' else 1)
+		self.group.edit.glyphSelection.set(0)
 
-			self.proof_mode = template['proof']['mode']
-			self.group.edit.proofMode.set(0 if self.proof_mode == 'waterfall' else 1)
-			self.group.edit.glyphSelection.set(0)
+		self.group.edit.layout.prooffooter.set(tryString(template['proof']['footer'], ''))
 
-			self.group.edit.list._editCallback = None
-			self.group.edit.list.set(lines)
-			
-		# self.tryRerender()
+		self.group.edit.list._editCallback = None
+		self.group.edit.list.set(lines)
 
 
 	def formatTemplateForDisplayList(self, template):
@@ -391,7 +405,8 @@ class OCCParametersView:
 				"block": int(self.group.edit.layout.block.get()),
 				"line": int(self.group.edit.layout.line.get())
 			},
-			"mode": self.proof_mode
+			"mode": self.proof_mode,
+			"footer": self.group.edit.layout.prooffooter.get()
 		}
 
 		template['glyphs'] = list(map(lambda g: g.name, self.glyphs))
@@ -442,7 +457,7 @@ class OCCParametersView:
 							self.group.templates.list.append(display)
 							modified_indices.append(len(self.group.templates.list) - 1)							
 			if len(modified_indices) > 0:
-				self.loadSelectedTemplate([modified_indices[-1]])
+				self.loadSelectedTemplate(modified_indices[-1])
 				self.group.templates.list.setSelection([modified_indices[-1]])
 
  
@@ -464,9 +479,6 @@ class OCCParametersView:
 		self.group.edit.refreshInstances.set(1)
 		for index in reversed(self.group.edit.list.getSelection()):
 			del self.group.edit.list[index]
-
-	# def triggerGlyphSelectionChange(self, sender):
-	# 	self.triggerParametersListEdit()
 
 	def parametersChanged(self, parameters, glyphs):
 		glyphsChanged = parameters['glyphs'][0] != self.parameters['glyphs'][0]
@@ -568,8 +580,8 @@ class OCCParametersView:
 			'point_sizes': list(map(int, point_sizes)),
 			'aligned': True,
 			'document': {'width': 11, 'height': 8.5},
-			'title': self.group.templates.proofname.get(),
-			'footer': self.group.edit.layout.prooffooter.get(),
+			'title': tryString(self.group.templates.proofname.get(), self.parameters['title']),
+			'footer': tryString(self.group.edit.layout.prooffooter.get(), self.parameters['footer']),
 			'mode': self.proof_mode,
 			'reinterpolate': self.group.edit.refreshInstances.get()
 		}

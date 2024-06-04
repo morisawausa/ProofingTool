@@ -70,6 +70,7 @@ class OCCProofingTool:
 
 	def draw(self, preview = True):
 		self.mainWindow.drawing.introText.show(0)
+		print( self.parameters['title'] )
 		print(f"Generating Proof [{self.parameters['title']}]...")
 
 		proof_mode = self.parameters['mode']
