@@ -14,7 +14,7 @@ class ProofingTool():
 	def __init__(self):
 		Glyphs.showMacroWindow()
 		if Glyphs.font:
-			print("\n🙌 Welcome to the Proofing Tool 🙌\n")
+			print("\n❇️ Welcome to the Proofing Tool \n")
 			if Glyphs.font.instances:
 				self.application = OCCProofingTool()
 			else:

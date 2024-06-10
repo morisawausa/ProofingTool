@@ -16,7 +16,6 @@ TEXT_PLACEMENT = 20
 WINDOW_WIDTH = 500 # In PIXELS
 TIMING = False # For performance-testing how long proofs take to generate
 
-
 class OCCProofingTool:
 	def __init__(self):
 		# Unit Arithmetic
@@ -69,9 +68,7 @@ class OCCProofingTool:
 
 
 	def draw(self, preview = True):
-		self.mainWindow.drawing.introText.show(0)
-		print( self.parameters['title'] )
-		print(f"Generating Proof [{self.parameters['title']}]...")
+		self.mainWindow.drawing.introText.show(0)		
 
 		proof_mode = self.parameters['mode']
 		# choose the right layout class based on the layout mode: 'waterfall' or 'paragraphs'

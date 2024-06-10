@@ -31,7 +31,7 @@ class OCCTemplatesView:
 		templates = []
 		for i, template_path in enumerate(files):
 			if not os.path.isfile(template_path):
-				print(f"⚠️ {template_path}\tnot found")
+				print(f"⚠️ [Missing Template] {template_path}\tnot found")
 				continue
 			try:
 				with open(template_path, 'r') as template_file:

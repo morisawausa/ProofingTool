@@ -16,7 +16,8 @@ from templates import OCCTemplatesView
 from preferences import OCCTemplatePreferences
 
 ELEMENT_PADDING = 8
-MAIN_PANEL_HEIGHT_FACTOR = 0.5
+TEMPLATES_PANEL_HEIGHT_FACTOR = 0.65
+EDIT_PANEL_HEIGHT_FACTOR = 0.35
 LINE_POS = 10
 LINE_HEIGHT = 30
 HEIGHT_DIVIDER = 30
@@ -110,7 +111,7 @@ class OCCParametersView:
 
 		WIDTH_FULL = windowSize[2]
 		WIDTH_HALF = windowSize[2]/2 - ELEMENT_PADDING/2
-		WIDTH_THIRD = windowSize[2]/3 - ELEMENT_PADDING
+		WIDTH_THIRD = windowSize[2]/3 - ELEMENT_PADDING/3
 
 
 		#
@@ -119,7 +120,7 @@ class OCCParametersView:
 
 		self.group.templates = Group(windowSize)
 		self.group.templates.list = List(
-			(0, 0, -0, self.window_height * MAIN_PANEL_HEIGHT_FACTOR),
+			(0, 0, -0, self.window_height * TEMPLATES_PANEL_HEIGHT_FACTOR),
 			map(lambda x: self.formatTemplateForDisplayList(x), self.templates.data),
 			columnDescriptions=[{"title": "Templates"}],
 			selectionCallback=self.triggerLoadSelectedTemplate,
@@ -132,7 +133,7 @@ class OCCParametersView:
 		)
 
 
-		LINE_POS = self.window_height * MAIN_PANEL_HEIGHT_FACTOR
+		LINE_POS = self.window_height * TEMPLATES_PANEL_HEIGHT_FACTOR
 
 		self.group.templates.addTemplate = Button(
 			(-100-ELEMENT_PADDING, LINE_POS - HEIGHT_BUTTON, 50, HEIGHT_BUTTON), "+",
@@ -146,32 +147,13 @@ class OCCParametersView:
 
 		LINE_POS += 10
 
-		self.group.templates.applyTemplate = Button(
-		(0, LINE_POS, WIDTH_FULL, HEIGHT_BUTTON),
-		"Apply Selected Template", callback=self.triggerApplyTemplate, sizeStyle="regular" )
-		self.group.templates.applyTemplate.setToolTip("Note: any edits to the proof will be reverted back to the saved template.")
-		self.group.templates.applyTemplate.enable( False )
-		#
-		# Output Settings
-		#
-		LINE_POS += HEIGHT_BUTTON + HEIGHT_DIVIDER
-
-		self.group.templates.outputdivider = HorizontalLine((0, LINE_POS, -0, 1))
-
-
-		LINE_POS += LINE_HEIGHT
-
-		self.group.templates.proofnamelabel = TextBox((0, LINE_POS,  WIDTH_TEXTBOX+20, HEIGHT_LABEL), "Proof Name", sizeStyle="regular")
-		self.group.templates.proofname = EditText((ELEMENT_PADDING + WIDTH_TEXTBOX+20, LINE_POS, -ELEMENT_PADDING, HEIGHT_LABEL), self.parameters['title'], continuous=False, callback=self.triggerParametersEdit)
-
-		LINE_POS += HEIGHT_DIVIDER
-
-		self.group.templates.saveTemplate = Button((0, LINE_POS, WIDTH_THIRD, HEIGHT_BUTTON), "Save New Template", callback=self.triggerSaveProofAsTemplate)
-		self.group.templates.saveproofas = Button((WIDTH_THIRD+ELEMENT_PADDING, LINE_POS, WIDTH_THIRD, HEIGHT_BUTTON), "Save Proof PDF", callback=self.saveProofAs, sizeStyle="regular")
-		self.group.templates.printproof = Button((WIDTH_THIRD*2+ELEMENT_PADDING*2, LINE_POS, WIDTH_THIRD, HEIGHT_BUTTON), "Print Proof", callback=self.printProof, sizeStyle="regular")
+		# self.group.templates.applyTemplate = Button(
+		# (0, LINE_POS, WIDTH_FULL, HEIGHT_BUTTON),
+		# "Apply Selected Template", callback=self.triggerApplyTemplate, sizeStyle="regular" )
+		# self.group.templates.applyTemplate.setToolTip("Note: any edits to the proof will be reverted back to the saved template.")
+		# self.group.templates.applyTemplate.enable( False )
 
 		self.group.templates.show(False)
-
 
 		#
 		# EDIT TAB
@@ -187,7 +169,7 @@ class OCCParametersView:
 		instances_LIST = [x for x in I_instances_LIST]
 
 		self.group.edit.list = List(
-			(0, LINE_POS, -0, self.window_height * MAIN_PANEL_HEIGHT_FACTOR),
+			(0, LINE_POS, -0, self.window_height * EDIT_PANEL_HEIGHT_FACTOR),
 			[{"Style": instances_LIST[0], "Point Size": 72}],
 			columnDescriptions=[
 				{
@@ -205,9 +187,9 @@ class OCCParametersView:
 			allowsEmptySelection=True,
 			rowHeight=20.0
 		)
-		self.group.edit.list.setToolTip("Use the +/- buttons to add styles to the list, or save and edit the template .json file in your Text Editor to reload.")
+		self.group.edit.list.setToolTip("Use the +/- buttons to add styles to the list, or edit the .json template file in a Text Editor and reload.")
 
-		LINE_POS += self.window_height * MAIN_PANEL_HEIGHT_FACTOR
+		LINE_POS += self.window_height * EDIT_PANEL_HEIGHT_FACTOR
 
 		self.group.edit.addRow = Button(
 			(-100-ELEMENT_PADDING, LINE_POS - HEIGHT_BUTTON, 50, HEIGHT_BUTTON), "+",
@@ -280,22 +262,45 @@ class OCCParametersView:
 		BOX_POS += LINE_HEIGHT + 3
 
 		self.group.edit.layout.prooffooterlabel = TextBox((ELEMENT_PADDING, BOX_POS, WIDTH_TEXTBOX, HEIGHT_LABEL), "Footer", sizeStyle="small")
-		self.group.edit.layout.prooffooter = EditText(( WIDTH_TEXTBOX + ELEMENT_PADDING, BOX_POS, -ELEMENT_PADDING, HEIGHT_LABEL), self.parameters['footer'], continuous=False, callback=self.triggerParametersEdit)
+		self.group.edit.layout.prooffooter = EditText(( WIDTH_TEXTBOX + ELEMENT_PADDING, BOX_POS, -ELEMENT_PADDING, HEIGHT_LABEL+5), self.parameters['footer'], continuous=False, callback=self.triggerParametersEdit)
 
-		LINE_POS += 110		
-		self.group.edit.refreshInstances =  CheckBox(
-			(0, LINE_POS, -0, HEIGHT_LABEL), "Re-export Instances", value=False)
-		self.group.edit.refreshInstances.setToolTip("Uncheck this to adjust the proof layout with existing styles. Keep checked for any changes in the list of styles.")
+		LINE_POS += 100
+		self.group.edit.show(False)
+
+		LINE_POS += HEIGHT_DIVIDER
+
+
+		#
+		# GLOBAL BUTTONS AND OUTPUT
+		#
+		self.group.output = Group( (ELEMENT_PADDING, -160, windowSize[2], 150) )
+		LINE_POS = 0
+		
+		self.group.output.refreshInstances =  CheckBox(
+			(ELEMENT_PADDING, LINE_POS, -ELEMENT_PADDING, HEIGHT_LABEL), "Re-export Instances", value=False)
+		self.group.output.refreshInstances.setToolTip("Uncheck this to adjust the proof with existing styles. Keep checked for any changes in the list of styles.")
 
 		LINE_POS += LINE_HEIGHT
 
-		self.group.edit.refreshProof = Button(
-		(0, LINE_POS, WIDTH_FULL, HEIGHT_BUTTON),
-		"Update Proof", callback=self.triggerProofUpdate, sizeStyle="regular" );
+		self.group.output.refreshProof = SquareButton(
+		(0, LINE_POS, -0, HEIGHT_BUTTON+10),
+		"❇️ Proof", callback=self.triggerProofUpdate, sizeStyle="regular" );
+		self.group.output.refreshProof.setToolTip("Update the proof with applied template or edited settings. ")
 
-		self.group.edit.refreshProof.setToolTip("Apply edits to the proof.")
+		#
+		# Output Settings
+		#
+		LINE_POS += HEIGHT_DIVIDER+20
 
-		self.group.edit.show(False)
+		self.group.output.proofnamelabel = TextBox((0, LINE_POS,  WIDTH_TEXTBOX+20, HEIGHT_LABEL), "Proof Name", sizeStyle="regular")
+		self.group.output.proofname = EditText((ELEMENT_PADDING + WIDTH_TEXTBOX+20, LINE_POS, -0, HEIGHT_LABEL+5), self.parameters['title'], continuous=False, callback=self.triggerParametersEdit)
+
+		LINE_POS += LINE_HEIGHT
+
+		self.group.output.saveTemplate = Button((0, LINE_POS, WIDTH_THIRD, HEIGHT_BUTTON), "📋 Save As Template", callback=self.triggerSaveProofAsTemplate)
+		self.group.output.saveproofas = Button((WIDTH_THIRD+ELEMENT_PADDING/2, LINE_POS, WIDTH_THIRD, HEIGHT_BUTTON), "📄 Save PDF", callback=self.saveProofAs, sizeStyle="regular")
+		self.group.output.printproof = Button((WIDTH_THIRD*2+ELEMENT_PADDING, LINE_POS, WIDTH_THIRD, HEIGHT_BUTTON), "🖨 Print Proof", callback=self.printProof, sizeStyle="regular")
+
 
 		parent_window.g = self.group
 		self.setActiveSection(0)
@@ -309,7 +314,7 @@ class OCCParametersView:
 			self.printProofCallback()
 
 	def saveProofAs(self, sender):
-		name = self.group.templates.proofname.get()
+		name = self.group.output.proofname.get()
 		name = name + '.pdf' if name != '' else 'UntitledProof.pdf'
 		result = putFile(
 			title="Save Proof",
@@ -323,7 +328,7 @@ class OCCParametersView:
 		self.parameters = self.getParameterSet()
 
 	def triggerInstanceListEdit(self, sender):
-		self.group.edit.refreshInstances.set(1)
+		self.group.output.refreshInstances.set(1)
 
 	def triggerTemplateListEdit(self, sender):
 		self.preferences.savePreferences(self.templateFiles)
@@ -333,17 +338,14 @@ class OCCParametersView:
 		if len(selectionIndices) > 0:
 			selectedIndex = selectionIndices[-1]
 			self.loadSelectedTemplate(selectedIndex)
-			self.group.templates.applyTemplate.enable( True )
-		else:
-			self.group.templates.applyTemplate.enable( False )
 
 	def triggerProofModeChange(self, sender):
 		index = int(sender.get())
 		self.proof_mode = 'waterfall' if index == 0 else 'paragraphs'
 
-	def triggerApplyTemplate(self, sender):
-		self.group.edit.refreshInstances.set(1)
-		self.tryRerender()
+	# def triggerApplyTemplate(self, sender):
+	# 	self.group.output.refreshInstances.set(1)
+	# 	self.tryRerender()
 
 	def triggerProofUpdate( self, sender ):
 		self.tryRerender()
@@ -363,7 +365,7 @@ class OCCParametersView:
 		lines = list(map(lambda row: {"Style": row['style'], "Point Size": row['size']}, template['lines']))
 
 		# settings
-		self.group.templates.proofname.set(tryString(template['name'], ''))
+		self.group.output.proofname.set(tryString(template['name'], ''))
 		# margins
 		self.group.edit.layout.left.set(tryParseInt(template['proof']['margins']['left'], 0))
 		self.group.edit.layout.right.set(tryParseInt(template['proof']['margins']['right'], 0))
@@ -388,7 +390,7 @@ class OCCParametersView:
 
 
 	def triggerSaveProofAsTemplate(self, sender):
-		name = self.group.templates.proofname.get()
+		name = self.group.output.proofname.get()
 		name = name if name != "" else "Proof"
 		filename = '-'.join(name.lower().split(' ')) + '.json'
 		template = OrderedDict()
@@ -465,7 +467,7 @@ class OCCParametersView:
 		self.setActiveSection(int(sender.get()))
 
 	def triggerAddRowToParametersList(self, sender):
-		self.group.edit.refreshInstances.set(1)
+		self.group.output.refreshInstances.set(1)
 		if len(self.group.edit.list) > 0:
 			last_style = self.group.edit.list[-1]['Style']
 			last_ptsz = self.group.edit.list[-1]['Point Size']
@@ -476,7 +478,7 @@ class OCCParametersView:
 				"Point Size": 24})
 
 	def triggerRemoveSelectedFromParametersList(self, sender):
-		self.group.edit.refreshInstances.set(1)
+		self.group.output.refreshInstances.set(1)
 		for index in reversed(self.group.edit.list.getSelection()):
 			del self.group.edit.list[index]
 
@@ -502,13 +504,13 @@ class OCCParametersView:
 			newGlyphSet = self.getGlyphSet()
 
 			# check to see if the parameters actually changed.
-			if self.parametersChanged(newParamSet, newGlyphSet):
+			if self.parametersChanged(newParamSet, newGlyphSet):				
 				# cache latest parameter state.
 				self.parameters = newParamSet
 				self.parameters['glyphs'] = newGlyphSet
+				print(f"Generating Proof [{self.parameters['title']}]...")
 
 				self.parametersChangedCallback(newParamSet, newGlyphSet)
-
 
 
 	def setActiveSection(self, index):
@@ -530,7 +532,7 @@ class OCCParametersView:
 		return [self.glyphs]
 
 	def getParameterSet(self):
-		if( self.group.edit.refreshInstances.get() == 1 ):
+		if( self.group.output.refreshInstances.get() == 1 ):
 			instances = []
 		else:
 			instances = self.parameters['instances']
@@ -580,10 +582,10 @@ class OCCParametersView:
 			'point_sizes': list(map(int, point_sizes)),
 			'aligned': True,
 			'document': {'width': 11, 'height': 8.5},
-			'title': tryString(self.group.templates.proofname.get(), self.parameters['title']),
+			'title': tryString(self.group.output.proofname.get(), self.parameters['title']),
 			'footer': tryString(self.group.edit.layout.prooffooter.get(), self.parameters['footer']),
 			'mode': self.proof_mode,
-			'reinterpolate': self.group.edit.refreshInstances.get()
+			'reinterpolate': self.group.output.refreshInstances.get()
 		}
 		#print('PARAMS', parameters)
 		return parameters
