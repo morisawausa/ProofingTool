@@ -32,7 +32,6 @@ class ProofingTool(GeneralPlugin):
 
 	def showWindow_(self, sender):
 		"""Do something like show a window """
-		print("show Windows")
 		Glyphs.showMacroWindow()
 		if Glyphs.font:
 			print("\n❇️ Welcome to the Proofing Tool \n")
@@ -44,7 +43,7 @@ class ProofingTool(GeneralPlugin):
 			else:
 				print("There are no exports set up yet 😥 Please define at least one instance and run the tool again.")
 		else:
-			print("There are no fonts open yet 😥 Please open a file and run the tool again.")
+			print("There isn’t a font open yet 😥 Please open a file and run the tool again.")
 
 
 	@objc.python_method

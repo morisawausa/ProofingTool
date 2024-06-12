@@ -57,7 +57,6 @@ class OCCParametersView:
 		self.templates = OCCTemplatesView(self.preferences)
 		self.templateFiles = []
 		self.templateFiles.extend( self.templates.templateFiles )
-		print( self.templateFiles )
 
 		self.instances = self.templates.instanceList
 
@@ -70,7 +69,7 @@ class OCCParametersView:
 
 		self.proof_mode = 'waterfall'
 		self.parameters = {
-			'padding': {
+			'gaps': {
 				'left': 20,
 				'right': 50,
 				'top': 20,
@@ -223,11 +222,11 @@ class OCCParametersView:
 		X_POS += WIDTH_TEXTBOX + ELEMENT_PADDING
 		self.group.edit.layout.linelabel = TextBox((X_POS, BOX_POS+5, WIDTH_LABEL, HEIGHT_LABEL), "Line", sizeStyle="mini")
 		X_POS += WIDTH_LABEL
-		self.group.edit.layout.line = EditText((X_POS, BOX_POS, WIDTH_INPUT_NO, HEIGHT_LABEL), self.parameters['padding']['line'], sizeStyle="small", continuous=False, callback=self.triggerParametersEdit)
+		self.group.edit.layout.line = EditText((X_POS, BOX_POS, WIDTH_INPUT_NO, HEIGHT_LABEL), self.parameters['gaps']['line'], sizeStyle="small", continuous=False, callback=self.triggerParametersEdit)
 		X_POS += WIDTH_INPUT_NO + ELEMENT_PADDING
 		self.group.edit.layout.blocklabel = TextBox((X_POS, BOX_POS+5, WIDTH_LABEL, HEIGHT_LABEL), "Block", sizeStyle="mini")
 		X_POS += WIDTH_LABEL
-		self.group.edit.layout.block = EditText((X_POS, BOX_POS, WIDTH_INPUT_NO, HEIGHT_LABEL), self.parameters['padding']['block'], sizeStyle="small", continuous=False, callback=self.triggerParametersEdit)
+		self.group.edit.layout.block = EditText((X_POS, BOX_POS, WIDTH_INPUT_NO, HEIGHT_LABEL), self.parameters['gaps']['block'], sizeStyle="small", continuous=False, callback=self.triggerParametersEdit)
 		
 		BOX_POS += LINE_HEIGHT
 
@@ -236,22 +235,22 @@ class OCCParametersView:
 		X_POS += WIDTH_TEXTBOX + ELEMENT_PADDING
 		self.group.edit.layout.toplabel = TextBox((X_POS, BOX_POS+5, WIDTH_LABEL, HEIGHT_LABEL), "Top", sizeStyle="mini")
 		X_POS += WIDTH_LABEL
-		self.group.edit.layout.top = EditText((X_POS, BOX_POS, WIDTH_INPUT_NO, HEIGHT_LABEL), self.parameters['padding']['top'], sizeStyle="small", continuous=False, callback=self.triggerParametersEdit)
+		self.group.edit.layout.top = EditText((X_POS, BOX_POS, WIDTH_INPUT_NO, HEIGHT_LABEL), self.parameters['gaps']['top'], sizeStyle="small", continuous=False, callback=self.triggerParametersEdit)
 		X_POS += WIDTH_INPUT_NO + ELEMENT_PADDING
 
 		self.group.edit.layout.leftlabel = TextBox((X_POS, BOX_POS+5, WIDTH_LABEL, HEIGHT_LABEL), "Left", sizeStyle="mini")
 		X_POS += WIDTH_LABEL
-		self.group.edit.layout.left = EditText((X_POS, BOX_POS, WIDTH_INPUT_NO, HEIGHT_LABEL), self.parameters['padding']['left'], sizeStyle="small", continuous=False, callback=self.triggerParametersEdit)
+		self.group.edit.layout.left = EditText((X_POS, BOX_POS, WIDTH_INPUT_NO, HEIGHT_LABEL), self.parameters['gaps']['left'], sizeStyle="small", continuous=False, callback=self.triggerParametersEdit)
 		X_POS += WIDTH_INPUT_NO + ELEMENT_PADDING
 
 		self.group.edit.layout.rightlabel = TextBox((X_POS, BOX_POS+5, WIDTH_LABEL, HEIGHT_LABEL), "Right", alignment="left", sizeStyle="mini")
 		X_POS += WIDTH_LABEL
-		self.group.edit.layout.right = EditText((X_POS, BOX_POS, WIDTH_INPUT_NO, HEIGHT_LABEL), self.parameters['padding']['right'], sizeStyle="small", continuous=False, callback=self.triggerParametersEdit)
+		self.group.edit.layout.right = EditText((X_POS, BOX_POS, WIDTH_INPUT_NO, HEIGHT_LABEL), self.parameters['gaps']['right'], sizeStyle="small", continuous=False, callback=self.triggerParametersEdit)
 		X_POS += WIDTH_INPUT_NO + ELEMENT_PADDING
 
 		self.group.edit.layout.botlabel = TextBox((X_POS, BOX_POS+5, WIDTH_LABEL, HEIGHT_LABEL), "Bottom", sizeStyle="mini")
 		X_POS += WIDTH_LABEL
-		self.group.edit.layout.bottom = EditText((X_POS, BOX_POS, WIDTH_INPUT_NO, HEIGHT_LABEL), self.parameters['padding']['bottom'], sizeStyle="small", continuous=False, callback=self.triggerParametersEdit)
+		self.group.edit.layout.bottom = EditText((X_POS, BOX_POS, WIDTH_INPUT_NO, HEIGHT_LABEL), self.parameters['gaps']['bottom'], sizeStyle="small", continuous=False, callback=self.triggerParametersEdit)
 
 		BOX_POS += LINE_HEIGHT + 3
 
@@ -362,8 +361,8 @@ class OCCParametersView:
 		self.group.edit.layout.top.set(tryParseInt(template['proof']['margins']['top'], 0))
 		self.group.edit.layout.bottom.set(tryParseInt(template['proof']['margins']['bottom'], 0))
 
-		self.group.edit.layout.block.set(tryParseInt(template['proof']['padding']['block'], 0))
-		self.group.edit.layout.line.set(tryParseInt(template['proof']['padding']['line'], 0))
+		self.group.edit.layout.block.set(tryParseInt(template['proof']['gaps']['block'], 0))
+		self.group.edit.layout.line.set(tryParseInt(template['proof']['gaps']['line'], 0))
 
 		self.proof_mode = template['proof']['mode']
 		self.group.edit.proofMode.set(0 if self.proof_mode == 'waterfall' else 1)
@@ -393,7 +392,7 @@ class OCCParametersView:
 				"top": int(self.group.edit.layout.top.get()),
 				"bottom": int(self.group.edit.layout.bottom.get())
 			},
-			"padding": {
+			"gaps": {
 				"block": int(self.group.edit.layout.block.get()),
 				"line": int(self.group.edit.layout.line.get())
 			},
@@ -473,7 +472,7 @@ class OCCParametersView:
 
 	def parametersChanged(self, parameters, glyphs):
 		glyphsChanged = parameters['glyphs'][0] != self.parameters['glyphs'][0]
-		layoutChanged = parameters['padding'] != self.parameters['padding']
+		layoutChanged = parameters['gaps'] != self.parameters['gaps']
 		instancesChanged = parameters['instances'] != self.parameters['instances']
 		sizesChanged = parameters['point_sizes'] != self.parameters['point_sizes']
 		titleChanged = parameters['title'] != self.parameters['title']
@@ -557,13 +556,13 @@ class OCCParametersView:
 		# print('[profile] time to interpolate: %.03f seconds' % (default_timer() - pre_interpolation))
 
 		parameters = {
-			'padding': {
-				'left': tryParseInt(self.group.edit.layout.left.get(), self.parameters['padding']['left']),
-				'right': tryParseInt(self.group.edit.layout.right.get(), self.parameters['padding']['right']),
-				'top': tryParseInt(self.group.edit.layout.top.get(), self.parameters['padding']['top']),
-				'bottom': tryParseInt(self.group.edit.layout.bottom.get(), self.parameters['padding']['bottom']),
-				'line': tryParseInt(self.group.edit.layout.line.get(), self.parameters['padding']['line']),
-				'block': tryParseInt(self.group.edit.layout.block.get(), self.parameters['padding']['block'])
+			'gaps': {
+				'left': tryParseInt(self.group.edit.layout.left.get(), self.parameters['gaps']['left']),
+				'right': tryParseInt(self.group.edit.layout.right.get(), self.parameters['gaps']['right']),
+				'top': tryParseInt(self.group.edit.layout.top.get(), self.parameters['gaps']['top']),
+				'bottom': tryParseInt(self.group.edit.layout.bottom.get(), self.parameters['gaps']['bottom']),
+				'line': tryParseInt(self.group.edit.layout.line.get(), self.parameters['gaps']['line']),
+				'block': tryParseInt(self.group.edit.layout.block.get(), self.parameters['gaps']['block'])
 			},
 			'glyphs': self.glyphs,
 			'instances': instances,

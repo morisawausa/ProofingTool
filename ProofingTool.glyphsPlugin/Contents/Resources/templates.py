@@ -148,7 +148,7 @@ class OCCTemplatesView:
 				"top": 20,
 				"bottom": 100,
 			},
-			"padding": {
+			"gaps": {
 				"line": 20,
 				"block": 20
 			},
@@ -163,9 +163,9 @@ class OCCTemplatesView:
 				proof['margins']['top'] = template['proof']['margins']['top']
 				proof['margins']['bottom'] = template['proof']['margins']['bottom']
 
-			if 'padding' in template['proof']:
-				proof['padding']['line'] = template['proof']['padding']['line']
-				proof['padding']['block'] = template['proof']['padding']['block']
+			if 'gaps' in template['proof']:
+				proof['gaps']['line'] = template['proof']['gaps']['line']
+				proof['gaps']['block'] = template['proof']['gaps']['block']
 
 			if 'mode' in template['proof']:
 				proof['mode'] = template['proof']['mode']
@@ -174,7 +174,7 @@ class OCCTemplatesView:
 				proof['footer'] = template['proof']['footer']
 		else:
 			if DEBUG:
-				print(f'[{template_name}]\t"{template_name}" does not specify margin and padding information. Setting defaults.')
+				print(f'[{template_name}]\t"{template_name}" does not specify margin and gap information. Setting defaults.')
 
 		return {
 			"name": name,

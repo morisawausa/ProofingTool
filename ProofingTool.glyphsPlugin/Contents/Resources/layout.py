@@ -22,8 +22,8 @@ class OCCProofingLayout(object):
         self.in_per_pt = 0.0138889
         self.px_per_in = width / parameters['document']['width']
         self.line_height_factor = 1.25
-        self.line_padding = parameters['padding']['line']
-        self.block_padding = parameters['padding']['block']
+        self.line_padding = parameters['gaps']['line']
+        self.block_padding = parameters['gaps']['block']
         self.block_glyph_index = 0
         self.pages = []
 
@@ -66,9 +66,9 @@ class OCCProofingParagraphLayout(OCCProofingLayout):
             self.pages = []
             return
 
-        page_origin_x_px = parameters['padding']['left']
-        available_space_x_px = self.width - self.parameters['padding']['right']
-        page_origin_y_px = self.height - parameters['padding']['top']
+        page_origin_x_px = parameters['gaps']['left']
+        available_space_x_px = self.width - self.parameters['gaps']['right']
+        page_origin_y_px = self.height - parameters['gaps']['top']
 
 
         block_advance_position_x_px = 0
@@ -89,7 +89,7 @@ class OCCProofingParagraphLayout(OCCProofingLayout):
 
             while i < len(self.glyphs):
 
-                if page_origin_y_px - block_advance_position_y_px < self.parameters['padding']['bottom']:
+                if page_origin_y_px - block_advance_position_y_px < self.parameters['gaps']['bottom']:
                     # we've fallen off the end of the page, time to add another one.
                     block_advance_position_y_px = height_px
                     block_advance_position_x_px = 0
@@ -181,8 +181,8 @@ class OCCProofingWaterfallLayout(OCCProofingLayout):
         pages = [[]]
         page_index = 0
 
-        page_origin_x_px = parameters['padding']['left']
-        page_origin_y_px = self.height - parameters['padding']['top']
+        page_origin_x_px = parameters['gaps']['left']
+        page_origin_y_px = self.height - parameters['gaps']['top']
 
         block_index = 0
 
@@ -207,7 +207,7 @@ class OCCProofingWaterfallLayout(OCCProofingLayout):
 
             # If we have a block-size that fits onto a single page, check for when a block runs off the page,
             # and advance it to the next page.
-            if block_origin_y_px - self.block_height < parameters['padding']['bottom'] and self.block_glyph_index > 0:
+            if block_origin_y_px - self.block_height < parameters['gaps']['bottom'] and self.block_glyph_index > 0:
                 # This block overshoots the end of the page.
                 # time to create a new page, and reset the block data.
                 pages.append([])
@@ -257,7 +257,7 @@ class OCCProofingWaterfallLayout(OCCProofingLayout):
                 block_advance_position_x_px = 0
 
                 # I need something here to advance the page pointer.
-                if block_origin_y_px - block_advance_position_y_px <= parameters['padding']['bottom']:
+                if block_origin_y_px - block_advance_position_y_px <= parameters['gaps']['bottom']:
                     pages.append([])
                     page_index += 1
                     block_origin_y_px = page_origin_y_px
@@ -293,9 +293,9 @@ class OCCProofingWaterfallLayout(OCCProofingLayout):
         line_index, (style_name, point_size) = data
 
         u_to_px = self.get_scalefactor(point_size)
-        advance_px = self.parameters['padding']['left']
+        advance_px = self.parameters['gaps']['left']
         glyph_count = 0
-        available_space_px = self.width - self.parameters['padding']['right']
+        available_space_px = self.width - self.parameters['gaps']['right']
 
         while advance_px < available_space_px and self.block_glyph_index + glyph_count < len(self.glyphs):
             this_glyph = self.glyphs[self.block_glyph_index + glyph_count]

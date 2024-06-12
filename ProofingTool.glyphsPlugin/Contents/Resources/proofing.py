@@ -113,9 +113,9 @@ class OCCProofingTool:
 
 			page = 'pg. %s' % str(i+1)
 
-			if self.parameters['padding']['bottom'] > TEXT_PLACEMENT:
-				_drawBotDrawingTool.text(text, (self.parameters['padding']['left'], TEXT_PLACEMENT))
-				_drawBotDrawingTool.text(page, (self.width - self.parameters['padding']['left'] - 20, TEXT_PLACEMENT))
+			if self.parameters['gaps']['bottom'] > TEXT_PLACEMENT:
+				_drawBotDrawingTool.text(text, (self.parameters['gaps']['left'], TEXT_PLACEMENT))
+				_drawBotDrawingTool.text(page, (self.width - self.parameters['gaps']['left'] - 20, TEXT_PLACEMENT))
 
 		#_drawBotDrawingTool.printImage()
 		#_drawBotDrawingTool.saveImage("/Users/nic/Desktop/proof.pdf")

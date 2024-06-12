@@ -1,6 +1,8 @@
 # Proofing Tool
 
-This Glyphs Plugin helps you output proofs directly from Glyphs. The plugin focuses on generating form comparison proofs in two forms: [waterfall]() and [paragraph]() view. It currently isn’t intended to robustly proof typesetting (it won’t show [kerning](), for example), but it should help you quickly format documents for proofing use without needing to export font binaries, deal with font caching, or open InDesign. We made this tool with the hope that it might reduce the annoyance of producing proofs for in-progress work intended for internal review.
+This Glyphs Plugin helps you output proofs directly from Glyphs. The plugin focuses on generating form comparison proofs in two forms: [waterfall](#waterfall) and [paragraph](#paragraph) view. It currently isn’t intended to robustly proof typesetting (it won’t show [kerning](https://github.com/morisawausa/ProofingTool/issues/5), for example), but it should help you quickly format documents for proofing use without needing to export font binaries, deal with font caching, or open InDesign. We made this tool with the hope that it might reduce the annoyance of producing proofs for in-progress work intended for internal review.
+
+Last tested in Glyphs 3.2.1 (3258).
 
 ## Prerequisites:
 
@@ -11,7 +13,21 @@ This Glyphs Plugin helps you output proofs directly from Glyphs. The plugin focu
 2. Open a glyphs file. The tool will use your currently selected file to generate the proof.
 
 3. Make sure that you have `exports` setup in your Font Information.
- 
+
+## Installation
+
+1. Clone the Proofing Tool repo. It’s usually best to clone them into the `Repositories` folder in Glyphs, along the lines of `/Users/yourusername/Library/Application Support/Glyphs 3/Repositories`. 
+
+2. Double-click on the `ProofingTool.glyphsPlugin` file. Glyphs App should open up and prompt you to install the plugin.
+
+3. It will ask you whether you want to copy the plugin or use an Alias. Using the Alias option will help you pull any future updates to the tool.
+
+4. Restart Glyphs
+
+5. Open a `.glyphs` file and make sure there are instances setup. 
+
+6. Go to `File > Proofing Tool` to start up the tool.
+
 
 ### On Setting up Exports
 ⚠️ The tool, by default, will use the `Style Name` field on the exports tab to setup the list of available instances.
@@ -20,7 +36,7 @@ This Glyphs Plugin helps you output proofs directly from Glyphs. The plugin focu
 
 This means that the proof templates will be setup with a specific family name, such as “Dispatch 2 Compressed ExtraLight” and won’t work for other typefaces. If re-using the template for another typeface, I recommend editing the template file in a text-editor to find-and-replace the Typographic Family Name. (We may be able to better extract style names by using more complex processing of those fields, but setting up the names in the Glyphs panel for production export can be tricky business, so let us know if you have any recommendations here.)
 
-**If there are duplicate `Style Name` entries but no `Typographic Family/Syle Names` entries, there will be missing instances in the dropdown field selection.**
+*If there are duplicate `Style Name` entries but no `Typographic Family/Syle Names` entries, there will be missing instances in the dropdown field selection.*
 
 
 ## Using the Tool
@@ -82,7 +98,7 @@ You’ll then choose which glyphs you’ll want in the proof. You have 3 options
 
 The proof in the above image sets the character set of a type family in a waterfall style. The text is broken up into blocks of a single line per style or size (this image shows them all at 24pt, but this can also be set up where each line is a different size). Any text that doesn’t fit into the line is pushed to the next block. If the block doesn’t fit entirely on the page, the entire block is shifted onto the next page.
 
-A key feature of the waterfall proof is that it *puts the same set of characters on each line*. This can be useful for comparing interpolation results across a family, checking alignment of diacritic placements, or any stray spacing errors.
+A key feature of the waterfall proof is that it *puts the same set of characters on each line*. This can be useful for comparing interpolation results across a family, checking alignment of diacritic placements, or identify any stray spacing errors. 
 
 #### Paragraph
 
@@ -92,7 +108,7 @@ A **Paragraph** proof are for block-by-block comparisons. A paragraph proof will
 
 In the paragraph proof, the entire text is displayed in a single paragraph, before we move on to the next style. (As you can tell from the above image, the Paragraph proof is best suited to longer chunks of text.)
 
-A key feature of the paragraph proof is that it *full blocks of text* across styles. This can be especially useful for comparing textures with specific glyphs generated from the Edit View. Depending on where you are in the type design process, it might be a set of [word-o-mat]()-generated paragraph of control characters, a set of spacing strings, stylistic alternates, or sample texts of a particular language.
+A key feature of the paragraph proof is that it *full blocks of text* across styles. This can be especially useful for comparing textures with specific glyphs generated from the Edit View. Depending on where you are in the type design process, it might be a set of Nina Stössinger’s [word-o-mat](https://github.com/schriftgestalt/word-o-mat)-generated paragraph of control characters, a set of spacing strings, a test for stylistic alternates, or sample texts of a particular language.
 
 ### Layout
 
@@ -112,15 +128,15 @@ In Paragraph mode, the `Block` is effectively be the paragraph of all text for s
 
 Margins of the document is the space around the lines of glyphs. Note: a larger `right` and `bottom` margin is recommended, especially with the footer being inserted at the bottom.
 
-Currently, the Editing UI isn’t the most user-friendly. For example, you can’t drag-and-drop to reorder styles, or change all the sizes of each style at once. For significant edits to your templates, we recommend using a Text Editor to directly edit the template data files.
+*Currently, the Editing UI isn’t the most user-friendly.* You can’t drag-and-drop to reorder styles (ssue [#7](https://github.com/morisawausa/ProofingTool/issues/7)), or change all the sizes of each style at once (issue [#8](https://github.com/morisawausa/ProofingTool/issues/8)). For significant edits to your templates, we recommend using a Text Editor to directly edit the template data files.
 
 ## Creating and Editing Proof Templates: Text Editor Option
 
 This tool uses a JSON-based template format to store proof configurations on a pre-project basis. You can version control these JSON files together with the rest of your typeface sources, if you wish. The intention here is to provide a way of quickly rendering proofs, without having to configure the tool each time you want to use it.
 
-Personally, I think the easiest thing to do is to adapt the `data/demo.json` file in this respository to suit the needs of your font project. You can keep the edited file in this repository and use it while you work, or copy it into your font project directory, for posterity. The tool will automatically load the contents of previously-opened data files.
+The easiest way to create a new template is to adapt the `data/demo.json` file in this respository to your font project. We often have a `proofs` folder for each of our font projects, where we keep both proof PDFs as well as project-specific templates. The tool will automatically load the contents of previously-opened data files.
 
-The rest of this section will walk you through the template syntax. Note that the JSON format is very strict, so it won’t work if there’s even a single syntax error; if you are new to JSON-editing, I recommend double-checking that your file is error-free through Online JSON validators. (To do: allow UI to enable DEBUG mode for template errors)
+The rest of this section will walk you through the template syntax. Note that the JSON format is very strict, so it won’t work if there’s even a single syntax error—if you are new to JSON-editing, I recommend double-checking that your file is error-free through Online JSON validators. (To do: allow UI to enable [debugging mode](https://github.com/morisawausa/ProofingTool/issues/21) for template errors)
 
 At the root, the template JSON looks like this:
 
@@ -147,7 +163,7 @@ The `"proof"` key contains all of the layout details for rendering the proof. It
     /**
      * These are the page margins, in pixels. for ease of working with DrawBot,
      * the calculations for layout and rendering are done in pixel space. So far,
-     * this hasn't been a huge issue for us, but we may convert to a different
+     * this hasn’t been a huge issue for us, but we may convert to a different
      * unit system at some point.
      */
     "margins": {
@@ -157,20 +173,20 @@ The `"proof"` key contains all of the layout details for rendering the proof. It
       "bottom": 50
     },
     /**
-     * These are padding values (also in pixels) to put in between lines and
+     * These are gaps (also in pixels) to put in between lines and
      * blocks. A line is a single line of glyphs running the length of the page.
      * a block is one contiguous block of glyphs. In waterfall mode, a block is
      * one line of glyphs across each style that you're rendering. In paragraph
      * mode, a block is one entire run of glyphs – paragraph – in a single
-     * style. Line padding is added between each line, block padding is added
+     * style. Line gap is added between each line, block gap is added
      * after each block.
      */
-    "padding": {
+    "gaps": {
       "block": 20,
       "line": 30
     },
     /**
-     * This is the rendermode: either "waterfall" or "paragraphs"
+     * This is the rendermode: either "waterfall" or "paragraph"
      */
     "mode": "waterfall"
   },
@@ -221,15 +237,6 @@ Finally, the `"glyphs"` key specifies an in-order sequence of glyphs to render. 
 ## Issues
 We’ve logged a number of other known issues on the repo. Feel free to leave any additional issues as you encounter them. Thanks!
 
-## Installation
-
-At this moment, the tool works as a Glyphs.app script. To install the tool:
-
-1. Install the DrawBot plugin using the built-in Plugin Manager in Glyphs.app. This tool uses drawbot to prepare proofs, so it requires you to have that library installed and available to Glyphs.app.
-
-2. Clone this git repository into your Glyphs.app Scripts directory. This is the same folder where your `_GlyphsScripts` folder lives, for example. It's usually somewhere like `~/Library/Application Support/Glyphs/Scripts`. (The `~` is your user’s home folder, something like `/Users/nic`, for example).
-
-3. Restart Glyphs.
-
 ## About
+This proofing tool was created as an internal tool for [Occupant Fonts](https://occupantfonts.com/), with original development by [Nic Schumann](https://github.com/nicschumann) with input from [June Shin](https://github.com/notborninjune), [Cem Eskinazi](https://github.com/cemeskinazi), and [Cyrus Highsmith](https://github.com/cyrushighsmith), and further development by [Marie Otsuka](https://github.com/marieotsuka) in preparation for public release.
 
