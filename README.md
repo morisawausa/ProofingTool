@@ -34,23 +34,22 @@ Last tested in Glyphs 3.2.1 (3258).
 
  However, in cases of multi-axes variable font, you may have duplicate `Style Name` entries across instances to support style-linked static font & VF exports from the same Glyphs file. In this case, the exports list will concatenate the default values in `Typographic Family Names` and `Typographic Style Names` (if specified, falling back to the `Style Name`.) 
 
-This means that the proof templates will be setup with a specific family name, such as “Dispatch 2 Compressed ExtraLight” and won’t work for other typefaces. If re-using the template for another typeface, I recommend editing the template file in a text-editor to find-and-replace the Typographic Family Name. (We may be able to better extract style names by using more complex processing of those fields, but setting up the names in the Glyphs panel for production export can be tricky business, so let us know if you have any recommendations here.)
+This means that the proof templates may be setup with a specific family name, such as “Dispatch 2 Compressed ExtraLight” and won’t work for other typefaces. If re-using the template for another typeface, I recommend editing the template file in a text-editor to find-and-replace the Typographic Family Name. (We may be able to better extract style names by using more complex processing of those fields, but setting up the names in the Glyphs panel for production export can be tricky business, so let me know if you have any recommendations here.)
 
 *If there are duplicate `Style Name` entries but no `Typographic Family/Syle Names` entries, there will be missing instances in the dropdown field selection.*
 
 
 ## Using the Tool
 
-### 1. Load / Select a Template
+### 1. Load / Select a Template, or skip to step 2
 
-- In order to proof the typeface, you must first select a proofing template or create a new one. The window will load any previously-loaded templates in the window. You can load additional template files or remove them from the view with the `+` / `-` buttons.
-More on the [templates] below.
+- In order to proof the typeface, first select a proofing template or create a new one. The window will load any previously-loaded templates in the window. You can load additional template files or remove them from the view with the `+` / `-` buttons. 
 
 - If there are no previously-loaded templates, it will load the demo template file, which outputs the basic Latin alphabet in the Regular style at 48pts — so if you do not have a `Regular`, you won’t see anything in the proofing window. 
 
 ### 2. Create / edit the template as needed.
 
-- To create a new template or adjust an existing template, click on the `Edit` tab. See [Creating and Editing Templates]()
+- To create a new template or adjust an existing template, click on the `Edit` tab. See Creating and Editing Templates using this [tool UI](#creating-and-editing-proof-templates-ui-option) as well as the [json template syntax](#creating-and-editing-proof-templates-text-editor-option)
 
 ### 3. Click the `❇️  Proof` button. This will apply the template with any additional edits.
 
@@ -73,8 +72,8 @@ The `Edit` tab allows you to set up your proof.
 ### Styles and Sizes
 The first section lets you select the instances and point sizes you’d like to compare. Each line in the list on the edit view corresponds to a style and point-size in your proof. 
 
-Use the `+` and `-` buttons to add / remove instances to this list.
-(In case you missed it, see [Setting up Exports] on caveats on instance naming.)
+Use the `+` and `-` buttons to add / remove instances to this list. Note: it will ignore the variable font instance and only load static instances. (In case you missed it, see [Setting up Exports](#on-setting-up-exports) on caveats on instance naming.)
+
 
 ### Glyph Selection
 You’ll then choose which glyphs you’ll want in the proof. You have 3 options:
@@ -140,7 +139,7 @@ The rest of this section will walk you through the template syntax. Note that th
 
 At the root, the template JSON looks like this:
 
-```js
+```json
 {
   "name": "My Proof Name",
   "proof": { ... } // configuration for the proof
@@ -149,14 +148,13 @@ At the root, the template JSON looks like this:
 }
 ```
 
-
 You may want to set up some standard template proofs corresponding to various stages of your design process. But there are often variations with each font: they may have slightly different glyph sets to render, be drawn for different optical sizes, or have different master names, so it’s often helpful to be able to make custom templates for each project as well.
 
 Let’s look at each of the keys in the JSON structure. The `"name"` key, obviously, is the name of the proof. It gets rendered at the bottom of the document and can be whatever you want.
 
 The `"proof"` key contains all of the layout details for rendering the proof. It looks like the following JSON structure:
 
-```js
+```json
 {
   ...
   "proof": {
@@ -194,9 +192,9 @@ The `"proof"` key contains all of the layout details for rendering the proof. It
 }
 ```
 
-The `"lines"` key specifies which styles to render, at which point size, and in which order. Styles are pulled from the instance list by default. If there are no instances, Styles are pulled from the masters list.
+The `"lines"` key specifies which styles to render, at which point size, and in which order. Styles are pulled from the instance list, and they must be unique. 
 
-```js
+```json
 {
   ...
   /**
