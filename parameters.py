@@ -54,10 +54,10 @@ class OCCParametersView:
 		self.printProofCallback = printProofCallback
 		
 		self.preferences = OCCTemplatePreferences()
+		self.templates = OCCTemplatesView(self.preferences)
 		self.templateFiles = []
-		self.templateFiles.extend( self.preferences.templatePaths )
-
-		self.templates = OCCTemplatesView()
+		self.templateFiles.extend( self.templates.templateFiles )
+		print( self.templateFiles )
 
 		self.instances = self.templates.instanceList
 
@@ -146,12 +146,6 @@ class OCCParametersView:
 		self.group.templates.removeTemplate.setToolTip("Remove selected template(s) from the list")
 
 		LINE_POS += 10
-
-		# self.group.templates.applyTemplate = Button(
-		# (0, LINE_POS, WIDTH_FULL, HEIGHT_BUTTON),
-		# "Apply Selected Template", callback=self.triggerApplyTemplate, sizeStyle="regular" )
-		# self.group.templates.applyTemplate.setToolTip("Note: any edits to the proof will be reverted back to the saved template.")
-		# self.group.templates.applyTemplate.enable( False )
 
 		self.group.templates.show(False)
 
@@ -343,10 +337,6 @@ class OCCParametersView:
 		index = int(sender.get())
 		self.proof_mode = 'waterfall' if index == 0 else 'paragraphs'
 
-	# def triggerApplyTemplate(self, sender):
-	# 	self.group.output.refreshInstances.set(1)
-	# 	self.tryRerender()
-
 	def triggerProofUpdate( self, sender ):
 		self.tryRerender()
 
@@ -446,7 +436,6 @@ class OCCParametersView:
 					template = self.templates.parseTemplateFile(name, template_file)
 					if template is not None:
 						display = self.formatTemplateForDisplayList(template);
-						
 						self.templateFiles.append(filepath)
 
 						try:

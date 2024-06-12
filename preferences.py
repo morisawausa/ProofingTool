@@ -8,9 +8,9 @@ class OCCTemplatePreferences( ):
 		self.loadPreferences()
 
 	def loadPreferences( self ):
-		Glyphs.registerDefault("com.motsuka.OCCProofingTool.templatefiles", ['data/demo.json'])
+		Glyphs.registerDefault("com.OCC.ProofingTool.templatefiles", ['data/demo.json'])
 		try:
-			self.templatePaths = Glyphs.defaults["com.motsuka.OCCProofingTool.templatefiles"]
+			self.templatePaths = Glyphs.defaults["com.OCC.ProofingTool.templatefiles"]
 			if len(self.templatePaths) < 1:
 				print( 'Loading demo template, which may not match your instances. Please review and edit the template for your font.' )
 				self.templatePaths = ['data/demo.json']
@@ -19,5 +19,5 @@ class OCCTemplatePreferences( ):
 		return True
 
 	def savePreferences( self, files ):
-		Glyphs.defaults["com.motsuka.OCCProofingTool.templatefiles"] = files
+		Glyphs.defaults["com.OCC.ProofingTool.templatefiles"] = files
 		return True

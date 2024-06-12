@@ -2,14 +2,13 @@ import os
 import json
 from GlyphsApp import *
 
-from preferences import OCCTemplatePreferences
+
 DEBUG = False
 
 class OCCTemplatesView:
 
-	def __init__(self):
-		self.preferences = OCCTemplatePreferences()
-		self.templateFiles = self.preferences.templatePaths
+	def __init__(self, preferences):
+		self.templateFiles = preferences.templatePaths
 		self.data = self.parseTemplatePaths(self.templateFiles)
 		self.instanceList = self.getInstanceList()
 
