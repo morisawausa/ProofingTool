@@ -25,20 +25,20 @@ This means that the proof templates will be setup with a specific family name, s
 
 ## Using the Tool
 
-1. Load / Select a Template
+### 1. Load / Select a Template
 
 - In order to proof the typeface, you must first select a proofing template or create a new one. The window will load any previously-loaded templates in the window. You can load additional template files or remove them from the view with the `+` / `-` buttons.
 More on the [templates] below.
 
 - If there are no previously-loaded templates, it will load the demo template file, which outputs the basic Latin alphabet in the Regular style at 48pts — so if you do not have a `Regular`, you won’t see anything in the proofing window. 
 
-2. Create / edit the template as needed.
+### 2. Create / edit the template as needed.
 
 - To create a new template or adjust an existing template, click on the `Edit` tab. See [Creating and Editing Templates]()
 
-3. Click the `❇️  Proof` button. This will apply the template with any additional edits.
+### 3. Click the `❇️  Proof` button. This will apply the template with any additional edits.
 
-4. Review the `Proof Name`. You can:
+### 4. Review the `Proof Name`. You can:
 
 - `📋 Save As Template` Save the current template as a new `.json` template file. Note: the Proof Name should be unique and not a duplicate of an existing template. (To do: support saving template changes to currently selected template, rather than always forcing a Save As.)
 
@@ -220,7 +220,6 @@ Finally, the `"glyphs"` key specifies an in-order sequence of glyphs to render. 
 
 ## Issues
 We’ve logged a number of other known issues on the repo. Feel free to leave any additional issues as you encounter them. Thanks!
-
 
 ## Installation
 
