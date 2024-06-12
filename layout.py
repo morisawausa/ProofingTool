@@ -317,6 +317,6 @@ class OCCProofingWaterfallLayout(OCCProofingLayout):
 
 
 PROOFING_LAYOUTS = {
-    'paragraphs': OCCProofingParagraphLayout,
+    'paragraph': OCCProofingParagraphLayout,
     'waterfall': OCCProofingWaterfallLayout
 }

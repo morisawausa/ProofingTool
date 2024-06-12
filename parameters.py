@@ -198,7 +198,7 @@ class OCCParametersView:
 		#
 		# Glyph Selection
 		#
-		self.group.edit.glyphSelection = SegmentedButton((0, LINE_POS, WIDTH_FULL - ELEMENT_PADDING, HEIGHT_BUTTON), [dict(title="Template Glyphs"), dict(title="Grid Selection"), dict(title="Edit View")], sizeStyle="regular")
+		self.group.edit.glyphSelection = SegmentedButton((0, LINE_POS, WIDTH_FULL - ELEMENT_PADDING, HEIGHT_BUTTON), [dict(title="Template Glyphs"), dict(title="Font View"), dict(title="Edit View")], sizeStyle="regular")
 		self.group.edit.glyphSelection.setToolTip("Choose which glyphs to use.")
 
 		LINE_POS += LINE_HEIGHT + 7
@@ -206,7 +206,7 @@ class OCCParametersView:
 		#
 		# Proof Settings
 		#
-		self.group.edit.proofMode = SegmentedButton((0, LINE_POS, WIDTH_FULL - ELEMENT_PADDING, HEIGHT_BUTTON), [dict(title="Waterfall"), dict(title="Paragraphs")], callback=self.triggerProofModeChange, sizeStyle="regular")
+		self.group.edit.proofMode = SegmentedButton((0, LINE_POS, WIDTH_FULL - ELEMENT_PADDING, HEIGHT_BUTTON), [dict(title="Waterfall"), dict(title="Paragraph")], callback=self.triggerProofModeChange, sizeStyle="regular")
 		self.group.edit.proofMode.setToolTip("Choose the layout mode: waterfall mode stacks styles line by line, while paragraph mode will output the glyphs together in a paragraph per style.")
 
 		LINE_POS += LINE_HEIGHT + 10
@@ -219,14 +219,14 @@ class OCCParametersView:
 		BOX_POS = 0
 
 		X_POS = ELEMENT_PADDING
-		self.group.edit.layout.paddinglabel = TextBox((X_POS, BOX_POS+5, WIDTH_TEXTBOX, HEIGHT_LABEL), "Padding", sizeStyle="small")
+		self.group.edit.layout.paddinglabel = TextBox((X_POS, BOX_POS+5, WIDTH_TEXTBOX, HEIGHT_LABEL), "Gaps", sizeStyle="small")
 		X_POS += WIDTH_TEXTBOX + ELEMENT_PADDING
-		self.group.edit.layout.linelabel = TextBox((X_POS, BOX_POS+5, 115, HEIGHT_LABEL), "Line Gap", sizeStyle="mini")
-		X_POS += 115 + ELEMENT_PADDING
+		self.group.edit.layout.linelabel = TextBox((X_POS, BOX_POS+5, WIDTH_LABEL, HEIGHT_LABEL), "Line", sizeStyle="mini")
+		X_POS += WIDTH_LABEL
 		self.group.edit.layout.line = EditText((X_POS, BOX_POS, WIDTH_INPUT_NO, HEIGHT_LABEL), self.parameters['padding']['line'], sizeStyle="small", continuous=False, callback=self.triggerParametersEdit)
 		X_POS += WIDTH_INPUT_NO + ELEMENT_PADDING
-		self.group.edit.layout.blocklabel = TextBox((X_POS, BOX_POS+5, 115, HEIGHT_LABEL), "Paragraph Gap", sizeStyle="mini")
-		X_POS += 115 + ELEMENT_PADDING
+		self.group.edit.layout.blocklabel = TextBox((X_POS, BOX_POS+5, WIDTH_LABEL, HEIGHT_LABEL), "Block", sizeStyle="mini")
+		X_POS += WIDTH_LABEL
 		self.group.edit.layout.block = EditText((X_POS, BOX_POS, WIDTH_INPUT_NO, HEIGHT_LABEL), self.parameters['padding']['block'], sizeStyle="small", continuous=False, callback=self.triggerParametersEdit)
 		
 		BOX_POS += LINE_HEIGHT
@@ -335,7 +335,7 @@ class OCCParametersView:
 
 	def triggerProofModeChange(self, sender):
 		index = int(sender.get())
-		self.proof_mode = 'waterfall' if index == 0 else 'paragraphs'
+		self.proof_mode = 'waterfall' if index == 0 else 'paragraph'
 
 	def triggerProofUpdate( self, sender ):
 		self.tryRerender()
