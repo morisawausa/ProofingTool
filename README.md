@@ -32,7 +32,7 @@ Last tested in Glyphs 3.2.1 (3258).
 ### On Setting up Exports
 ⚠️ The tool, by default, will use the `Style Name` field on the exports tab to setup the list of available instances.
 
- However, in cases of multi-axes variable font, you may have duplicate `Style Name` entries across instances to support style-linked static font & VF exports from the same Glyphs file. In this case, the exports list will concatenate the default values in `Typographic Family Names` and `Typographic Style Names` (if specified, falling back to the `Style Name`.) 
+However, in cases of multi-axes variable font, you may have duplicate `Style Name` entries across instances to support style-linked static font & VF exports from the same Glyphs file. In this case, the exports list will concatenate the default values in `Typographic Family Names` and `Typographic Style Names` (if specified, falling back to the `Style Name`.) 
 
 This means that the proof templates may be setup with a specific family name, such as “Dispatch 2 Compressed ExtraLight” and won’t work for other typefaces. If re-using the template for another typeface, I recommend editing the template file in a text-editor to find-and-replace the Typographic Family Name. (We may be able to better extract style names by using more complex processing of those fields, but setting up the names in the Glyphs panel for production export can be tricky business, so let me know if you have any recommendations here.)
 
@@ -61,7 +61,7 @@ This means that the proof templates may be setup with a specific family name, su
 
 - `🖨 Print Proof"`Send the PDF to your printer
 
-⚠️ If you have a lot of instances, generating the proof can take some time as instances are reinterpolated. To help with this, there is a `Re-export Instances` checkbox to keep checked if additional instances need to be proofed, or if you change the shapes of a master. Keep this unchecked for simple layout changes with no changes to the instances. (To do: this optimization may be automated down the line.)
+⚠️ If you have a lot of instances, generating the proof can take some time as instances are reinterpolated. To help with this, there is a `Re-export Instances` checkbox to keep checked if additional instances need to be proofed, or if you change the shapes of a master. Keep this unchecked for simple layout changes with no changes to the instances. (To do: this optimization may be automated down the line, tracked in issue [#12](https://github.com/morisawausa/ProofingTool/issues/12).)
 
 ## Creating and Editing Proof Templates: UI Option
 
@@ -133,13 +133,13 @@ Margins of the document is the space around the lines of glyphs. Note: a larger 
 
 This tool uses a JSON-based template format to store proof configurations on a pre-project basis. You can version control these JSON files together with the rest of your typeface sources, if you wish. The intention here is to provide a way of quickly rendering proofs, without having to configure the tool each time you want to use it.
 
-The easiest way to create a new template is to adapt the `data/demo.json` file in this respository to your font project. We often have a `proofs` folder for each of our font projects, where we keep both proof PDFs as well as project-specific templates. The tool will automatically load the contents of previously-opened data files.
+The easiest way to create a new template is to adapt the `templates/basic-letters.json` file in this respository to your font project. We often have a `proofs` folder for each of our font projects, where we keep both proof PDFs as well as project-specific templates. The Proofing Tool will automatically list previously-loaded template files.
 
-The rest of this section will walk you through the template syntax. Note that the JSON format is very strict, so it won’t work if there’s even a single syntax error—if you are new to JSON-editing, I recommend double-checking that your file is error-free through Online JSON validators. (To do: allow UI to enable [debugging mode](https://github.com/morisawausa/ProofingTool/issues/21) for template errors)
+The rest of this section will walk you through the template syntax. Note that the [JSON format](https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Objects/JSON) is very strict, so it won’t work if there’s even a single syntax error—if you are new to JSON-editing, I recommend double-checking that your file is error-free through online JSON validators. (To do: allow UI to enable [debugging mode](https://github.com/morisawausa/ProofingTool/issues/21) for template errors) ⚠️ Don’t copy-paste the contents of the snippets below directly, as the explanatory comments within them will cause a syntax error in the resulting JSON. Instead, use the starter template above with the notes below as a reference.
 
 At the root, the template JSON looks like this:
 
-```json
+```js
 {
   "name": "My Proof Name",
   "proof": { ... } // configuration for the proof
@@ -154,7 +154,7 @@ Let’s look at each of the keys in the JSON structure. The `"name"` key, obviou
 
 The `"proof"` key contains all of the layout details for rendering the proof. It looks like the following JSON structure:
 
-```json
+```js
 {
   ...
   "proof": {
@@ -194,7 +194,7 @@ The `"proof"` key contains all of the layout details for rendering the proof. It
 
 The `"lines"` key specifies which styles to render, at which point size, and in which order. Styles are pulled from the instance list, and they must be unique. 
 
-```json
+```js
 {
   ...
   /**
