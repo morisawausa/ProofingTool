@@ -4,7 +4,7 @@ This Glyphs Plugin helps you output proofs directly from Glyphs. The plugin focu
 
 Last tested in Glyphs 3.2.1 (3258).
 
-## Prerequisites:
+## Prerequisites
 
 1. You must have the following installed this to work. Install them via the Plugin Manager on Glyphs.
 - Modules: Vanilla and Python
@@ -43,23 +43,27 @@ This means that the proof templates may be setup with a specific family name, su
 
 ### 1. Load / Select a Template, or skip to step 2
 
-- In order to proof the typeface, first select a proofing template or create a new one. The window will load any previously-loaded templates in the window. You can load additional template files or remove them from the view with the `+` / `-` buttons. 
+In order to proof the typeface, first select a proofing template or create a new one. The window will load any previously-loaded templates in the window. You can load additional template files or remove them from the view with the `+` / `-` buttons. (Command / Shift Click to select multiple.)
 
-- If there are no previously-loaded templates, it will load the demo template file, which outputs the basic Latin alphabet in the Regular style at 48pts — so if you do not have a `Regular`, you won’t see anything in the proofing window. 
+If there are no previously-loaded templates, you will need to create a new template using the `Edit` tab.
 
 ### 2. Create / edit the template as needed.
 
-- To create a new template or adjust an existing template, click on the `Edit` tab. See Creating and Editing Templates using this [tool UI](#creating-and-editing-proof-templates-ui-option) as well as the [json template syntax](#creating-and-editing-proof-templates-text-editor-option)
+To create a new template or adjust an existing template, click on the `Edit` tab. See Creating and Editing Templates using this [tool UI](#creating-and-editing-proof-templates-ui-option) as well as the [json template syntax](#creating-and-editing-proof-templates-text-editor-option)
 
-### 3. Click the `❇️  Proof` button. This will apply the template with any additional edits.
+### 3. Click the `Proof` button. 
 
-### 4. Review the `Proof Name`. You can:
+This will apply the template with any additional edits.
+
+### 4. Select your output.
+
+Review the `Proof Name` field — this be the file name of your PDF. A slugified version will be the basis for the proof template file name.
 
 - `📋 Save As Template` Save the current template as a new `.json` template file. Note: the Proof Name should be unique and not a duplicate of an existing template. (To do: support saving template changes to currently selected template, rather than always forcing a Save As.)
 
 - `📄 Save PDF` Save a copy of the generated proof to your computer
 
-- `🖨 Print Proof"`Send the PDF to your printer
+- `🖨 Print Proof`Send the PDF to your printer
 
 ⚠️ If you have a lot of instances, generating the proof can take some time as instances are reinterpolated. To help with this, there is a `Re-export Instances` checkbox to keep checked if additional instances need to be proofed, or if you change the shapes of a master. Keep this unchecked for simple layout changes with no changes to the instances. (To do: this optimization may be automated down the line, tracked in issue [#12](https://github.com/morisawausa/ProofingTool/issues/12).)
 
@@ -69,7 +73,7 @@ The `Edit` tab allows you to set up your proof.
 
 ![View of the tool showing the edit view with a waterfall mode](docs/sample_waterfall_edit.png)
 
-### Styles and Sizes
+### Styles and Point Sizes
 The first section lets you select the instances and point sizes you’d like to compare. Each line in the list on the edit view corresponds to a style and point-size in your proof. 
 
 Use the `+` and `-` buttons to add / remove instances to this list. Note: it will ignore the variable font instance and only load static instances. (In case you missed it, see [Setting up Exports](#on-setting-up-exports) on caveats on instance naming.)
@@ -86,24 +90,22 @@ You’ll then choose which glyphs you’ll want in the proof. You have 3 options
 
 ### Proofing Mode
 
-- `Waterfall`
-- `Paragraph`
+- `Waterfall` proofs are for line-by-line comparisons
+- `Paragraph` proof are for block-by-block comparisons
 
-#### Waterfall
-
-**Waterfall** proofs are for line-by-line comparisons. A waterfall proof prints _a single line of text_ per selected style, with each line of text containing the same set of glyphs.
+A **Waterfall proof** prints _a single line of text_ per selected style, with each line of text containing the same set of glyphs.
 
 ![Image of a waterfall-style proof in the proofing tool window](./docs/sample_waterfall.png)
+![Image of Edit tab of a paragraph-style proof in the proofing tool window](./docs/sample_waterfall_edit.png)
 
 The proof in the above image sets the character set of a type family in a waterfall style. The text is broken up into blocks of a single line per style or size (this image shows them all at 24pt, but this can also be set up where each line is a different size). Any text that doesn’t fit into the line is pushed to the next block. If the block doesn’t fit entirely on the page, the entire block is shifted onto the next page.
 
 A key feature of the waterfall proof is that it *puts the same set of characters on each line*. This can be useful for comparing interpolation results across a family, checking alignment of diacritic placements, or identify any stray spacing errors. 
 
-#### Paragraph
-
-A **Paragraph** proof are for block-by-block comparisons. A paragraph proof will output the entire set of specified glyphs together for each selected style.
+A **Paragraph proof** will output the entire set of specified glyphs together for each selected style.
 
 ![Image of a paragraph-style proof in the proofing tool window](./docs/sample_paragraph.png)
+![Image of Edit tab of a paragraph-style proof in the proofing tool window](./docs/sample_paragraph_edit.png)
 
 In the paragraph proof, the entire text is displayed in a single paragraph, before we move on to the next style. (As you can tell from the above image, the Paragraph proof is best suited to longer chunks of text.)
 
@@ -115,12 +117,12 @@ These settings help you adjust the spacing in and around the blocks of text in t
 
 `Gaps` settings control spacing within the proof content. `Line` refers to the space inserted between each line of text; `Block` refers to the space inserted between groups of lines. 
 
-In Waterfall mode, the `Block` is a set of lines, one for each specified style, displaying the same set of glyphs that would fit on one line.
+In **Waterfall mode**, the `Block` is a set of lines, one for each specified style, displaying the same set of glyphs that would fit on one line.
 
 ![Layout settings for waterfall mode](./docs/layoutsettings_waterfall.png)
 
 
-In Paragraph mode, the `Block` is effectively be the paragraph of all text for specified style.
+In **Paragraph mode**, the `Block` is effectively be the paragraph of all text for specified style.
 
 ![Layout settings for paragraph mode](./docs/layoutsettings_paragraph.png)
 
