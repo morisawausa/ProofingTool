@@ -97,8 +97,7 @@ You’ll then choose which glyphs you’ll want in the proof. You have 3 options
 
 A **Waterfall proof** prints *a single line of text* per selected style, with each line of text containing the same set of glyphs.
 
-![Image of a waterfall-style proof in the proofing tool window](./docs/sample_waterfall.png)
-![Image of Edit tab of a paragraph-style proof in the proofing tool window](./docs/sample_waterfall_edit.png)
+![Image of Edit tab of a paragraph-style proof in the proofing tool window](./docs/sample_waterfall_edit.png) |
 
 The proof in the above image sets the character set of a type family in a waterfall style. The text is broken up into blocks of a single line per style or size (this image shows them all at 24pt, but this can also be set up where each line is a different size). Any text that doesn’t fit into the line is pushed to the next block. If the block doesn’t fit entirely on the page, the entire block is shifted onto the next page.
 
@@ -106,7 +105,6 @@ A key feature of the waterfall proof is that it *puts the same set of characters
 
 A **Paragraph proof** will output the *entire set of specified glyphs together* for each selected style.
 
-![Image of a paragraph-style proof in the proofing tool window](./docs/sample_paragraph.png)
 ![Image of Edit tab of a paragraph-style proof in the proofing tool window](./docs/sample_paragraph_edit.png)
 
 In the paragraph proof, the entire text is displayed in a single paragraph, before we move on to the next style. (As you can tell from the above image, the Paragraph proof is best suited to longer chunks of text.)
@@ -242,5 +240,5 @@ Finally, the `"glyphs"` key specifies an in-order sequence of glyphs to render. 
 We’ve logged a number of known issues on the repo, and there are probably a number of other open items. Feel free to leave any additional issues as you encounter them.
 
 ## About
-This proofing tool was initially created as an internal tool for [Occupant Fonts](https://occupantfonts.com/), with original development by [Nic Schumann](https://github.com/nicschumann) with input from [June Shin](https://github.com/notborninjune), [Cem Eskinazi](https://github.com/cemeskinazi), and [Cyrus Highsmith](https://github.com/cyrushighsmith), and further iterations by [Marie Otsuka](https://github.com/marieotsuka) in preparation for public release.
+This proofing tool was initially created as an internal tool for [Occupant Fonts](https://occupantfonts.com/). Original development by [Nic Schumann](https://github.com/nicschumann) with input from [June Shin](https://github.com/notborninjune), [Cem Eskinazi](https://github.com/cemeskinazi), and [Cyrus Highsmith](https://github.com/cyrushighsmith), and further iterations by [Marie Otsuka](https://github.com/marieotsuka) in preparation for public release.
 
