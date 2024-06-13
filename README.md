@@ -1,6 +1,6 @@
 # Proofing Tool
 
-This Glyphs Plugin helps you output proofs directly from Glyphs. The plugin focuses on generating form comparison proofs in two forms: [waterfall](#waterfall) and [paragraph](#paragraph) view. It currently isn’t intended to robustly proof typesetting (it won’t show [kerning](https://github.com/morisawausa/ProofingTool/issues/5), for example), but it should help you quickly format documents for proofing use without needing to export font binaries, deal with font caching, or open InDesign. We made this tool with the hope that it might reduce the annoyance of producing proofs for in-progress work intended for internal review.
+This Glyphs Plugin helps you output proofs directly from Glyphs. The plugin focuses on generating form comparison proofs in two forms: waterfall and paragraph view. It currently isn’t intended to robustly proof typesetting (it won’t show [kerning](https://github.com/morisawausa/ProofingTool/issues/5), for example), but it should help you quickly format documents for proofing without needing to export font binaries, deal with font caching, or open InDesign. We made this tool with the hope that it might reduce the annoyance of producing proofs for in-progress work intended for internal review.
 
 Last tested in Glyphs 3.2.1 (3258).
 
@@ -16,21 +16,21 @@ Last tested in Glyphs 3.2.1 (3258).
 
 ## Installation
 
-1. Clone the Proofing Tool repo. It’s usually best to clone them into the `Repositories` folder in Glyphs, along the lines of `/Users/yourusername/Library/Application Support/Glyphs 3/Repositories`. 
+1. Clone the Proofing Tool repo. It’s usually best to clone into the `Repositories` folder in Glyphs, along the lines of `/Users/yourusername/Library/Application Support/Glyphs 3/Repositories`. 
 
 2. Double-click on the `ProofingTool.glyphsPlugin` file. Glyphs App should open up and prompt you to install the plugin.
 
 3. It will ask you whether you want to copy the plugin or use an Alias. Using the Alias option will help you pull any future updates to the tool.
 
-4. Restart Glyphs
+4. Quit and restart Glyphs.
 
 5. Open a `.glyphs` file and make sure there are instances setup. 
 
 6. Go to `File > Proofing Tool` to start up the tool.
 
 
-### On Setting up Exports
-⚠️ The tool, by default, will use the `Style Name` field on the exports tab to setup the list of available instances.
+### Setting up Exports
+⚠️ The tool, by default, will use the `Style Name` field on the font’s exports information to setup the list of available instances.
 
 However, in cases of multi-axes variable font, you may have duplicate `Style Name` entries across instances to support style-linked static font & VF exports from the same Glyphs file. In this case, the exports list will concatenate the default values in `Typographic Family Names` and `Typographic Style Names` (if specified, falling back to the `Style Name`.) 
 
@@ -38,26 +38,28 @@ This means that the proof templates may be setup with a specific family name, su
 
 *If there are duplicate `Style Name` entries but no `Typographic Family/Syle Names` entries, there will be missing instances in the dropdown field selection.*
 
+It will also ignore the variable font instance for now. (We could potentially add support for outputting non-static interpolations for variable font testing in the future.)
+
 
 ## Using the Tool
 
-### 1. Load / Select a Template, or skip to step 2
+### 1. Select or load a template
 
-In order to proof the typeface, first select a proofing template or create a new one. The window will load any previously-loaded templates in the window. You can load additional template files or remove them from the view with the `+` / `-` buttons. (Command / Shift Click to select multiple.)
+In order to proof the typeface, first select a proofing template or create a new one. The window will load any previously-loaded templates in the window. You can load additional template files or remove them from the view with the `+` / `-` buttons. (Command / shift click to select multiple.)
 
 If there are no previously-loaded templates, you will need to create a new template using the `Edit` tab.
 
-### 2. Create / edit the template as needed.
+### 2. Edit or create the template as needed
 
-To create a new template or adjust an existing template, click on the `Edit` tab. See Creating and Editing Templates using this [tool UI](#creating-and-editing-proof-templates-ui-option) as well as the [json template syntax](#creating-and-editing-proof-templates-text-editor-option)
+To create a new template or adjust an existing template, click on the `Edit` tab. You you can use the tool’s [UI](#creating-and-editing-proof-templates-ui-option) here, as well as directly create templates using the [json template syntax](#creating-and-editing-proof-templates-text-editor-option). (For setting up complex proofs, I recommend the JSON method.)
 
-### 3. Click the `Proof` button. 
+### 3. Click the `Proof` button 
 
 This will apply the template with any additional edits.
 
-### 4. Select your output.
+### 4. Select your output
 
-Review the `Proof Name` field — this be the file name of your PDF. A slugified version will be the basis for the proof template file name.
+Review the `Proof Name` field — this will be the file name of your proof PDF. If saving a template file, a slugified version will be the name for the `.json` file.
 
 - `📋 Save As Template` Save the current template as a new `.json` template file. Note: the Proof Name should be unique and not a duplicate of an existing template. (To do: support saving template changes to currently selected template, rather than always forcing a Save As.)
 
@@ -65,7 +67,7 @@ Review the `Proof Name` field — this be the file name of your PDF. A slugified
 
 - `🖨 Print Proof`Send the PDF to your printer
 
-⚠️ If you have a lot of instances, generating the proof can take some time as instances are reinterpolated. To help with this, there is a `Re-export Instances` checkbox to keep checked if additional instances need to be proofed, or if you change the shapes of a master. Keep this unchecked for simple layout changes with no changes to the instances. (To do: this optimization may be automated down the line, tracked in issue [#12](https://github.com/morisawausa/ProofingTool/issues/12).)
+⚠️ If you have a lot of instances, generating the proof can take some time as instances are reinterpolated. To help with this, there is a `Refresh glyphs` checkbox to keep checked if additional instances need to be proofed, or if you change the shapes of a master. Keep this unchecked for simple layout changes with no changes to the instances. (To do: this optimization may be automated down the line, tracked in issue [#12](https://github.com/morisawausa/ProofingTool/issues/12).)
 
 ## Creating and Editing Proof Templates: UI Option
 
@@ -93,7 +95,7 @@ You’ll then choose which glyphs you’ll want in the proof. You have 3 options
 - `Waterfall` proofs are for line-by-line comparisons
 - `Paragraph` proof are for block-by-block comparisons
 
-A **Waterfall proof** prints _a single line of text_ per selected style, with each line of text containing the same set of glyphs.
+A **Waterfall proof** prints *a single line of text* per selected style, with each line of text containing the same set of glyphs.
 
 ![Image of a waterfall-style proof in the proofing tool window](./docs/sample_waterfall.png)
 ![Image of Edit tab of a paragraph-style proof in the proofing tool window](./docs/sample_waterfall_edit.png)
@@ -102,14 +104,14 @@ The proof in the above image sets the character set of a type family in a waterf
 
 A key feature of the waterfall proof is that it *puts the same set of characters on each line*. This can be useful for comparing interpolation results across a family, checking alignment of diacritic placements, or identify any stray spacing errors. 
 
-A **Paragraph proof** will output the entire set of specified glyphs together for each selected style.
+A **Paragraph proof** will output the *entire set of specified glyphs together* for each selected style.
 
 ![Image of a paragraph-style proof in the proofing tool window](./docs/sample_paragraph.png)
 ![Image of Edit tab of a paragraph-style proof in the proofing tool window](./docs/sample_paragraph_edit.png)
 
 In the paragraph proof, the entire text is displayed in a single paragraph, before we move on to the next style. (As you can tell from the above image, the Paragraph proof is best suited to longer chunks of text.)
 
-A key feature of the paragraph proof is that it *full blocks of text* across styles. This can be especially useful for comparing textures with specific glyphs generated from the Edit View. Depending on where you are in the type design process, it might be a set of Nina Stössinger’s [word-o-mat](https://github.com/schriftgestalt/word-o-mat)-generated paragraph of control characters, a set of spacing strings, a test for stylistic alternates, or sample texts of a particular language.
+A key feature of the paragraph proof is that it *full blocks of text* across styles. This can be especially useful for comparing textures with specific glyphs generated from the Edit View. Depending on where you are in the type design process, it might be a set of Nina Stössinger’s [word-o-mat](https://github.com/schriftgestalt/word-o-mat)-generated paragraph of control characters, a set of spacing strings, a test for stylistic alternates, or sample texts of a specific language.
 
 ### Layout
 
@@ -137,7 +139,9 @@ This tool uses a JSON-based template format to store proof configurations on a p
 
 The easiest way to create a new template is to adapt the `templates/basic-letters.json` file in this respository to your font project. We often have a `proofs` folder for each of our font projects, where we keep both proof PDFs as well as project-specific templates. The Proofing Tool will automatically list previously-loaded template files.
 
-The rest of this section will walk you through the template syntax. Note that the [JSON format](https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Objects/JSON) is very strict, so it won’t work if there’s even a single syntax error—if you are new to JSON-editing, I recommend double-checking that your file is error-free through online JSON validators. (To do: allow UI to enable [debugging mode](https://github.com/morisawausa/ProofingTool/issues/21) for template errors) ⚠️ Don’t copy-paste the contents of the snippets below directly, as the explanatory comments within them will cause a syntax error in the resulting JSON. Instead, use the starter template above with the notes below as a reference.
+The rest of this section will walk you through the template syntax. 
+
+Note that the [JSON format](https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Objects/JSON) is very strict, so it won’t work if there’s even a single syntax error—if you are new to JSON-editing, I recommend double-checking that your file is error-free through an online JSON validator. (To do: allow UI to enable [debugging mode](https://github.com/morisawausa/ProofingTool/issues/21) for template errors) ⚠️ Don’t copy-paste the contents of the snippets below directly, as the explanatory comments within them will cause a syntax error in the resulting JSON. Instead, use the starter template above with the notes below as a reference.
 
 At the root, the template JSON looks like this:
 
@@ -232,11 +236,11 @@ The `"lines"` key specifies which styles to render, at which point size, and in 
 
 Finally, the `"glyphs"` key specifies an in-order sequence of glyphs to render. This is fairly straightforward: just an array of glyph names as strings, just as `Glyphs.app` would expect them (nothing fancy, no leading `/`, etc. If you want the glyph `Aacute` to render, put `"Aacute"` in this list).
 
-👉 An easy way to get a set of glyphs is to select them in Font View, right click, then `Copy Glyph Names > Python List`. Remove the last trailing `,` and wrap the list in `[]`, and assign it to the `"glyphs"` key. Note: if selecting glyphs from the Edit View, this Copy Glyph Names method will *not* preserve line breaks displayed. To specify a line break in the proof, add `"newGlyph"` in the glyphs list. (Line breaks are detected automatically when extracting glyphs from the Edit View using the Proofing Tool UI.)
+👉 An easy way to get a set of glyphs is to select them in Font View, right click, then `Copy Glyph Names > Python List`. Remove the last trailing `,` and wrap the list in `[]`, and assign it to the `"glyphs"` key. Note: if selecting glyphs from the Edit View, this Copy Glyph Names method will *not* preserve line breaks displayed. To specify a line break in the proof, add `"newGlyph"` in the glyphs list. (Line breaks are detected automatically when extracting glyphs from the Edit View using the Proofing Tool UI, so for paragraphs, it’s probably easiest to use the `Edit View` glyphs selection option.)
 
 ## Issues
-We’ve logged a number of other known issues on the repo. Feel free to leave any additional issues as you encounter them. Thanks!
+We’ve logged a number of known issues on the repo, and there are probably a number of other open items. Feel free to leave any additional issues as you encounter them.
 
 ## About
-This proofing tool was created as an internal tool for [Occupant Fonts](https://occupantfonts.com/), with original development by [Nic Schumann](https://github.com/nicschumann) with input from [June Shin](https://github.com/notborninjune), [Cem Eskinazi](https://github.com/cemeskinazi), and [Cyrus Highsmith](https://github.com/cyrushighsmith), and further development by [Marie Otsuka](https://github.com/marieotsuka) in preparation for public release.
+This proofing tool was initially created as an internal tool for [Occupant Fonts](https://occupantfonts.com/), with original development by [Nic Schumann](https://github.com/nicschumann) with input from [June Shin](https://github.com/notborninjune), [Cem Eskinazi](https://github.com/cemeskinazi), and [Cyrus Highsmith](https://github.com/cyrushighsmith), and further iterations by [Marie Otsuka](https://github.com/marieotsuka) in preparation for public release.
 
