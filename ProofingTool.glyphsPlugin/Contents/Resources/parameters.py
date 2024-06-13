@@ -270,8 +270,12 @@ class OCCParametersView:
 		LINE_POS = 0
 		
 		self.group.output.refreshInstances =  CheckBox(
-			(ELEMENT_PADDING, LINE_POS, -ELEMENT_PADDING, HEIGHT_LABEL), "Re-export Instances", value=False)
-		self.group.output.refreshInstances.setToolTip("Uncheck this to adjust the proof with existing styles. Keep checked for any changes in the list of styles.")
+			(ELEMENT_PADDING, LINE_POS, 150, HEIGHT_LABEL), "Refresh glyphs", value=False)
+		self.group.output.refreshInstances.setToolTip("Uncheck this to only adjust the proof layout with existing styles. Keep checked for any changes in the list of styles.")
+
+		self.group.output.debugMode =  CheckBox(
+			(-ELEMENT_PADDING-80, LINE_POS, 80, HEIGHT_LABEL), "Debug", callback=self.triggerDebugModeChange, value=self.preferences.debugMode)
+		self.group.output.debugMode.setToolTip("Check if something isn’t working quite right. It’ll provide some verbose output in the Macro panel.")
 
 		LINE_POS += LINE_HEIGHT
 
@@ -324,7 +328,7 @@ class OCCParametersView:
 		self.group.output.refreshInstances.set(1)
 
 	def triggerTemplateListEdit(self, sender):
-		self.preferences.savePreferences(self.templateFiles)
+		self.preferences.saveTemplates(self.templateFiles)
 
 	def triggerLoadSelectedTemplate(self, sender):
 		selectionIndices = self.group.templates.list.getSelection()
@@ -422,9 +426,10 @@ class OCCParametersView:
 	def triggerRemoveTemplate(self, sender):
 		for index in reversed(self.group.templates.list.getSelection()):
 			del self.group.templates.list[index]
+			del self.templates.data[index]
 			filepathRemove = self.templateFiles[index]
 			self.templateFiles.remove(filepathRemove)
-			self.preferences.savePreferences(self.templateFiles)
+			self.preferences.saveTemplates(self.templateFiles)
 
 	def processTemplateFiles(self, template_files ):
 		modified_indices = []
@@ -436,16 +441,17 @@ class OCCParametersView:
 					if template is not None:
 						display = self.formatTemplateForDisplayList(template);
 						self.templateFiles.append(filepath)
+						self.preferences.saveTemplates(self.templateFiles)
 
 						try:
 							i = self.group.templates.list.index(display)
 							self.templates.data[i] = template
 							self.group.templates.list[i] = display
-							modified_indices.append(i)
+							modified_indices.append(i)							
 						except ValueError:
 							self.templates.data.append(template)
 							self.group.templates.list.append(display)
-							modified_indices.append(len(self.group.templates.list) - 1)							
+							modified_indices.append(len(self.group.templates.list) - 1)
 			if len(modified_indices) > 0:
 				self.loadSelectedTemplate(modified_indices[-1])
 				self.group.templates.list.setSelection([modified_indices[-1]])
@@ -469,6 +475,11 @@ class OCCParametersView:
 		self.group.output.refreshInstances.set(1)
 		for index in reversed(self.group.edit.list.getSelection()):
 			del self.group.edit.list[index]
+
+	def triggerDebugModeChange(self, sender):
+		self.templates.debug = bool( sender.get() )
+		self.preferences.saveDebug( sender.get() )
+
 
 	def parametersChanged(self, parameters, glyphs):
 		glyphsChanged = parameters['glyphs'][0] != self.parameters['glyphs'][0]

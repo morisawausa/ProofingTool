@@ -3,12 +3,11 @@ import json
 from GlyphsApp import *
 
 
-DEBUG = False
-
 class OCCTemplatesView:
 
 	def __init__(self, preferences):
 		self.templateFiles = preferences.templatePaths
+		self.debug = bool(preferences.debugMode)
 		self.data = self.parseTemplatePaths(self.templateFiles)
 		self.instanceList = self.getInstanceList()
 
@@ -43,16 +42,16 @@ class OCCTemplatesView:
 
 	def parseTemplateFile(self, name, file):
 		try:
-			if DEBUG:
+			if self.debug:
 				print(f'[{name}]\tloading template...')
 			template = json.load(file)
 			result = self.validateAndFormatTemplate(name, template)
-			if DEBUG:
+			if self.debug:
 				print(f'[{name}]\tdone loading.\n')
 			return result
 
 		except Exception as error:
-			if DEBUG:
+			if self.debug:
 				print(f'[{name}]\terror parsing this template\'s json:')
 				print(f'[{name}]\t{error}')
 
@@ -65,7 +64,7 @@ class OCCTemplatesView:
 		if 'name' in template:
 			name = template['name']
 		else:
-			if DEBUG:
+			if self.debug:
 				print(f'[{template_name}]\t"{template_name}" does not have a template name specified. Naming it "{template_name}"')
 			name = template_name
 
@@ -76,20 +75,20 @@ class OCCTemplatesView:
 			if template['style'] in instance_names:
 				default_style = template['style']
 			else:
-				if DEBUG:
+				if self.debug:
 					print(f'[{template_name}]\tthe template specifies a default style ({template["style"]}), but it’s not a style of the current typeface.')
 		else:
-			if DEBUG:
+			if self.debug:
 				print(f'[{template_name}]\tthe template does not specify a default style.')
 
 		if 'size' in template:
 			if isinstance(template['size'], int):
 				default_size = template['size']
 			else:
-				if DEBUG:
+				if self.debug:
 					print(f'[{template_name}]\tthe proof specifies a default size ({template["size"]}), but it’s not a whole number.')
 		else:
-			if DEBUG:
+			if self.debug:
 				print(f'[{template_name}]\tthe template does not specify a default size.')
 
 		glyphs = []
@@ -98,10 +97,10 @@ class OCCTemplatesView:
 			if isinstance(template['glyphs'], list):
 				glyphs = template['glyphs']
 			else:
-				if DEBUG:
+				if self.debug:
 					print(f'[{template_name}]\tthe template provides a "glyphs" key, but it’s not a list of glyph names.')
 		else:
-			if DEBUG:
+			if self.debug:
 				print(f'[{template_name}]\tthe template does not provide a "glyphs" key.')
 
 		if 'lines' in template:
@@ -111,33 +110,33 @@ class OCCTemplatesView:
 					if default_style is not None:
 						line['style'] = default_style
 					else:
-						if DEBUG:
+						if self.debug:
 							print(f'[{template_name}]\tline {linenum + 1} has no style specified and no default style is set.')
 						continue
 
 				if len(list(filter(lambda i: i == line['style'], instances))) != 1:
 					if default_style is not None:
-						if DEBUG:
+						if self.debug:
 							print(f'[{template_name}]\t⚠️ line {linenum + 1} specifies "{line["style"]}," which is not an instance in this typeface. Replacing with the default "{default_style}".')
 						line['style'] = default_style
 					else:
-						if DEBUG:
+						if self.debug:
 							print(f'[{template_name}]\t⚠️ line {linenum + 1} specifies "{line["style"]}," which is not an instance in this typeface. Since no valid default style is specified, we’re skipping the line.')
 						continue
 
 				if 'size' not in line:
-					if DEBUG:
+					if self.debug:
 						print(f'[{template_name}]\tline {linenum + 1} has no size specified, setting default of {default_size}.')
 					line['size'] = default_size
 
 				if not isinstance(line['size'], int):
-					if DEBUG:
+					if self.debug:
 						print(f'[{template_name}]\tline {linenum + 1} does not specify a whole number size, replacing it with the default ({default_size})...')
 					line['size'] = default_size
 
 				lines.append(line)
 		else:
-			if DEBUG:
+			if self.debug:
 				print(f'[{template_name}]\t"{template_name}" does not have any lines specified.')
 			lines = []
 
@@ -173,7 +172,7 @@ class OCCTemplatesView:
 			if 'footer' in template['proof']:
 				proof['footer'] = template['proof']['footer']
 		else:
-			if DEBUG:
+			if self.debug:
 				print(f'[{template_name}]\t"{template_name}" does not specify margin and gap information. Setting defaults.')
 
 		return {
