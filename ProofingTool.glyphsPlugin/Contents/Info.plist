@@ -17,7 +17,7 @@
 	<key>CFBundleVersion</key>
 	<string>2</string> <!-- 123 -->
 	<key>UpdateFeedURL</key>
-	<string>____OnlineUrlToThisPlist____</string>
+	<string>https://github.com/morisawausa/ProofingTool/blob/master/ProofingTool.glyphsPlugin/Contents/Info.plist</string>
 	<key>productPageURL</key>
 	<string>https://github.com/morisawausa/ProofingTool</string>
 	<key>productReleaseNotes</key>
