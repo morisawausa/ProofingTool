@@ -13,10 +13,11 @@
       "bottom": 50
     },
     "gaps": {
-      "line": 10,
-      "block": 20      
+      "line": 5,
+      "block": 10      
     },
-    "mode": "waterfall"
+    "mode": "waterfall",
+    "footer": "masters @48pt"
   },
   "glyphs": [
     "A",
