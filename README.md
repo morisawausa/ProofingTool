@@ -1,6 +1,6 @@
 # Proofing Tool
 
-This Glyphs Plugin helps you output proofs directly from Glyphs. The plugin focuses on generating form comparison proofs in two forms: waterfall and paragraph view. It currently isn’t intended to robustly proof typesetting (it won’t show [kerning](https://github.com/morisawausa/ProofingTool/issues/5), for example), but it should help you quickly format documents for proofing without needing to export font binaries, deal with font caching, or open InDesign. We made this tool with the hope that it might reduce the annoyance of producing proofs for in-progress work intended for internal review.
+This Glyphs Plugin helps you output proofs directly from Glyphs. The plugin focuses on generating form comparison proofs in two forms: waterfall and paragraph view. It currently isn’t intended to robustly proof typesetting (it won’t show [kerning](https://github.com/morisawausa/ProofingTool/issues/5), for example), but it should help you quickly format documents for comparing instances without needing to export font binaries, deal with font caching, or open InDesign. We made this tool with the hope that it might reduce the annoyance of producing proofs for in-progress work intended for internal review.
 
 Last tested in Glyphs 3.3 (3311).
 
