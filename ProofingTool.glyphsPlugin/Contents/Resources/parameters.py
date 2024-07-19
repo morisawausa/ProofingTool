@@ -1,16 +1,14 @@
 # -*- coding: utf-8 -*-
 
-from timeit import default_timer
 
 import re
 import os
 import json
 from collections import OrderedDict
 
-from GlyphsApp import *
-from vanilla import *
-from vanilla.dialogs import putFile, getFile
-from GlyphsApp.UI import *
+from GlyphsApp import Glyphs, GSControlLayer, GetFile
+from vanilla import Group, SegmentedButton, List, Button, PopUpButtonListCell, Box, TextBox, EditText, CheckBox, SquareButton
+from vanilla.dialogs import putFile
 
 from templates import OCCTemplatesView
 from preferences import OCCTemplatePreferences
@@ -31,13 +29,14 @@ WIDTH_INPUT_NO = 35
 def tryParseInt(value, default_value):
 	try:
 		return int(value)
-	except ValueError as e:
+	except:
 		return default_value
+
 
 def tryString(value, default_value):
 	try:
 		return value
-	except ValueError as e:
+	except:
 		return default_value
 
 
