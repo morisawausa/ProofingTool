@@ -1,19 +1,22 @@
 # encoding: utf-8\
 ###########################################################################################################
 #
-#	Proofing Tool Plugin
+# Proofing Tool Plugin
 #
-#	Read the docs:
-#	https://github.com/morisawausa/ProofingTool
+# Read the docs:
+# https://github.com/morisawausa/ProofingTool
 #
 ###########################################################################################################
 
 from __future__ import division, print_function, unicode_literals
 import objc
-from GlyphsApp import *
-from GlyphsApp.plugins import *
+import traceback
+from Cocoa import NSMenuItem, NSLog
+from GlyphsApp import Glyphs, FILE_MENU
+from GlyphsApp.plugins import GeneralPlugin
 
 from proofing import OCCProofingTool
+
 
 class ProofingTool(GeneralPlugin):
 
@@ -34,7 +37,7 @@ class ProofingTool(GeneralPlugin):
 	def showWindow_(self, sender):
 		"""Do something like show a window """
 		try:
-			Glyphs.showMacroWindow()						
+			Glyphs.showMacroWindow()
 			if Glyphs.font:
 				print("\n❇️ Welcome to the Proofing Tool \n")
 				if Glyphs.font.instances:
