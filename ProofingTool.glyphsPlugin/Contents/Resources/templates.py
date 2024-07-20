@@ -1,6 +1,6 @@
 import os
 import json
-from GlyphsApp import *
+from GlyphsApp import Glyphs
 
 
 class OCCTemplatesView:
@@ -152,7 +152,7 @@ class OCCTemplatesView:
 				"block": 20
 			},
 			"mode": "waterfall",
-			"footer" : ""
+			"footer": ""
 		}
 
 		if 'proof' in template:
