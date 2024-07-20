@@ -21,9 +21,10 @@ LINE_HEIGHT = 30
 HEIGHT_DIVIDER = 30
 HEIGHT_BUTTON = 30
 HEIGHT_LABEL = 20
+HEIGHT_TEXTBOX = 22
 WIDTH_LABEL = 40
 WIDTH_TEXTBOX = 65
-WIDTH_INPUT_NO = 35
+WIDTH_INPUT_NO = 40
 
 
 def tryParseInt(value, default_value):
@@ -222,43 +223,43 @@ class OCCParametersView:
 		BOX_POS = 0
 
 		X_POS = ELEMENT_PADDING
-		self.group.edit.layout.paddinglabel = TextBox((X_POS, BOX_POS + 5, WIDTH_TEXTBOX, HEIGHT_LABEL), "Gaps", sizeStyle="small")
+		self.group.edit.layout.paddinglabel = TextBox((X_POS, BOX_POS + 3, WIDTH_TEXTBOX, HEIGHT_LABEL), "Gaps")
 		X_POS += WIDTH_TEXTBOX + ELEMENT_PADDING
-		self.group.edit.layout.linelabel = TextBox((X_POS, BOX_POS + 5, WIDTH_LABEL, HEIGHT_LABEL), "Line", sizeStyle="mini")
+		self.group.edit.layout.linelabel = TextBox((X_POS, BOX_POS + 3, WIDTH_LABEL, HEIGHT_LABEL), "Line")
 		X_POS += WIDTH_LABEL
-		self.group.edit.layout.line = EditText((X_POS, BOX_POS, WIDTH_INPUT_NO, HEIGHT_LABEL), self.parameters['gaps']['line'], sizeStyle="small", continuous=False, callback=self.triggerParametersEdit)
+		self.group.edit.layout.line = EditText((X_POS, BOX_POS, WIDTH_INPUT_NO, HEIGHT_TEXTBOX), self.parameters['gaps']['line'], continuous=False, callback=self.triggerParametersEdit)
 		X_POS += WIDTH_INPUT_NO + ELEMENT_PADDING
-		self.group.edit.layout.blocklabel = TextBox((X_POS, BOX_POS + 5, WIDTH_LABEL, HEIGHT_LABEL), "Block", sizeStyle="mini")
+		self.group.edit.layout.blocklabel = TextBox((X_POS, BOX_POS + 3, WIDTH_LABEL, HEIGHT_LABEL), "Block")
 		X_POS += WIDTH_LABEL
-		self.group.edit.layout.block = EditText((X_POS, BOX_POS, WIDTH_INPUT_NO, HEIGHT_LABEL), self.parameters['gaps']['block'], sizeStyle="small", continuous=False, callback=self.triggerParametersEdit)
+		self.group.edit.layout.block = EditText((X_POS, BOX_POS, WIDTH_INPUT_NO, HEIGHT_TEXTBOX), self.parameters['gaps']['block'], continuous=False, callback=self.triggerParametersEdit)
 
 		BOX_POS += LINE_HEIGHT
 
 		X_POS = ELEMENT_PADDING
-		self.group.edit.layout.marginlabel = TextBox((X_POS, BOX_POS + 5, WIDTH_TEXTBOX, HEIGHT_LABEL), "Margins", sizeStyle="small")
+		self.group.edit.layout.marginlabel = TextBox((X_POS, BOX_POS + 3, WIDTH_TEXTBOX, HEIGHT_LABEL), "Margins")
 		X_POS += WIDTH_TEXTBOX + ELEMENT_PADDING
-		self.group.edit.layout.toplabel = TextBox((X_POS, BOX_POS + 5, WIDTH_LABEL, HEIGHT_LABEL), "Top", sizeStyle="mini")
+		self.group.edit.layout.toplabel = TextBox((X_POS, BOX_POS + 3, WIDTH_LABEL, HEIGHT_LABEL), "Top")
 		X_POS += WIDTH_LABEL
-		self.group.edit.layout.top = EditText((X_POS, BOX_POS, WIDTH_INPUT_NO, HEIGHT_LABEL), self.parameters['gaps']['top'], sizeStyle="small", continuous=False, callback=self.triggerParametersEdit)
+		self.group.edit.layout.top = EditText((X_POS, BOX_POS, WIDTH_INPUT_NO, HEIGHT_TEXTBOX), self.parameters['gaps']['top'], continuous=False, callback=self.triggerParametersEdit)
 		X_POS += WIDTH_INPUT_NO + ELEMENT_PADDING
 
-		self.group.edit.layout.leftlabel = TextBox((X_POS, BOX_POS + 5, WIDTH_LABEL, HEIGHT_LABEL), "Left", sizeStyle="mini")
+		self.group.edit.layout.leftlabel = TextBox((X_POS, BOX_POS + 3, WIDTH_LABEL, HEIGHT_LABEL), "Left")
 		X_POS += WIDTH_LABEL
-		self.group.edit.layout.left = EditText((X_POS, BOX_POS, WIDTH_INPUT_NO, HEIGHT_LABEL), self.parameters['gaps']['left'], sizeStyle="small", continuous=False, callback=self.triggerParametersEdit)
+		self.group.edit.layout.left = EditText((X_POS, BOX_POS, WIDTH_INPUT_NO, HEIGHT_TEXTBOX), self.parameters['gaps']['left'], continuous=False, callback=self.triggerParametersEdit)
 		X_POS += WIDTH_INPUT_NO + ELEMENT_PADDING
 
-		self.group.edit.layout.rightlabel = TextBox((X_POS, BOX_POS + 5, WIDTH_LABEL, HEIGHT_LABEL), "Right", alignment="left", sizeStyle="mini")
+		self.group.edit.layout.rightlabel = TextBox((X_POS, BOX_POS + 3, WIDTH_LABEL, HEIGHT_LABEL), "Right", alignment="left")
 		X_POS += WIDTH_LABEL
-		self.group.edit.layout.right = EditText((X_POS, BOX_POS, WIDTH_INPUT_NO, HEIGHT_LABEL), self.parameters['gaps']['right'], sizeStyle="small", continuous=False, callback=self.triggerParametersEdit)
+		self.group.edit.layout.right = EditText((X_POS, BOX_POS, WIDTH_INPUT_NO, HEIGHT_TEXTBOX), self.parameters['gaps']['right'], continuous=False, callback=self.triggerParametersEdit)
 		X_POS += WIDTH_INPUT_NO + ELEMENT_PADDING
 
-		self.group.edit.layout.botlabel = TextBox((X_POS, BOX_POS + 5, WIDTH_LABEL, HEIGHT_LABEL), "Bottom", sizeStyle="mini")
-		X_POS += WIDTH_LABEL
-		self.group.edit.layout.bottom = EditText((X_POS, BOX_POS, WIDTH_INPUT_NO, HEIGHT_LABEL), self.parameters['gaps']['bottom'], sizeStyle="small", continuous=False, callback=self.triggerParametersEdit)
+		self.group.edit.layout.botlabel = TextBox((X_POS, BOX_POS + 3, WIDTH_LABEL + 16, HEIGHT_LABEL), "Bottom")
+		X_POS += WIDTH_LABEL + 6
+		self.group.edit.layout.bottom = EditText((X_POS, BOX_POS, WIDTH_INPUT_NO, HEIGHT_TEXTBOX), self.parameters['gaps']['bottom'], continuous=False, callback=self.triggerParametersEdit)
 
 		BOX_POS += LINE_HEIGHT + 3
 
-		self.group.edit.layout.prooffooterlabel = TextBox((ELEMENT_PADDING, BOX_POS, WIDTH_TEXTBOX, HEIGHT_LABEL), "Footer", sizeStyle="small")
+		self.group.edit.layout.prooffooterlabel = TextBox((ELEMENT_PADDING, BOX_POS, WIDTH_TEXTBOX, HEIGHT_LABEL), "Footer")
 		self.group.edit.layout.prooffooter = EditText((WIDTH_TEXTBOX + ELEMENT_PADDING, BOX_POS, -ELEMENT_PADDING, HEIGHT_LABEL + 5), self.parameters['footer'], continuous=False, callback=self.triggerParametersEdit)
 
 		LINE_POS += 100
