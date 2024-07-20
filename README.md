@@ -8,13 +8,16 @@ Last tested in Glyphs 3.3 (3311).
 
 1. You must have the following installed this to work. Install them via the Plugin Manager on Glyphs.
 - Modules: Vanilla and Python
-- Plugin: [DrawBot](https://github.com/schriftgestalt/DrawBotGlyphsPlugin)
+- Plugins: [DrawBot](https://github.com/schriftgestalt/DrawBotGlyphsPlugin)
 
 2. Open a glyphs file. The tool will use your currently selected file to generate the proof.
 
 3. Make sure that you have `exports` setup in your Font Information.
 
 ## Installation
+
+Update: You can install the Proofing Tool via the Glyphs Plugin Manager!
+Alternatively, follow the steps below.
 
 1. Clone the Proofing Tool repo. It’s usually best to clone into the `Repositories` folder in Glyphs, along the lines of `/Users/yourusername/Library/Application Support/Glyphs 3/Repositories`. 
 
