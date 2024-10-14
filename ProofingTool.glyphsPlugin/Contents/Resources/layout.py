@@ -9,8 +9,7 @@ SPACE = 1000
 class OCCProofingLayout(object):
 	def __init__(self, glyphs, parameters, width, height, upm):
 		self.width = width
-		self.height = height
-		# self.glyphs = list(filter(lambda g: g.name is not None, glyphs[0]))
+		self.height = height		
 		self.glyphs = glyphs[0]
 		self.parameters = parameters
 

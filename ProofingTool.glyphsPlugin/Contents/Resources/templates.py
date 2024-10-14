@@ -96,6 +96,12 @@ class OCCTemplatesView:
 		if 'glyphs' in template:
 			if isinstance(template['glyphs'], list):
 				glyphs = template['glyphs']
+				for g in glyphs:
+					if not Glyphs.font.glyphs[g]:
+						if g != "newGlyph":						
+							glyphs.remove(g)
+							if self.debug:
+								print(f'[{template_name}]\t⚠️{g} does not exist in the current font and will be skipped.')
 			else:
 				if self.debug:
 					print(f'[{template_name}]\tthe template provides a "glyphs" key, but it’s not a list of glyph names.')
